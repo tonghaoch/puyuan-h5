@@ -19,6 +19,23 @@ const models = JSON.parse(
 const tiles = JSON.parse(
   await readFile(new URL('src/data/architecture-tiles.json', root), 'utf8'),
 ).tiles
+let landscapeJobs = []
+const landscapePath = new URL('src/data/native-landscape.json', root)
+if (existsSync(landscapePath)) {
+  const landscape = JSON.parse(await readFile(landscapePath, 'utf8'))
+  landscapeJobs = [
+    { id: 'native-ground', asset: landscape.ground, sourceAsset: landscape.ground },
+    { id: 'native-waterfronts', asset: landscape.waterfronts, sourceAsset: landscape.waterfronts },
+    ...landscape.tiles,
+  ].map((tile) => ({
+    id: tile.id,
+    sourceAsset: tile.sourceAsset,
+    asset: tile.asset.replace('.svg', '.webp'),
+    overviewAsset: tile.overviewAsset || tile.asset.replace('.svg', '.preview.webp'),
+    factor: tile.id.startsWith('native-') ? 4 : 6,
+    preview: tile.id.startsWith('native-') ? 1 : 2,
+  }))
+}
 const selection = process.argv
   .find((arg) => arg.startsWith('--only='))
   ?.slice(7)
@@ -26,6 +43,7 @@ const selection = process.argv
 const jobs = [
   ...models.map((model) => ({ ...model, factor: 8, preview: 2 })),
   ...tiles.map((tile) => ({ ...tile, factor: 4, preview: 2 })),
+  ...landscapeJobs,
 ].filter((job) => !selection || selection.includes(job.id))
 const localChrome = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 const browser = await chromium.launch({

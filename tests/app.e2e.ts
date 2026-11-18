@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import landmarkAtlas from '../src/data/landmark-models.json' with { type: 'json' }
 
 test('all three views work, restaurant search and categories filter actual results', async ({
   page,
@@ -229,7 +230,7 @@ test('reference and illustration share geometry, real map and imagery share geor
   page,
 }) => {
   await page.goto('/')
-  await expect(page.locator('.map-art')).toHaveAttribute('src', '/art/puyuan-layered-ground.webp')
+  await expect(page.locator('.map-art')).toHaveAttribute('src', '/art/native/ground.svg')
   const initial = await page.locator('.map-scene').getAttribute('style')
   await page.getByRole('button', { name: '原图对照', exact: true }).click()
   await expect(page.locator('.map-art')).toHaveAttribute('src', '/art/puyuan-original-scope.webp')
@@ -368,6 +369,272 @@ test('all landmark groups can be selected from the architecture directory', asyn
   await expect(page.locator('[data-model-id="north-watchtower"]')).toBeInViewport()
 })
 
+test('the published temple gate admits daylight between its upper eave and lower roof', async ({
+  page,
+}) => {
+  const model = landmarkAtlas.models.find((item) => item.id === 'temple-hall')!
+  await page.goto('/')
+  await page.getByRole('button', { name: '细看古建', exact: true }).click()
+  await page.getByRole('button', { name: '选择要细看的建筑' }).click()
+  await page
+    .getByRole('region', { name: '古建目录' })
+    .getByRole('button', { name: new RegExp(model.name) })
+    .click()
+  const asset = page.locator('[data-model-id="temple-hall"] img')
+  await expect(asset).toHaveAttribute('src', model.asset)
+  const alpha = await asset.evaluate(async (element: HTMLImageElement, bounds: number[]) => {
+    await element.decode()
+    const canvas = document.createElement('canvas')
+    canvas.width = 1
+    canvas.height = 1
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })!
+    return [
+      [936, 762],
+      [936, 766],
+      [939, 766],
+      [936, 770],
+    ].map(([x, y]) => {
+      ctx.clearRect(0, 0, 1, 1)
+      ctx.drawImage(
+        element,
+        Math.round(((x! - bounds[0]!) * element.naturalWidth) / bounds[2]!),
+        Math.round(((y! - bounds[1]!) * element.naturalHeight) / bounds[3]!),
+        1,
+        1,
+        0,
+        0,
+        1,
+        1,
+      )
+      return ctx.getImageData(0, 0, 1, 1).data[3]
+    })
+  }, model.sourceBounds)
+  expect(alpha).toEqual([255, 0, 0, 255])
+})
+
+test('the published Zen courtyard separates its timber lodges, open lawn and limestone terrace', async ({
+  page,
+}) => {
+  const model = landmarkAtlas.models.find((item) => item.id === 'zen-courtyard')!
+  await page.goto('/')
+  await page.getByRole('button', { name: '细看古建', exact: true }).click()
+  await page.getByRole('button', { name: '选择要细看的建筑' }).click()
+  await page
+    .getByRole('region', { name: '古建目录' })
+    .getByRole('button', { name: new RegExp(model.name) })
+    .click()
+  const image = page.locator('[data-model-id="zen-courtyard"] img')
+  await expect(image).toHaveAttribute('src', model.asset)
+  const materials = await image.evaluate(async (element: HTMLImageElement, bounds: number[]) => {
+    await element.decode()
+    const canvas = document.createElement('canvas')
+    canvas.width = element.naturalWidth
+    canvas.height = element.naturalHeight
+    const context = canvas.getContext('2d', { willReadFrequently: true })!
+    context.drawImage(element, 0, 0)
+    return [
+      [1174, 539],
+      [1188, 540],
+      [1205, 540],
+      [1228, 539],
+      [1228, 550],
+      [1245, 550],
+      [1206, 566],
+      [1206, 577],
+      [1206, 590],
+      [1248, 477],
+    ].map(([x, y]) => {
+      const [red, green, blue, alpha] = context.getImageData(
+        Math.round(((x! - bounds[0]!) * canvas.width) / bounds[2]!),
+        Math.round(((y! - bounds[1]!) * canvas.height) / bounds[3]!),
+        1,
+        1,
+      ).data
+      if (alpha! < 16) return 'clear'
+      if (green! > red! + 8 && green! > blue! + 20) return 'lawn'
+      if (Math.min(red!, green!, blue!) > 185) return 'limestone'
+      if (red! > green! + 14 && green! > blue! + 3) return 'timber'
+      return 'tile'
+    })
+  }, model.sourceBounds)
+  expect(materials).toEqual([
+    'lawn',
+    'tile',
+    'lawn',
+    'timber',
+    'lawn',
+    'tile',
+    'timber',
+    'limestone',
+    'tile',
+    'clear',
+  ])
+})
+
+const landmarkMaterials = {
+  'temple-pagoda': [
+    [915, 459, 'clear'],
+    [912, 469.5, 'slate'],
+    [902, 485, 'slate'],
+    [925, 489, 'slate'],
+    [933, 482, 'clear'],
+    [916, 515, 'timber'],
+    [916.5, 552, 'timber'],
+    [899, 534, 'clear'],
+    [921, 580, 'timber'],
+    [915, 589.6, 'plaster'],
+    [937, 578, 'plaster'],
+  ],
+  'waterside-stage': [
+    [962, 352, 'glass'],
+    [1015, 314, 'glass'],
+    [1120, 286, 'glass'],
+    [968, 369, 'plaster'],
+    [1013, 351.5, 'timber'],
+    [995.1, 375.3, 'timber'],
+    [1031, 349, 'clear'],
+    [1054, 352, 'clear'],
+    [1062, 367, 'timber'],
+    [1062, 376.5, 'plaster'],
+  ],
+  'north-watchtower': [
+    [540, 528, 'slate'],
+    [544, 536.5, 'plaster'],
+    [538, 544, 'slate'],
+    [545, 551.5, 'plaster'],
+    [541.4, 552, 'slate'],
+    [525, 557, 'plaster'],
+    [544, 575.8, 'slate'],
+    [566, 574, 'plaster'],
+    [558, 583.8, 'clear'],
+  ],
+  'designer-quarter': [
+    [1306, 552, 'slate'],
+    [1312, 591, 'plaster'],
+    [1325, 556, 'clear'],
+    [1334, 551, 'slate'],
+    [1342, 586, 'plaster'],
+    [1303, 611, 'slate'],
+    [1381, 533, 'slate'],
+    [1399, 554, 'plaster'],
+    [1409, 568, 'slate'],
+    [1332, 650, 'timber'],
+  ],
+  'dressing-house': [
+    [656, 1159, 'slate'],
+    [672, 1168, 'timber'],
+    [683, 1171, 'clear'],
+    [695, 1163, 'timber'],
+    [727, 1136, 'slate'],
+    [712, 1150, 'timber'],
+    [717, 1156, 'timber'],
+    [715, 1170, 'clear'],
+    [760, 1141, 'timber'],
+    [774, 1144, 'clear'],
+  ],
+  'visitor-court': [
+    [660, 440, 'plaster'],
+    [700, 400, 'glass'],
+    [806, 383, 'glass'],
+    [790, 474, 'slate'],
+    [803, 473, 'clear'],
+    [830, 474, 'clear'],
+    [853.6, 466.4, 'plaster'],
+    [855.6, 466.4, 'clear'],
+    [858.8, 466.4, 'slate'],
+  ],
+  'zen-gallery': [
+    [993, 504, 'plaster'],
+    [1017, 503, 'plaster'],
+    [1055, 477, 'slate'],
+    [1054, 489, 'timber'],
+    [1054, 499, 'slate'],
+    [1054, 507, 'timber'],
+    [1055, 517, 'slate'],
+    [1055, 524, 'timber'],
+    [1090, 530, 'clear'],
+    [1116, 526, 'slate'],
+  ],
+} as const
+
+test('the tower link survives reload without changing the temple place or its default card', async ({
+  page,
+}) => {
+  await page.goto('/#map/place/temple/temple-pagoda')
+  const dialog = page.getByRole('dialog')
+  await page.reload()
+  await expect(dialog.getByRole('heading', { name: '寺塔', exact: true })).toBeVisible()
+  await expect(dialog.locator('.detail-facts')).toContainText('福善寺')
+  for (const suffix of ['', '/waterside-stage']) {
+    await page.goto(`/#map/place/temple${suffix}`)
+    await expect(dialog.getByRole('heading', { name: '福善寺', exact: true })).toBeVisible()
+    await expect(dialog.locator('.detail-hero img')).toHaveAttribute(
+      'src',
+      '/art/landmarks/temple-hall.scene.webp',
+    )
+  }
+})
+
+for (const [site, samples] of Object.entries(landmarkMaterials)) {
+  test(`published ${site} keeps the observed walls, roofs and openings distinct`, async ({
+    page,
+  }) => {
+    const model = landmarkAtlas.models.find((entry) => entry.id === site)!
+    await page.goto('/')
+    await page.getByRole('button', { name: '细看古建', exact: true }).click()
+    await page.getByRole('button', { name: '选择要细看的建筑' }).click()
+    await page
+      .getByRole('region', { name: '古建目录' })
+      .getByRole('button', { name: new RegExp(model.name) })
+      .click()
+    const image = page.locator(`[data-model-id="${site}"] img`)
+    await expect(image).toHaveAttribute('src', model.asset)
+    const materials = await image.evaluate(
+      async (element: HTMLImageElement, { bounds, points }) => {
+        await element.decode()
+        const canvas = document.createElement('canvas')
+        canvas.width = element.naturalWidth
+        canvas.height = element.naturalHeight
+        const context = canvas.getContext('2d', { willReadFrequently: true })!
+        context.drawImage(element, 0, 0)
+        return points.map(([x, y]) => {
+          const colors = context.getImageData(
+            Math.round(((x! - bounds[0]!) * canvas.width) / bounds[2]!) - 1,
+            Math.round(((y! - bounds[1]!) * canvas.height) / bounds[3]!) - 1,
+            3,
+            3,
+          ).data
+          const votes = new Map<string, number>()
+          for (let offset = 0; offset < colors.length; offset += 4) {
+            const [red, green, blue, alpha] = colors.slice(offset, offset + 4)
+            const material =
+              alpha! < 20
+                ? 'clear'
+                : blue! > red! + 13 && green! > red! + 5
+                  ? 'glass'
+                  : Math.min(red!, green!, blue!) > 178
+                    ? 'plaster'
+                    : red! > green! + 13 && green! >= blue!
+                      ? 'timber'
+                      : Math.max(red!, green!, blue!) < 142
+                        ? 'slate'
+                        : 'other'
+            votes.set(material, (votes.get(material) ?? 0) + 1)
+          }
+          return [...votes].sort((first, second) => second[1] - first[1])[0]![0]
+        })
+      },
+      { bounds: model.sourceBounds, points: samples.map(([x, y]) => [x, y]) },
+    )
+    expect(materials).toEqual(samples.map(([, , material]) => material))
+    await page.getByRole('button', { name: `查看${model.name}建筑详情` }).click()
+    await expect(page.getByRole('dialog').locator('.detail-hero img')).toHaveAttribute(
+      'src',
+      model.heroAsset,
+    )
+  })
+}
+
 test('background architecture changes detail level and stays out of geographic views', async ({
   page,
 }) => {
@@ -386,4 +653,41 @@ test('background architecture changes detail level and stays out of geographic v
   await expect(page.locator('.landmark-layer')).toHaveCount(0)
   await page.getByRole('button', { name: '手绘导览', exact: true }).click()
   await expect(page.locator('.architecture-context-layer')).toBeVisible()
+})
+
+test('native illustration stays usable with reference-derived raster maps blocked', async ({
+  page,
+}) => {
+  const requests: string[] = []
+  await page.route('**/art/puyuan-*', async (route) => {
+    requests.push(route.request().url())
+    await route.abort()
+  })
+  await page.goto('/')
+  await expect(page.locator('.map-art')).toHaveAttribute('src', '/art/native/ground.svg')
+  await expect(page.locator('.native-landscape-layer img').first()).toBeVisible()
+  const waterfront = page.locator('.native-waterfront-art')
+  await expect(waterfront).toHaveAttribute('src', '/art/native/waterfronts.svg')
+  await waterfront.evaluate((image: HTMLImageElement) => image.decode())
+  await expect(page.locator('.native-landscape-layer img').first()).toHaveAttribute(
+    'src',
+    /preview\.webp$/,
+  )
+  await page.getByRole('button', { name: '细看古建', exact: true }).click()
+  await page.getByRole('button', { name: '选择要细看的建筑' }).click()
+  await page
+    .getByRole('region', { name: '古建目录' })
+    .getByRole('button', { name: /禅意酒店/ })
+    .click()
+  const model = page.locator('[data-model-id="zen-courtyard"] img')
+  await expect(model).toBeVisible()
+  await model.evaluate((image: HTMLImageElement) => image.decode())
+  const plants = page.locator('.native-landscape-layer img')
+  await expect(plants.first()).toHaveAttribute('src', /(?<!preview)\.webp$/)
+  for (const image of await plants.all())
+    await image.evaluate((img: HTMLImageElement) => img.decode())
+  expect(requests).toEqual([])
+  await page.getByRole('button', { name: '查看禅意酒店建筑详情' }).click()
+  await expect(page.getByRole('dialog')).toBeVisible()
+  expect(requests).toEqual([])
 })

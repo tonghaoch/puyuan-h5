@@ -5,7 +5,9 @@ import { clampCamera, zoomAt, SCENE, type Camera } from '../lib/map-camera'
 import MeadowLayer from './MeadowLayer.vue'
 import LandmarkLayer from './LandmarkLayer.vue'
 import ArchitectureLayer from './ArchitectureLayer.vue'
+import LandscapeLayer from './LandscapeLayer.vue'
 import landmarkModels from '../data/landmark-models.json'
+import nativeLandscape from '../data/native-landscape.json'
 import AppIcon from './AppIcon.vue'
 import referenceMap from '../data/reference-map.json'
 import { useParkGeography, isGeographicView, type MapView } from '../lib/park-geography'
@@ -23,7 +25,7 @@ const props = defineProps<{
   query: string
 }>()
 const emit = defineEmits<{
-  select: [place: Place]
+  select: [place: Place, modelId?: string]
   locate: []
   zoom: [value: number]
   geoselect: [feature: GeoFeature]
@@ -171,9 +173,9 @@ function inspectBuilding(index?: number) {
     y: (dimensions.height + 55) / 2 - (y + height / 2 + referenceMap.sourceOffset.y) * scale,
   })
 }
-function selectBuilding(placeId: string) {
+function selectBuilding(placeId: string, modelId: string) {
   const place = props.allPlaces.find((p) => p.id === placeId)
-  if (place) emit('select', place)
+  if (place) emit('select', place, modelId)
 }
 function guardClick(event: MouseEvent) {
   if (suppressClick) {
@@ -315,7 +317,7 @@ onBeforeUnmount(() => observer?.disconnect())
     }"
     role="region"
     :aria-label="
-      geographic ? '古镇真实地理地图，可拖动缩放' : '古镇示意地图，按原图保留建筑与水系，可拖动缩放'
+      geographic ? '古镇真实地理地图，可拖动缩放' : '古镇示意地图，手绘水系、建筑与园林，可拖动缩放'
     "
     tabindex="0"
     @click.capture="guardClick"
@@ -334,31 +336,12 @@ onBeforeUnmount(() => observer?.disconnect())
         <MeadowLayer :camera="camera" :width="dimensions.width" :height="dimensions.height" />
         <img
           class="map-art"
-          :src="
-            view === 'reference'
-              ? '/art/puyuan-original-scope.webp'
-              : '/art/puyuan-layered-ground.webp'
-          "
-          alt="原图布局的古镇地面与水系，外围渐变衔接草地，重点建筑以独立图层绘制"
+          :src="view === 'reference' ? '/art/puyuan-original-scope.webp' : nativeLandscape.ground"
+          :alt="view === 'reference' ? '原始参考地图' : '原生绘制的古镇水系、石岸、铺装与桥梁'"
           :width="SCENE.width"
           :height="SCENE.height"
           draggable="false"
           fetchpriority="high"
-        />
-        <ArchitectureLayer
-          v-if="view === 'illustration'"
-          :camera="camera"
-          :width="dimensions.width"
-          :height="dimensions.height"
-        />
-        <LandmarkLayer
-          v-if="view === 'illustration'"
-          :camera="camera"
-          :width="dimensions.width"
-          :height="dimensions.height"
-          :selected-id="selectedId"
-          :highlighted-id="inspected?.id"
-          @select="selectBuilding"
         />
         <div v-if="view === 'illustration'" class="map-water-mask">
           <svg
@@ -379,6 +362,37 @@ onBeforeUnmount(() => observer?.disconnect())
             </g>
           </svg>
         </div>
+        <img
+          v-if="view === 'illustration'"
+          class="native-waterfront-art"
+          :src="nativeLandscape.waterfronts"
+          :width="SCENE.width"
+          :height="SCENE.height"
+          alt="原生桥梁、码头与游船"
+          draggable="false"
+        />
+        <ArchitectureLayer
+          v-if="view === 'illustration'"
+          :camera="camera"
+          :width="dimensions.width"
+          :height="dimensions.height"
+        />
+        <LandmarkLayer
+          v-if="view === 'illustration'"
+          :camera="camera"
+          :width="dimensions.width"
+          :height="dimensions.height"
+          :selected-id="selectedId"
+          :highlighted-id="inspected?.id"
+          @select="selectBuilding"
+        />
+        <LandscapeLayer
+          v-if="view === 'illustration'"
+          :camera="camera"
+          :width="dimensions.width"
+          :height="dimensions.height"
+        />
+
         <svg
           v-if="view === 'illustration'"
           class="map-effects"
@@ -390,14 +404,16 @@ onBeforeUnmount(() => observer?.disconnect())
           <g
             :transform="`translate(${referenceMap.sourceOffset.x} ${referenceMap.sourceOffset.y})`"
           >
-            <g class="floating-boat" transform="translate(1218 911) rotate(25) scale(.5)">
-              <path
-                d="M0-30Q-18-8-12 25Q0 45 12 25Q18-8 0-30Z"
-                fill="#8c7655"
-                stroke="#e8d8ae"
-                stroke-width="2"
-              />
-              <path d="M-10-10Q0-25 10-10V13H-10Z" fill="#617b67" />
+            <g transform="translate(1218 911) rotate(25) scale(.5)">
+              <g class="floating-boat">
+                <path
+                  d="M0-30Q-18-8-12 25Q0 45 12 25Q18-8 0-30Z"
+                  fill="#8c7655"
+                  stroke="#e8d8ae"
+                  stroke-width="2"
+                />
+                <path d="M-10-10Q0-25 10-10V13H-10Z" fill="#617b67" />
+              </g>
             </g>
             <g class="lantern-glows" fill="#edc275"><circle cx="1061" cy="365" r="3" /></g>
             <g class="falling-petals" fill="#d5a39a">

@@ -6,7 +6,7 @@
 
 地图现有四种视图：
 
-- **手绘导览**：沿用原图的古镇水系、桥梁和地标布局，按实际可见轮廓重建全园建筑图层，外围衔接草地，叠加动画与18处地点。
+- **手绘导览**：以可编辑几何和绘制代码生成水系、驳岸、铺装、桥梁、植物及建筑，叠加动画与18处地点。底图、遮罩和详情场景均独立于原图像素。
 - **原图对照**：同一范围与坐标的原始配色，可直接检查还原位置。
 - **真实路网**：OSM 的道路、桥梁、水道、园区边界和具名地标。
 - **影像核对**：带准确投影范围的地图服务影像，与路网和 GPS 叠加。
@@ -32,23 +32,29 @@
 
 ## 维护
 
-    npm run art:trace
+    npm run art:landscape
     npm run art:models
     npm run art:meadow
-    npm run art:reference
+    npm run art:scenes
     npm run art:generate
     npm run geo:package
     npm run format
 
-原图和建筑处理脚本需要 Python 3、Pillow、NumPy 和 OpenCV（scripts/requirements-art.txt）；建筑预渲染另使用 Playwright 与 Chrome/Chromium。开发无需重生成素材，已提交工作区内的生成结果可直接使用。原始图片不被覆盖。
+日常重绘需要 Python 3、Pillow、Playwright 与 Chrome/Chromium，`art:generate` 直接使用保存的几何数据，无需原图或网络。只有可选的原始资料导入与 `art:trace` 需要 NumPy/OpenCV；`art:reference` 单独重建原图对照。原始图片不被覆盖。
+
+目标是原生手绘的完整度与细腻程度超过原图；当前已替换地形与景观底稿、补画被标签遮挡的院落，建筑体量、河岸与装饰仍需逐区精修。范围与验收标准见 [原生手绘目标](docs/native-map.md)。
 
 - src/data/reference-map.json：18处参考图地点、范围与坐标变换。
+- src/data/town-landscape.json：独立地形、水系、铺装、桥梁与植物实例。
+- src/data/town-architecture.json：独立建筑轮廓及原生材质。
+- src/data/town-completions.json：标签遮挡区域的原生建筑设计。
 - src/data/landmark-models.json：独立建筑范围、资产和局部灯光。
 - src/data/architecture-tiles.json：未命名街巷的建筑细节图块。
+- src/data/street-houses.json、src/data/street-observations.json：逐栋檐线、院墙和可见木面等原生构件；核对方法见 [街屋精修](docs/street-houses.md)。
 - src/data/meadow-tiles.json：外围草地景观块，按视野加载。
 - src/data/catalog.ts：演示餐厅、活动与场次。
 - src/data/geographic-pois.json：保存原始来源的地理地标，与插画地点分开。
-- public/art：原图衍生地图、原色对照、水面遮罩和卡片插画。
+- public/art：原生 SVG、预渲染图层、原生水面遮罩、卡片插画与可选原图对照。
 - public/geodata：真实路网、地图服务影像及其投影范围、来源信息。
 - references：原图、上版原型地图、原始地理资料和研究参考。
 
@@ -56,6 +62,7 @@
 
 ## 文档
 
+- [独立原生手绘导览目标与验收](docs/native-map.md)
 - [开发接续与剩余事项](docs/handoff.md)：恢复会话或接续本轮建筑细化时先读。
 - [当前实现](docs/implementation.md)
 - [本轮构件细化](docs/architecture-finishing.md)

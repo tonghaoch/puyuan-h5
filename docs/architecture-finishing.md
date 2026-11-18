@@ -50,7 +50,7 @@
 ## 实现与交付
 
 - scripts/art/surface_finishes.py：统一构件处理及组团材质差异。
-- scripts/art/secondary_details.py：北更楼与妆楼的局部绘制。
+- 此阶段北更楼与妆楼的独立占位画法已由 `src/data/street-houses.json` 与 `scripts/art/street_houses.py` 的分层屋体、立面和石台替代。
 - references/architecture/finishing-audit.json：来源、数量与几何校验摘要。
 - 所有19个地标组团和24块街巷图层重新输出透明细节图与预览图。
 - 详情图片现在合成周边建筑图块，避免相邻屋面在详情里遗漏。

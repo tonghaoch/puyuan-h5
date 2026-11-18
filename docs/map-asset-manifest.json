@@ -1,7 +1,7 @@
 {
   "source": "references/puyuan-reference.jpg",
   "source_sha256": "10e9e3b067ce85d910fc225268eb76066194a3bc37f40a787e7da259417f767e",
-  "version": "whole-town-visible-architecture-2026-11-18",
+  "version": "native-landscape-and-architecture-1",
   "scene": {
     "width": 1520,
     "height": 1240
@@ -10,7 +10,7 @@
     "x": -30,
     "y": -180
   },
-  "geometry_operation": "Source-visible contours remain in their original pixel locations. Original printed labels are preserved; the ambiguous tower silhouette is replaced using first-party photo evidence. No georeferencing inferred.",
+  "geometry_operation": "Editable native ground, water, planting and architecture geometry. Label-obscured areas receive authored artistic completions. No georeferencing inferred.",
   "landmark_count": 18,
   "independent_model_sites": [
     "visitor-court",
@@ -34,5 +34,14 @@
     "food-center"
   ],
   "traced_surfaces": 1025,
-  "georeferenced": false
+  "georeferenced": false,
+  "native_authoring": [
+    "src/data/town-landscape.json",
+    "src/data/town-architecture.json",
+    "src/data/town-completions.json",
+    "src/data/street-houses.json",
+    "src/data/street-observations.json"
+  ],
+  "illustration_uses_reference_pixels": false,
+  "native_surface_count": 863
 }

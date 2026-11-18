@@ -1,0 +1,536 @@
+{
+  "version": "authored-courtyards-waterfront-3",
+  "meaning": "Native artistic completions of label-obscured areas. Layout references are not surveyed hidden architecture.",
+  "sites": {
+    "fuma-residence": {
+      "houses": [
+        [
+          681,
+          604,
+          24,
+          12,
+          8,
+          "residence"
+        ],
+        [
+          765,
+          617.5,
+          14,
+          6,
+          5,
+          "hall",
+          -25
+        ]
+      ],
+      "courts": [
+        {
+          "bounds": [
+            676,
+            594,
+            104,
+            64
+          ],
+          "wall": true,
+          "items": [
+            [
+              "well",
+              85,
+              46
+            ],
+            [
+              "bamboo",
+              7,
+              57
+            ],
+            [
+              "planter",
+              96,
+              57
+            ],
+            [
+              "bench",
+              50,
+              60
+            ],
+            [
+              "rock",
+              91,
+              34
+            ]
+          ]
+        }
+      ]
+    },
+    "xiangyun-temple": {
+      "houses": [
+        [
+          1169,
+          752,
+          42,
+          16,
+          10,
+          "shrine",
+          -12
+        ]
+      ],
+      "courts": [
+        {
+          "bounds": [
+            1134,
+            780,
+            59,
+            26
+          ],
+          "items": [
+            [
+              "urn",
+              31,
+              15
+            ],
+            [
+              "lantern",
+              8,
+              20
+            ],
+            [
+              "planter",
+              51,
+              20
+            ],
+            [
+              "rock",
+              9,
+              9
+            ]
+          ]
+        }
+      ]
+    },
+    "merchant-hall": {
+      "houses": [
+        [
+          568,
+          910,
+          35,
+          12,
+          8,
+          "hall"
+        ],
+        [
+          646,
+          907,
+          33,
+          12,
+          8,
+          "hall"
+        ]
+      ],
+      "courts": [
+        {
+          "bounds": [
+            565,
+            899,
+            43,
+            38
+          ],
+          "wall": true,
+          "items": [
+            [
+              "planter",
+              6,
+              32
+            ],
+            [
+              "lantern",
+              35,
+              32
+            ]
+          ]
+        },
+        {
+          "bounds": [
+            645,
+            897,
+            40,
+            41
+          ],
+          "wall": true,
+          "items": [
+            [
+              "bamboo",
+              6,
+              34
+            ],
+            [
+              "bench",
+              25,
+              34
+            ]
+          ]
+        }
+      ]
+    },
+    "meijing-theater": {
+      "houses": [
+        [
+          774,
+          890,
+          40,
+          13,
+          9,
+          "hall"
+        ],
+        [
+          849,
+          895,
+          23,
+          10,
+          7,
+          "hall"
+        ]
+      ],
+      "courts": [
+        {
+          "bounds": [
+            766,
+            884,
+            53,
+            44
+          ],
+          "items": [
+            [
+              "stage",
+              23,
+              38
+            ],
+            [
+              "lantern",
+              7,
+              35
+            ],
+            [
+              "planter",
+              45,
+              36
+            ]
+          ]
+        },
+        {
+          "bounds": [
+            843,
+            890,
+            35,
+            38
+          ],
+          "items": [
+            [
+              "planter",
+              12,
+              35
+            ],
+            [
+              "lantern",
+              28,
+              31
+            ]
+          ]
+        }
+      ]
+    },
+    "night-dining": {
+      "houses": [
+        [
+          796,
+          950,
+          33,
+          10,
+          7,
+          "shop",
+          -27
+        ],
+        [
+          871,
+          951,
+          30,
+          11,
+          7,
+          "shop"
+        ]
+      ],
+      "courts": [
+        {
+          "bounds": [
+            801,
+            948,
+            108,
+            38
+          ],
+          "surface": "brick",
+          "items": [
+            [
+              "table",
+              51,
+              21
+            ],
+            [
+              "table",
+              21,
+              34
+            ],
+            [
+              "table",
+              83,
+              32
+            ],
+            [
+              "planter",
+              6,
+              33
+            ],
+            [
+              "lantern",
+              101,
+              33
+            ]
+          ]
+        }
+      ]
+    },
+    "storytelling-house": {
+      "houses": [
+        [
+          945,
+          927,
+          46,
+          12,
+          7,
+          "hall"
+        ]
+      ],
+      "courts": [
+        {
+          "bounds": [
+            938,
+            923,
+            64,
+            31
+          ],
+          "items": [
+            [
+              "bench",
+              12,
+              27
+            ],
+            [
+              "bamboo",
+              4,
+              25
+            ],
+            [
+              "lantern",
+              58,
+              22
+            ]
+          ]
+        }
+      ]
+    },
+    "dayou-bridge-quarter": {
+      "houses": [
+        [
+          569,
+          1016,
+          42,
+          13,
+          8,
+          "residence"
+        ],
+        [
+          654,
+          1016,
+          62,
+          12,
+          9,
+          "hall"
+        ]
+      ],
+      "courts": [
+        {
+          "bounds": [
+            562,
+            1005,
+            54,
+            41
+          ],
+          "wall": true,
+          "items": [
+            [
+              "rock",
+              6,
+              33
+            ],
+            [
+              "planter",
+              47,
+              34
+            ]
+          ]
+        },
+        {
+          "bounds": [
+            649,
+            1003,
+            78,
+            44
+          ],
+          "items": [
+            [
+              "bench",
+              44,
+              38
+            ],
+            [
+              "lantern",
+              8,
+              36
+            ],
+            [
+              "bamboo",
+              68,
+              35
+            ]
+          ]
+        }
+      ]
+    },
+    "pu-family-residence": {
+      "houses": [
+        [
+          1001,
+          1039,
+          43,
+          12,
+          8,
+          "residence"
+        ],
+        [
+          1051,
+          1040,
+          32,
+          12,
+          7,
+          "hall"
+        ]
+      ],
+      "courts": [
+        {
+          "bounds": [
+            995,
+            1030,
+            112,
+            41
+          ],
+          "wall": true,
+          "items": [
+            [
+              "well",
+              61,
+              27
+            ],
+            [
+              "planter",
+              10,
+              30
+            ],
+            [
+              "bamboo",
+              101,
+              35
+            ],
+            [
+              "bench",
+              40,
+              35
+            ]
+          ]
+        }
+      ]
+    },
+    "longwan-dining": {
+      "houses": [
+        [
+          385,
+          1068,
+          43,
+          13,
+          7,
+          "shop"
+        ],
+        [
+          431,
+          1070,
+          39,
+          13,
+          7,
+          "shop"
+        ],
+        [
+          480,
+          1068,
+          65,
+          15,
+          9,
+          "shop"
+        ]
+      ],
+      "courts": [
+        {
+          "bounds": [
+            374,
+            1060,
+            180,
+            51
+          ],
+          "surface": "brick",
+          "items": [
+            [
+              "table",
+              24,
+              43
+            ],
+            [
+              "table",
+              65,
+              43
+            ],
+            [
+              "table",
+              105,
+              41
+            ],
+            [
+              "table",
+              146,
+              43
+            ],
+            [
+              "lantern",
+              8,
+              39
+            ],
+            [
+              "lantern",
+              170,
+              39
+            ],
+            [
+              "planter",
+              87,
+              37
+            ]
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,5 +1,6 @@
 """Fine material treatment within source contours. Coordinates and source voids remain unchanged."""
 import math
+from .native_roofs import facade, planes, slate
 
 PROFILES = {
  'north-watchtower': ('石台与门楼', '#d2d1bd', '#76816f', 'stone'),
@@ -20,6 +21,13 @@ PROFILES = {
 
 def poly_path(points): return 'M'+'L'.join(f'{x:.3f},{y:.3f}' for x,y in points)+'Z'
 def path_shape(f):return poly_path(f['points'])+''.join(poly_path(hole) for hole in f['holes'])
+
+def timber_facings(feature,prefix):
+    panels=feature.get('streetObservation',{}).get('timber',[])
+    if not panels:return ''
+    key=prefix+'-timber-'+feature['id']
+    material=f'<defs><pattern id="{key}" width="5.1" height="3.6" patternUnits="userSpaceOnUse"><rect width="5.1" height="3.6" fill="#745145"/><path d="M.4 0v3.6M1.9 .25h2.5v2.05H1.9Z" fill="#5a4039" stroke="#493c37" stroke-width=".28"/><path d="M3.12 .35V2.1M1.9 1.24h2.5M.82 0v3.6" stroke="#b0987f" stroke-width=".2"/></pattern></defs>'
+    return material+''.join(f'<path d="{path_shape(panel)}" fill="url(#{key})" fill-rule="evenodd"/>' for panel in panels)
 def stroke(points,color,width=.25,opacity=1):
     return '<polyline points="'+' '.join(f'{x:.3f},{y:.3f}' for x,y in points)+f'" fill="none" stroke="{color}" stroke-width="{width}" opacity="{opacity}" stroke-linejoin="round" stroke-linecap="round"/>'
 def color(rgb):return '#'+''.join(f'{int(max(0,min(255,c))):02x}' for c in rgb)
@@ -39,10 +47,10 @@ def roof_folds(f):
             +stroke([(x-.5,y) for x,y in ridge],'#b4bda3',.28,.6))
 
 def render_surface(f):
-    key=f['id'];kind=f['kind'];x,y,w,h=f['bounds'];angle=f['angle'];source=f['sourceColor'];d=path_shape(f)
+    key=f['id'];kind=f['kind'];x,y,w,h=f['bounds'];angle=f['angle'];source=f['color'];d=path_shape(f)
     profile=PROFILES.get(f['owner'],('街巷瓦木细节','#775b43','#c2ad80','lattice'))
     lum=sum(source)/3
-    if kind=='roof':base=color([lum*.40+35,lum*.42+42,lum*.40+39]);edge='#2d3e37';light='#aeb5a6'
+    if kind=='roof':base=color(slate(f));edge='#3b383a';light='#b0a9a0'
     elif kind=='gold':base='#b08645';edge='#77582e';light='#e1c17d'
     elif kind=='wood':base=color([source[0]*.75+20,source[1]*.70+17,source[2]*.65+14]);edge='#514539';light=profile[2]
     elif kind=='glass':base='#b8d1c8';edge='#6a9088';light='#ebf0e2'
@@ -65,6 +73,7 @@ def render_surface(f):
         tw,th=7,4;angle=0
     defs.append(f'<pattern id="finish-tile-{key}" width="{tw}" height="{th}" patternUnits="userSpaceOnUse" patternTransform="rotate({angle} {x} {y})">{texture}</pattern>')
     p=['<defs>'+''.join(defs)+'</defs>']
+    p.append(facade(f))
     if kind in ['roof','gold']:
         p.append(f'<path d="{d}" transform="translate(.35 .65)" fill="#253e32" fill-rule="evenodd" opacity=".18"/>')
     p.append(f'<path d="{d}" fill="{base}" fill-rule="evenodd" stroke="{edge}" stroke-width=".16" stroke-linejoin="round"/>')
@@ -79,13 +88,14 @@ def render_surface(f):
     texture_opacity=.36 if kind in ['roof','gold'] else .32
     p.append(f'<path d="{d}" fill="url(#finish-tile-{key})" fill-rule="evenodd" opacity="{texture_opacity}"/>')
     p.append(f'<path d="{d}" fill="url(#finish-shade-{key})" fill-rule="evenodd"/>')
-    p.append(roof_folds(f))
-    for points in observed.get('sourceRelief',{}).get('seams',[]):
+    p.append(planes(f))
+    study=f.get('streetObservation',{})
+    for points in study.get('ink',observed.get('sourceRelief',{}).get('seams',[])):
         p.append(stroke(points,edge,.43,.78))
         p.append(stroke([(a+.5,b+.25) for a,b in points],light,.2,.4))
     if kind in ['roof','gold']:
-        for patch in observed.get('sourceShadePatches',[]):
-            p.append(f'<path d="{poly_path(patch)}" fill="#142e24" opacity=".12"/>')
+        for patch in study.get('shade',observed.get('sourceShadePatches',[])):
+            p.append(f'<path d="{poly_path(patch)}" fill="#28242a" opacity=".28"/>')
         for points in observed.get('observedRoofMarks',[]):
             p.append(stroke([(a+.18,b+.28) for a,b in points],edge,.75,.45))
             p.append(stroke(points,light,.3,.62))
@@ -123,6 +133,7 @@ def render_surface(f):
         elif mode=='panel':
             for yy in range(y+1,y+h,2):p.append(stroke([(x,yy),(x+w,yy)],'#b2a58a',.16,.35))
     p.append('</g>')
+    p.append(timber_facings(f,'surface'))
     for opening in observed.get('observedOpenings',[]):
         points=opening['points'];hx,hy,hw,hh=opening['bounds'];outline=poly_path(points)
         p.append(f'<path d="{outline}" fill="none" stroke="#aaa78c" stroke-width=".7"/>')

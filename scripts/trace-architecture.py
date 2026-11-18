@@ -6,7 +6,8 @@ import json, math, hashlib
 import cv2
 import numpy as np
 from PIL import Image
-from art.atlas_layout import ZONES, LABELS
+from art.atlas_layout import ZONES, PRINT_EXCLUSIONS
+from art.landscape import quay_edge
 ROOT=Path(__file__).resolve().parents[1]
 source=ROOT/'references/puyuan-reference.jpg'
 rgb=np.array(Image.open(source).convert('RGB'))
@@ -15,9 +16,12 @@ gray=cv2.cvtColor(rgb,cv2.COLOR_RGB2GRAY)
 manifest=json.loads((ROOT/'src/data/reference-map.json').read_text())
 scope=np.zeros(gray.shape,np.uint8);cv2.fillPoly(scope,[np.array(manifest['scope'],np.int32)],255)
 labels=np.zeros_like(scope)
-for polygon in LABELS: cv2.fillPoly(labels,[np.array(polygon,np.int32)],255)
-# The large vertical town title is typography. It is not a building component.
-cv2.rectangle(labels,(1012,584),(1107,850),255,-1)
+for polygon in PRINT_EXCLUSIONS: cv2.fillPoly(labels,[np.array(polygon,np.int32)],255)
+town=json.loads((ROOT/'src/data/town-landscape.json').read_text())
+for region in town['water']:
+    for quay in region.get('bankFaces',[]):
+        edge=quay_edge(region['points'],quay);top=[(x,y-quay['height']-.6) for x,y in edge]
+        cv2.fillPoly(labels,[np.int32(np.rint(edge+top[::-1]))],255)
 allowed=(scope>0)&(labels==0)
 r,g,b=rgb[:,:,0].astype(float),rgb[:,:,1].astype(float),rgb[:,:,2].astype(float)
 roof=((gray<121)&(hsv[:,:,1]<92)&(g<r*1.17+2)&allowed).astype(np.uint8)*255

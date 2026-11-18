@@ -10,7 +10,7 @@ const props = defineProps<{
   width: number
   height: number
 }>()
-const emit = defineEmits<{ select: [placeId: string] }>()
+const emit = defineEmits<{ select: [placeId: string, modelId: string] }>()
 const buildings = computed(() => {
   const view = visibleScene(props.camera, props.width, props.height, 100)
   return models.models
@@ -50,7 +50,7 @@ function bounds(source: number[]) {
       :style="bounds(model.sourceBounds)"
       :data-model-id="model.id"
       :aria-label="`查看${model.name}建筑详情`"
-      @click.stop="emit('select', model.placeId)"
+      @click.stop="emit('select', model.placeId, model.id)"
       @dblclick.stop
     >
       <img

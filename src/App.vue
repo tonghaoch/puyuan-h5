@@ -37,6 +37,7 @@ const mapViews: { id: MapView; name: string }[] = [
   { id: 'imagery', name: '影像核对' },
 ]
 const selection = ref<Selection | null>(null)
+const detailModelId = ref<string>()
 const overlay = ref<Overlay>(null)
 const query = ref('')
 const mapFilter = ref<Category | 'all'>('all')
@@ -102,9 +103,10 @@ function validSelection(kind: string, id: string): Selection | null {
   return null
 }
 function readRoute() {
-  const [nextTab, kind, id] = window.location.hash.slice(1).split('/')
+  const [nextTab, kind, id, modelId] = window.location.hash.slice(1).split('/')
   tab.value = nextTab === 'food' || nextTab === 'activities' ? nextTab : 'map'
   selection.value = kind && id ? validSelection(kind, id) : null
+  detailModelId.value = kind === 'place' ? modelId : undefined
   geoSelection.value =
     kind === 'geopoint'
       ? ((geographicPois as unknown as GeoCollection).features.find(
@@ -129,8 +131,8 @@ function changeTab(next: Tab) {
     route(next)
   }
 }
-function openSelection(next: Selection) {
-  route(`${tab.value}/${next.kind}/${next.id}`, true, hasModal.value)
+function openSelection(next: Selection, modelId?: string) {
+  route(`${tab.value}/${next.kind}/${next.id}${modelId ? `/${modelId}` : ''}`, true, hasModal.value)
 }
 function openOverlay(next: Exclude<Overlay, null>) {
   route(`${tab.value}/${next}`, true, hasModal.value)
@@ -237,14 +239,18 @@ const currentPlace = computed(() => {
 const detail = computed(() => {
   const item = currentActivity.value || currentRestaurant.value || currentPlace.value
   if (!item || !currentPlace.value) return null
-  const model = landmarkModels.models.find(
-    (m) => m.placeId === currentPlace.value!.id && m.id !== 'temple-pagoda',
-  )
+  const models = landmarkModels.models.filter((entry) => entry.placeId === currentPlace.value!.id)
+  const model =
+    models.find((entry) => entry.id === detailModelId.value) ??
+    models.find((entry) => entry.id !== 'temple-pagoda')
+  const pagoda = model?.id === 'temple-pagoda'
   return {
     model,
-    name: item.name,
-    subtitle: item.subtitle,
-    description: item.description,
+    name: pagoda ? model.name : item.name,
+    subtitle: pagoda ? model.finishLabel : item.subtitle,
+    description: pagoda
+      ? '导览按原图画出赭褐塔身、紧密的檐线和浅色多边形石台。上方深灰剪影是插画中可见的形状，不能据此认定它的结构或塔的实际层数。'
+      : item.description,
     art: currentRestaurant.value?.art || currentPlace.value.art,
     category: currentRestaurant.value ? '寻味濮院' : categoryLabels[currentPlace.value.category],
     place: currentPlace.value,
@@ -371,7 +377,7 @@ onBeforeUnmount(() => {
           :query="query"
           @geoselect="openGeoPoint"
           @outside="notify('当前位置在园区视野之外，未将定位点移入园区')"
-          @select="(place) => openSelection({ kind: 'place', id: place.id })"
+          @select="(place, modelId) => openSelection({ kind: 'place', id: place.id }, modelId)"
           @locate="openOverlay('location')"
         />
         <div class="map-topbar">
@@ -450,7 +456,7 @@ onBeforeUnmount(() => {
         </button>
         <div class="map-bottom-note">
           <span class="demo-dot"></span
-          ><span v-if="!geographicView">原图布局 · {{ places.length }} 处地点</span
+          ><span v-if="!geographicView">水乡漫游 · {{ places.length }} 处地点</span
           ><span v-else
             ><a
               href="https://www.openstreetmap.org/copyright"

@@ -2881,9 +2881,9 @@ body {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  mask-image: url('/art/puyuan-water-mask.png');
+  mask-image: url('/art/native/water-mask.svg');
   mask-size: 100% 100%;
-  -webkit-mask-image: url('/art/puyuan-water-mask.png');
+  -webkit-mask-image: url('/art/native/water-mask.svg');
   -webkit-mask-size: 100% 100%;
 }
 .map-scene .reference-caption {
@@ -3267,6 +3267,22 @@ body {
 .architecture-context-layer img {
   position: absolute;
   max-width: none;
+}
+.native-landscape-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.native-waterfront-art {
+  position: absolute;
+  inset: 0;
+  max-width: none;
+  pointer-events: none;
+}
+.native-landscape-layer img {
+  position: absolute;
+  max-width: none;
+  pointer-events: none;
 }
 .building-inspection .inspection-title {
   display: flex;
