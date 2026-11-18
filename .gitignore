@@ -11,3 +11,8 @@ project.private.config.json
 artifacts/
 playwright-report/
 test-results/
+
+__pycache__/
+*.pyc
+
+.venv-art/

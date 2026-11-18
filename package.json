@@ -13,10 +13,13 @@
     "preview": "vite preview",
     "test": "node --test tests/*.test.ts",
     "test:e2e": "playwright test",
-    "art:generate": "python3 scripts/generate-map.py && python3 scripts/prepare-reference-map.py",
-    "format": "prettier --write src tests scripts/capture.mjs vite.config.ts playwright.config.ts tsconfig.json package.json index.html",
+    "art:generate": "python3 scripts/generate-map.py && npm run art:trace && npm run art:models && npm run art:meadow && npm run art:reference",
+    "format": "prettier --write src tests scripts/*.mjs vite.config.ts playwright.config.ts tsconfig.json package.json index.html",
     "geo:package": "python3 scripts/package-geodata.py",
-    "art:reference": "python3 scripts/prepare-reference-map.py"
+    "art:reference": "python3 scripts/prepare-reference-map.py && python3 scripts/finalize-architecture.py",
+    "art:models": "python3 scripts/generate-landmarks.py && node scripts/render-landmarks.mjs",
+    "art:meadow": "python3 scripts/generate-meadow.py",
+    "art:trace": "python3 scripts/trace-architecture.py && python3 scripts/enrich-architecture.py"
   },
   "dependencies": {
     "vue": "^3.5.45"

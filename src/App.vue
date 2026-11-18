@@ -7,6 +7,7 @@ import GeoLocationMap from './components/GeoLocationMap.vue'
 import { isGeographicView, geoName, type MapView } from './lib/park-geography'
 import type { GeoCollection, GeoFeature } from './lib/geography'
 import geographicPois from './data/geographic-pois.json'
+import landmarkModels from './data/landmark-models.json'
 import {
   activities,
   restaurants,
@@ -236,7 +237,11 @@ const currentPlace = computed(() => {
 const detail = computed(() => {
   const item = currentActivity.value || currentRestaurant.value || currentPlace.value
   if (!item || !currentPlace.value) return null
+  const model = landmarkModels.models.find(
+    (m) => m.placeId === currentPlace.value!.id && m.id !== 'temple-pagoda',
+  )
   return {
+    model,
     name: item.name,
     subtitle: item.subtitle,
     description: item.description,
@@ -708,11 +713,11 @@ onBeforeUnmount(() => {
 
   <Transition name="sheet">
     <AppDialog v-if="selection && detail" :label="detail.name" @close="closeModal">
-      <div class="detail-hero">
-        <img :src="`/art/${detail.art}.svg`" :alt="`${detail.name}意境插画`" /><span
-          class="detail-category"
-          >{{ detail.category }}</span
-        >
+      <div class="detail-hero" :class="{ 'model-hero': detail.model }">
+        <img
+          :src="detail.model?.heroAsset || detail.model?.asset || `/art/${detail.art}.svg`"
+          :alt="`${detail.name}意境插画`"
+        /><span class="detail-category">{{ detail.category }}</span>
       </div>
       <div class="detail-body">
         <p class="eyebrow">A MOMENT IN PUYUAN</p>

@@ -3116,3 +3116,226 @@ body {
   flex-shrink: 0;
   margin-top: 4px;
 }
+/* Continuous world ground. Its texture tracks the same camera as the town. */
+.map-viewport.has-meadow {
+  background: #e4e6cc;
+}
+.meadow-backdrop {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-color: #e4e6cc;
+  background-image: url('/art/meadow-tile.svg');
+  background-repeat: repeat;
+}
+.meadow-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.meadow-layer img {
+  position: absolute;
+  max-width: none;
+  pointer-events: none;
+}
+.map-art {
+  position: relative;
+}
+.landmark-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.landmark-model {
+  position: absolute;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  pointer-events: auto;
+  overflow: visible;
+  touch-action: none;
+}
+.landmark-model img {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: fill;
+  pointer-events: none;
+}
+.landmark-model:focus-visible {
+  outline: 1.5px solid #aa925a;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+.landmark-light-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+.landmark-lamp {
+  fill: #f7dda0;
+  filter: drop-shadow(0 0 2px #f4cd7b);
+  animation: lamp-breathe 3.8s ease-in-out infinite alternate;
+}
+@keyframes lamp-breathe {
+  from {
+    opacity: 0.35;
+  }
+  to {
+    opacity: 0.95;
+  }
+}
+.building-tool {
+  color: #9c8750;
+  background: #fbf5e1f5;
+}
+.building-inspection {
+  position: absolute;
+  z-index: 8;
+  top: 152px;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #faf6e9f2;
+  border: 1px solid #d5ceb2;
+  padding: 10px 11px 10px 14px;
+  border-radius: 6px;
+  box-shadow: 0 4px 16px #5665410c;
+}
+.building-inspection > div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.building-inspection small {
+  color: #9d9474;
+  letter-spacing: 1px;
+  font-size: 8px;
+}
+.building-inspection strong {
+  font-family: var(--serif);
+  color: #576c4d;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 1px;
+}
+.building-inspection button {
+  color: #7a8966;
+  padding: 6px;
+  display: grid;
+  place-items: center;
+}
+.return-to-town {
+  position: absolute;
+  top: 165px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 17px;
+  color: #667d54;
+  background: #fbf7eaf2;
+  border: 1px solid #cbd4b6;
+  box-shadow: 0 4px 20px #56654116;
+  border-radius: 20px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.map-pin.under-inspection {
+  visibility: hidden;
+}
+.detail-hero.model-hero {
+  background: radial-gradient(ellipse at 50% 70%, #e0e6ca, #eeeddb);
+}
+.detail-hero.model-hero img {
+  object-fit: contain;
+  padding: 18px 20px 10px;
+  filter: drop-shadow(4px 7px 4px #65744c17);
+}
+.architecture-context-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.architecture-context-layer img {
+  position: absolute;
+  max-width: none;
+}
+.building-inspection .inspection-title {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  padding: 0;
+  text-align: left;
+}
+.inspection-title strong {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.building-picker {
+  position: absolute;
+  z-index: 15;
+  top: 220px;
+  left: 16px;
+  right: 16px;
+  max-height: min(390px, calc(100% - 265px));
+  overflow: auto;
+  overscroll-behavior: contain;
+  background: #faf7edfa;
+  border: 1px solid #d5ceb2;
+  border-radius: 7px;
+  box-shadow: 0 10px 35px #50603924;
+}
+.building-picker header {
+  position: sticky;
+  top: 0;
+  background: #f9f5e8;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 15px;
+  border-bottom: 1px solid #dfdeca;
+  color: #8b8e73;
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+.building-picker header button {
+  display: grid;
+  place-items: center;
+  padding: 4px;
+}
+.building-picker > div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  padding: 11px;
+}
+.building-picker > div > button {
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 6px;
+  color: #738367;
+  font-size: 11px;
+  border-radius: 4px;
+}
+.building-picker > div > button > span {
+  font:
+    9px Georgia,
+    serif;
+  color: #aa9b73;
+}
+.building-picker > div > button.active {
+  background: #e8eddc;
+  color: #4a684b;
+}

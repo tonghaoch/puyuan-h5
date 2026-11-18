@@ -1,0 +1,790 @@
+{
+  "version": "source-traced-relief-2026-11-18",
+  "coordinateSpace": "reference-image-pixels",
+  "models": [
+    {
+      "id": "visitor-court",
+      "placeId": "visitor",
+      "name": "游客中心",
+      "sourceBounds": [
+        619,
+        300,
+        267,
+        229
+      ],
+      "focus": [
+        752.5,
+        414.5
+      ],
+      "erase": [],
+      "ground": "source-preserved",
+      "asset": "/art/landmarks/visitor-court.webp",
+      "overviewAsset": "/art/landmarks/visitor-court.preview.webp",
+      "heroAsset": "/art/landmarks/visitor-court.scene.webp",
+      "sourceAsset": "/art/landmarks/visitor-court.svg",
+      "lights": [
+        [
+          0.7903,
+          0.5721
+        ],
+        [
+          0.3165,
+          0.6965
+        ],
+        [
+          0.7041,
+          0.6026
+        ]
+      ],
+      "surfaceCount": 49,
+      "evidence": "source-visible-contours",
+      "kinds": [
+        "glass",
+        "roof",
+        "wall",
+        "wood"
+      ],
+      "finishLabel": "地标屋面与木构细节"
+    },
+    {
+      "id": "temple-pagoda",
+      "placeId": "temple",
+      "name": "寺塔",
+      "sourceBounds": [
+        878,
+        450,
+        74,
+        149
+      ],
+      "focus": [
+        915.0,
+        524.5
+      ],
+      "erase": [],
+      "ground": "source-preserved",
+      "asset": "/art/landmarks/temple-pagoda.webp",
+      "overviewAsset": "/art/landmarks/temple-pagoda.preview.webp",
+      "heroAsset": "/art/landmarks/temple-pagoda.scene.webp",
+      "sourceAsset": "/art/landmarks/temple-pagoda.svg",
+      "lights": [],
+      "surfaceCount": 0,
+      "evidence": "official-photo-and-source-layout",
+      "kinds": [],
+      "finishLabel": "地标屋面与木构细节"
+    },
+    {
+      "id": "temple-hall",
+      "placeId": "temple",
+      "name": "福善寺建筑群",
+      "sourceBounds": [
+        806,
+        620,
+        207,
+        231
+      ],
+      "focus": [
+        909.5,
+        735.5
+      ],
+      "erase": [],
+      "ground": "source-preserved",
+      "asset": "/art/landmarks/temple-hall.webp",
+      "overviewAsset": "/art/landmarks/temple-hall.preview.webp",
+      "heroAsset": "/art/landmarks/temple-hall.scene.webp",
+      "sourceAsset": "/art/landmarks/temple-hall.svg",
+      "lights": [
+        [
+          0.4855,
+          0.1818
+        ],
+        [
+          0.5628,
+          0.2403
+        ],
+        [
+          0.7778,
+          0.184
+        ]
+      ],
+      "surfaceCount": 54,
+      "evidence": "source-visible-contours",
+      "kinds": [
+        "gold",
+        "roof",
+        "wall",
+        "wood"
+      ],
+      "finishLabel": "地标屋面与木构细节"
+    },
+    {
+      "id": "zen-courtyard",
+      "placeId": "zen-hotel",
+      "name": "禅意酒店",
+      "sourceBounds": [
+        1120,
+        457,
+        183,
+        169
+      ],
+      "focus": [
+        1211.5,
+        541.5
+      ],
+      "erase": [],
+      "ground": "source-preserved",
+      "asset": "/art/landmarks/zen-courtyard.webp",
+      "overviewAsset": "/art/landmarks/zen-courtyard.preview.webp",
+      "heroAsset": "/art/landmarks/zen-courtyard.scene.webp",
+      "sourceAsset": "/art/landmarks/zen-courtyard.svg",
+      "lights": [
+        [
+          0.4563,
+          0.855
+        ],
+        [
+          0.6066,
+          0.645
+        ],
+        [
+          0.6011,
+          0.4911
+        ]
+      ],
+      "surfaceCount": 35,
+      "evidence": "source-visible-contours",
+      "kinds": [
+        "roof",
+        "wall",
+        "wood"
+      ],
+      "finishLabel": "地标屋面与木构细节"
+    },
+    {
+      "id": "waterside-stage",
+      "placeId": "water-stage",
+      "name": "水上舞台",
+      "sourceBounds": [
+        943,
+        274,
+        228,
+        129
+      ],
+      "focus": [
+        1057.0,
+        338.5
+      ],
+      "erase": [],
+      "ground": "source-preserved",
+      "asset": "/art/landmarks/waterside-stage.webp",
+      "overviewAsset": "/art/landmarks/waterside-stage.preview.webp",
+      "heroAsset": "/art/landmarks/waterside-stage.scene.webp",
+      "sourceAsset": "/art/landmarks/waterside-stage.svg",
+      "lights": [
+        [
+          0.5241,
+          0.7171
+        ],
+        [
+          0.3092,
+          0.6395
+        ]
+      ],
+      "surfaceCount": 13,
+      "evidence": "source-visible-contours",
+      "kinds": [
+        "roof",
+        "wall",
+        "wood"
+      ],
+      "finishLabel": "地标屋面与木构细节"
+    },
+    {
+      "id": "north-watchtower",
+      "placeId": "north-gate",
+      "name": "北更楼",
+      "sourceBounds": [
+        502,
+        480,
+        91,
+        105
+      ],
+      "focus": [
+        547.5,
+        532.5
+      ],
+      "erase": [],
+      "ground": "source-preserved",
+      "asset": "/art/landmarks/north-watchtower.webp",
+      "overviewAsset": "/art/landmarks/north-watchtower.preview.webp",
+      "heroAsset": "/art/landmarks/north-watchtower.scene.webp",
+      "sourceAsset": "/art/landmarks/north-watchtower.svg",
+      "lights": [],
+      "surfaceCount": 8,
+      "evidence": "source-visible-contours",
+      "kinds": [
+        "roof",
+        "wall"
+      ],
+      "finishLabel": "石台与门楼"
+    },
+    {
+      "id": "fuma-residence",
+      "placeId": "fuma",
+      "name": "濮驸马第",
+      "sourceBounds": [
+        596,
+        521,
+        279,
+        216
+      ],
+      "focus": [
+        735.5,
+        629.0
+      ],
+      "erase": [],
+      "ground": "source-preserved",
+      "asset": "/art/landmarks/fuma-residence.webp",
+      "overviewAsset": "/art/landmarks/fuma-residence.preview.webp",
+      "heroAsset": "/art/landmarks/fuma-residence.scene.webp",
+      "sourceAsset": "/art/landmarks/fuma-residence.svg",
+      "lights": [
+        [
+          0.6953,
+          0.1319
+        ],
+        [
+          0.4337,
+          0.7847
+        ],
+        [
+          0.5,
+          0.1366
+        ]
+      ],
+      "surfaceCount": 72,
+      "evidence": "source-visible-contours",
+      "kinds": [
+        "roof",
+        "wall",
+        "wood"
+      ],
+      "finishLabel": "院落木构与窗棂"
+    },
+    {
+      "id": "zen-gallery",
+      "placeId": "art-gallery",
+      "name": "禅美术馆",
+      "sourceBounds": [
+        980,
+        436,
+        158,
+        173
+      ],
+      "focus": [
+        1059.0,
+        522.5
+      ],
+      "erase": [],
+      "ground": "source-preserved",
+      "asset": "/art/landmarks/zen-gallery.webp",
+      "overviewAsset": "/art/landmarks/zen-gallery.preview.webp",
+      "heroAsset": "/art/landmarks/zen-gallery.scene.webp",
+      "sourceAsset": "/art/landmarks/zen-gallery.svg",
+      "lights": [
+        [
+          0.6013,
+          0.7803
+        ],
+        [
+          0.4494,
+          0.4104
+        ],
+        [
+          0.7278,
+          0.4017
+        ]
+      ],
+      "surfaceCount": 25,
+      "evidence": "source-visible-contours",
+      "kinds": [
+        "roof",
+        "wall",
+        "wood"
+      ],
+      "finishLabel": "深色立面与檐口"
+    },
+    {
+      "id": "designer-quarter",
+      "placeId": "designer-house",
+      "name": "设计师之家",
+      "sourceBounds": [
+        1274,
+        495,
+        152,
+        219
+      ],
+      "focus": [
+        1350.0,
+        604.5
+      ],
+      "erase": [],
+      "ground": "source-preserved",
+      "asset": "/art/landmarks/designer-quarter.webp",
+      "overviewAsset": "/art/landmarks/designer-quarter.preview.webp",
+      "heroAsset": "/art/landmarks/designer-quarter.scene.webp",
+      "sourceAsset": "/art/landmarks/designer-quarter.svg",
+      "lights": [
+        [
+          0.8454,
+          0.8128
+        ],
+        [
+          0.6974,
+          0.8379
+        ],
+        [
+          0.3717,
+          0.6986
+        ]
+      ],
+      "surfaceCount": 28,
+      "evidence": "source-visible-contours",
+      "kinds": [
+        "roof",
+        "wall",
+        "wood"
+      ],
+      "finishLabel": "纵向屋脊与檐边"
+    },
+    {
+      "id": "xiangyun-temple",
+      "placeId": "xiangyun",
+      "name": "翔云观",
+      "sourceBounds": [
+        1089,
+        646,
+        181,
+        225
+      ],
+      "focus": [
+        1179.5,
+        758.5
+      ],
+      "erase": [],
+      "ground": "source-preserved",
+      "asset": "/art/landmarks/xiangyun-temple.webp",
+      "overviewAsset": "/art/landmarks/xiangyun-temple.preview.webp",
+      "heroAsset": "/art/landmarks/xiangyun-temple.scene.webp",
+      "sourceAsset": "/art/landmarks/xiangyun-temple.svg",
+      "lights": [
+        [
+          0.7624,
+          0.24
+        ],
+        [
+          0.442,
+          0.7778
+        ],
+        [
+          0.674,
+          0.24
+        ]
+      ],
+      "surfaceCount": 39,
+      "evidence": "source-visible-contours",
+      "kinds": [
+        "roof",
+        "wall",
+        "wood"
+      ],
+      "finishLabel": "斜向院落与木柱"
+    },
+    {
+      "id": "merchant-hall",
+      "placeId": "guildhall",
+      "name": "濮商会馆",
+      "sourceBounds": [
+        537,
+        873,
+        156,
+        115
+      ],
+      "focus": [
+        615.0,
+        930.5
+      ],
+      "erase": [],
+      "ground": "source-preserved",
+      "asset": "/art/landmarks/merchant-hall.webp",
+      "overviewAsset": "/art/landmarks/merchant-hall.preview.webp",
+      "heroAsset": "/art/landmarks/merchant-hall.scene.webp",
+      "sourceAsset": "/art/landmarks/merchant-hall.svg",
+      "lights": [
+        [
+          0.3205,
+          0.1
+        ],
+        [
+          0.7853,
+          0.6783
+        ],
+        [
+          0.8045,
+          0.8652
+        ]
+      ],
+      "surfaceCount": 17,
+      "evidence": "source-visible-contours",
+      "kinds": [
+        "roof",
+        "wall",
+        "wood"
+      ],
+      "finishLabel": "会馆门窗与木饰面"
+    },
+    {
+      "id": "meijing-theater",
+      "placeId": "theater",
+      "name": "梅泾剧场",
+      "sourceBounds": [
+        696,
+        841,
+        188,
+        115
+      ],
+      "focus": [
+        790.0,
+        898.5
+      ],
+      "erase": [],
+      "ground": "source-preserved",
+      "asset": "/art/landmarks/meijing-theater.webp",
+      "overviewAsset": "/art/landmarks/meijing-theater.preview.webp",
+      "heroAsset": "/art/landmarks/meijing-theater.scene.webp",
+      "sourceAsset": "/art/landmarks/meijing-theater.svg",
+      "lights": [
+        [
+          0.766,
+          0.0261
+        ],
+        [
+          0.2128,
+          0.9478
+        ],
+        [
+          0.2633,
+          0.3174
+        ]
+      ],
+      "surfaceCount": 10,
+      "evidence": "source-visible-contours",
+      "kinds": [
+        "roof",
+        "wall",
+        "wood"
+      ],
+      "finishLabel": "戏台檐口与窗格"
+    },
+    {
+      "id": "night-dining",
+      "placeId": "teahouse",
+      "name": "深夜食堂",
+      "sourceBounds": [
+        773,
+        932,
+        147,
+        93
+      ],
+      "focus": [
+        846.5,
+        978.5
+      ],
+      "erase": [],
+      "ground": "source-preserved",
+      "asset": "/art/landmarks/night-dining.webp",
+      "overviewAsset": "/art/landmarks/night-dining.preview.webp",
+      "heroAsset": "/art/landmarks/night-dining.scene.webp",
+      "sourceAsset": "/art/landmarks/night-dining.svg",
+      "lights": [
+        [
+          0.5782,
+          0.8871
+        ],
+        [
+          0.4286,
+          0.957
+        ],
+        [
+          0.4728,
+          0.5108
+        ]
+      ],
+      "surfaceCount": 10,
+      "evidence": "source-visible-contours",
+      "kinds": [
+        "roof",
+        "wall",
+        "wood"
+      ],
+      "finishLabel": "街铺门楣与木门"
+    },
+    {
+      "id": "storytelling-house",
+      "placeId": "shuchang",
+      "name": "书场",
+      "sourceBounds": [
+        910,
+        905,
+        119,
+        112
+      ],
+      "focus": [
+        969.5,
+        961.0
+      ],
+      "erase": [],
+      "ground": "source-preserved",
+      "asset": "/art/landmarks/storytelling-house.webp",
+      "overviewAsset": "/art/landmarks/storytelling-house.preview.webp",
+      "heroAsset": "/art/landmarks/storytelling-house.scene.webp",
+      "sourceAsset": "/art/landmarks/storytelling-house.svg",
+      "lights": [
+        [
+          0.7773,
+          0.9062
+        ],
+        [
+          0.5,
+          0.9286
+        ],
+        [
+          0.1387,
+          0.4375
+        ]
+      ],
+      "surfaceCount": 12,
+      "evidence": "source-visible-contours",
+      "kinds": [
+        "roof",
+        "wall",
+        "wood"
+      ],
+      "finishLabel": "书场栏杆与木格"
+    },
+    {
+      "id": "dayou-bridge-quarter",
+      "placeId": "dayou",
+      "name": "大有桥建筑群",
+      "sourceBounds": [
+        549,
+        974,
+        228,
+        129
+      ],
+      "focus": [
+        663.0,
+        1038.5
+      ],
+      "erase": [],
+      "ground": "source-preserved",
+      "asset": "/art/landmarks/dayou-bridge-quarter.webp",
+      "overviewAsset": "/art/landmarks/dayou-bridge-quarter.preview.webp",
+      "heroAsset": "/art/landmarks/dayou-bridge-quarter.scene.webp",
+      "sourceAsset": "/art/landmarks/dayou-bridge-quarter.svg",
+      "lights": [
+        [
+          0.1952,
+          0.8372
+        ],
+        [
+          0.5614,
+          0.7248
+        ],
+        [
+          0.1513,
+          0.6667
+        ]
+      ],
+      "surfaceCount": 32,
+      "evidence": "source-visible-contours",
+      "kinds": [
+        "roof",
+        "wall",
+        "wood"
+      ],
+      "finishLabel": "桥头石基与墙脚"
+    },
+    {
+      "id": "pu-family-residence",
+      "placeId": "market",
+      "name": "濮家大院",
+      "sourceBounds": [
+        920,
+        1007,
+        202,
+        155
+      ],
+      "focus": [
+        1021.0,
+        1084.5
+      ],
+      "erase": [],
+      "ground": "source-preserved",
+      "asset": "/art/landmarks/pu-family-residence.webp",
+      "overviewAsset": "/art/landmarks/pu-family-residence.preview.webp",
+      "heroAsset": "/art/landmarks/pu-family-residence.scene.webp",
+      "sourceAsset": "/art/landmarks/pu-family-residence.svg",
+      "lights": [
+        [
+          0.8911,
+          0.7065
+        ],
+        [
+          0.3639,
+          0.3613
+        ],
+        [
+          0.2401,
+          0.1161
+        ]
+      ],
+      "surfaceCount": 39,
+      "evidence": "source-visible-contours",
+      "kinds": [
+        "roof",
+        "wall",
+        "wood"
+      ],
+      "finishLabel": "宅院窗格与墙脚"
+    },
+    {
+      "id": "dressing-house",
+      "placeId": "zhuanglou",
+      "name": "妆楼",
+      "sourceBounds": [
+        632,
+        1091,
+        148,
+        107
+      ],
+      "focus": [
+        706.0,
+        1144.5
+      ],
+      "erase": [],
+      "ground": "source-preserved",
+      "asset": "/art/landmarks/dressing-house.webp",
+      "overviewAsset": "/art/landmarks/dressing-house.preview.webp",
+      "heroAsset": "/art/landmarks/dressing-house.scene.webp",
+      "sourceAsset": "/art/landmarks/dressing-house.svg",
+      "lights": [
+        [
+          0.6047,
+          0.5981
+        ],
+        [
+          0.2399,
+          0.743
+        ],
+        [
+          0.8682,
+          0.6308
+        ]
+      ],
+      "surfaceCount": 21,
+      "evidence": "source-visible-contours",
+      "kinds": [
+        "roof",
+        "wall",
+        "wood"
+      ],
+      "finishLabel": "木楼分层与窗门"
+    },
+    {
+      "id": "longwan-dining",
+      "placeId": "dining",
+      "name": "龙湾街美食广场",
+      "sourceBounds": [
+        292,
+        1028,
+        299,
+        188
+      ],
+      "focus": [
+        441.5,
+        1122.0
+      ],
+      "erase": [],
+      "ground": "source-preserved",
+      "asset": "/art/landmarks/longwan-dining.webp",
+      "overviewAsset": "/art/landmarks/longwan-dining.preview.webp",
+      "heroAsset": "/art/landmarks/longwan-dining.scene.webp",
+      "sourceAsset": "/art/landmarks/longwan-dining.svg",
+      "lights": [
+        [
+          0.0753,
+          0.7739
+        ],
+        [
+          0.0569,
+          0.9574
+        ],
+        [
+          0.0602,
+          0.883
+        ]
+      ],
+      "surfaceCount": 68,
+      "evidence": "source-visible-contours",
+      "kinds": [
+        "roof",
+        "wall",
+        "wood"
+      ],
+      "finishLabel": "临水店铺与门楣"
+    },
+    {
+      "id": "food-center",
+      "placeId": "food-center",
+      "name": "美食中心",
+      "sourceBounds": [
+        1291,
+        407,
+        137,
+        94
+      ],
+      "focus": [
+        1359.5,
+        454.0
+      ],
+      "erase": [],
+      "ground": "source-preserved",
+      "asset": "/art/landmarks/food-center.webp",
+      "overviewAsset": "/art/landmarks/food-center.preview.webp",
+      "heroAsset": "/art/landmarks/food-center.scene.webp",
+      "sourceAsset": "/art/landmarks/food-center.svg",
+      "lights": [
+        [
+          0.3467,
+          0.5904
+        ],
+        [
+          0.2555,
+          0.3617
+        ],
+        [
+          0.208,
+          0.2606
+        ]
+      ],
+      "surfaceCount": 13,
+      "evidence": "source-visible-contours",
+      "kinds": [
+        "roof",
+        "wall",
+        "wood"
+      ],
+      "finishLabel": "排屋檐口与门窗"
+    }
+  ]
+}

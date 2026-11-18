@@ -229,10 +229,7 @@ test('reference and illustration share geometry, real map and imagery share geor
   page,
 }) => {
   await page.goto('/')
-  await expect(page.locator('.map-art')).toHaveAttribute(
-    'src',
-    '/art/puyuan-reference-aligned.webp',
-  )
+  await expect(page.locator('.map-art')).toHaveAttribute('src', '/art/puyuan-layered-ground.webp')
   const initial = await page.locator('.map-scene').getAttribute('style')
   await page.getByRole('button', { name: '原图对照', exact: true }).click()
   await expect(page.locator('.map-art')).toHaveAttribute('src', '/art/puyuan-original-scope.webp')
@@ -288,4 +285,105 @@ test('bottom sheet can be dragged down to dismiss', async ({ page }) => {
   await page.mouse.move(handle.x + handle.width / 2, handle.y + 125, { steps: 8 })
   await page.mouse.up()
   await expect(page.getByRole('dialog')).toHaveCount(0)
+})
+
+test('detailed buildings are independent, inspectable and selectable', async ({ page }) => {
+  await page.goto('/')
+  expect(await page.locator('.landmark-model').count()).toBeGreaterThan(0)
+  expect(await page.locator('.landmark-model').count()).toBeLessThanOrEqual(19)
+  await page.getByRole('button', { name: '细看古建', exact: true }).click()
+  await expect(page.locator('.building-inspection')).toContainText('游客中心')
+  const model = page.getByRole('button', { name: '查看游客中心建筑详情', exact: true })
+  await expect(model).toBeInViewport()
+  await model.click({ position: { x: 35, y: 100 } })
+  await expect(
+    page.getByRole('dialog').getByRole('heading', { name: '游客中心', exact: true }),
+  ).toBeVisible()
+  await page.getByRole('button', { name: '关闭弹窗' }).click()
+  await page.getByRole('button', { name: '下一处建筑' }).click()
+  await expect(page.locator('.building-inspection')).toContainText('寺塔')
+  const camera = await page.locator('.map-scene').getAttribute('style')
+  await page.getByRole('button', { name: '原图对照', exact: true }).click()
+  await expect(page.locator('.landmark-model')).toHaveCount(0)
+  await expect(page.locator('.map-scene')).toHaveAttribute('style', camera!)
+  await page.getByRole('button', { name: '手绘导览', exact: true }).click()
+  expect(await page.locator('.landmark-model').count()).toBeGreaterThan(0)
+  expect(await page.locator('.landmark-model').count()).toBeLessThanOrEqual(19)
+})
+
+test('dragging on a large building pans the map without opening its detail', async ({ page }) => {
+  await page.goto('/')
+  await page.getByRole('button', { name: '细看古建', exact: true }).click()
+  const model = (await page
+    .getByRole('button', { name: '查看游客中心建筑详情', exact: true })
+    .boundingBox())!
+  const scene = page.locator('.map-scene')
+  const before = await scene.getAttribute('style')
+  const x = model.x + 35,
+    y = model.y + 100
+  await page.mouse.move(x, y)
+  await page.mouse.down()
+  await page.mouse.move(x + 65, y + 30, { steps: 8 })
+  await page.mouse.up()
+  await expect(scene).not.toHaveAttribute('style', before!)
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+})
+
+test('panning beyond the former crop reveals meadow and can return to town', async ({ page }) => {
+  await page.goto('/')
+  const scene = page.locator('.map-scene')
+  const initial = await scene.getAttribute('style')
+  await page.getByRole('region', { name: /古镇示意地图/ }).focus()
+  for (let i = 0; i < 22; i++) await page.keyboard.press('ArrowRight')
+  await expect(page.getByRole('button', { name: '回到古镇', exact: true })).toBeVisible()
+  await expect(page.locator('.meadow-backdrop')).toHaveCSS('background-image', /meadow-tile\.svg/)
+  const view = (await page.locator('.map-viewport').boundingBox())!
+  const image = (await page.locator('.map-art').boundingBox())!
+  expect(image.x + image.width).toBeLessThan(view.x + 35)
+  expect(await page.locator('.meadow-layer img').count()).toBeLessThan(25)
+  await page.getByRole('button', { name: '回到古镇', exact: true }).click()
+  await expect(scene).toHaveAttribute('style', initial!)
+  await page.getByRole('button', { name: '真实路网', exact: true }).click()
+  await expect(page.locator('.meadow-backdrop')).toHaveCount(0)
+  await expect(page.locator('.landmark-model')).toHaveCount(0)
+})
+
+test('all landmark groups can be selected from the architecture directory', async ({ page }) => {
+  await page.goto('/')
+  await page.getByRole('button', { name: '细看古建', exact: true }).click()
+  await page.getByRole('button', { name: '选择要细看的建筑' }).click()
+  const directory = page.getByRole('region', { name: '古建目录' })
+  await expect(directory.locator('div > button')).toHaveCount(19)
+  await directory.getByRole('button', { name: /龙湾街美食广场/ }).click()
+  await expect(directory).toHaveCount(0)
+  await expect(page.locator('.building-inspection')).toContainText('龙湾街美食广场')
+  await expect(page.locator('[data-model-id="longwan-dining"]')).toBeInViewport()
+  await expect(page.locator('[data-model-id="longwan-dining"] img')).toHaveAttribute(
+    'src',
+    '/art/landmarks/longwan-dining.webp',
+  )
+  await page.getByRole('button', { name: '选择要细看的建筑' }).click()
+  await directory.getByRole('button', { name: /北更楼/ }).click()
+  await expect(page.locator('.building-inspection')).toContainText('北更楼')
+  await expect(page.locator('[data-model-id="north-watchtower"]')).toBeInViewport()
+})
+
+test('background architecture changes detail level and stays out of geographic views', async ({
+  page,
+}) => {
+  await page.goto('/')
+  await expect(page.locator('.architecture-context-layer img').first()).toBeVisible()
+  expect(await page.locator('.architecture-context-layer img').count()).toBeLessThanOrEqual(24)
+  await expect(page.locator('.architecture-context-layer img').first()).toHaveAttribute(
+    'src',
+    /preview\.webp$/,
+  )
+  await page.getByRole('button', { name: '细看古建', exact: true }).click()
+  const images = page.locator('.architecture-context-layer img')
+  await expect(images.first()).toHaveAttribute('src', /(?<!preview)\.webp$/)
+  await page.getByRole('button', { name: '真实路网', exact: true }).click()
+  await expect(page.locator('.architecture-context-layer')).toHaveCount(0)
+  await expect(page.locator('.landmark-layer')).toHaveCount(0)
+  await page.getByRole('button', { name: '手绘导览', exact: true }).click()
+  await expect(page.locator('.architecture-context-layer')).toBeVisible()
 })

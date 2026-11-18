@@ -2,9 +2,11 @@
 
 具有微信小程序布局的 H5：紧凑顶部栏、固定底部三 tab、下拉关闭的底部详情。手机直接使用，电脑居中预览同一套手机界面。
 
+已覆盖18个原图标注地点，寺塔单列后形成19个独立建筑组团，并细化其余街巷建筑。右侧“细看古建”可打开目录选择；外围为连续的无建筑草地，支持拖出古镇范围并一键返回。
+
 地图现有四种视图：
 
-- **手绘导览**：保留用户原图古镇范围内的建筑、水系、桥梁和标签，统一配色，叠加动画与18处地点。
+- **手绘导览**：沿用原图的古镇水系、桥梁和地标布局，按实际可见轮廓重建全园建筑图层，外围衔接草地，叠加动画与18处地点。
 - **原图对照**：同一范围与坐标的原始配色，可直接检查还原位置。
 - **真实路网**：OSM 的道路、桥梁、水道、园区边界和具名地标。
 - **影像核对**：带准确投影范围的地图服务影像，与路网和 GPS 叠加。
@@ -30,14 +32,20 @@
 
 ## 维护
 
+    npm run art:trace
+    npm run art:models
+    npm run art:meadow
     npm run art:reference
     npm run art:generate
     npm run geo:package
     npm run format
 
-原图处理脚本需要 Python 3 和 Pillow。开发无需重生成素材，已提交工作区内的生成结果可直接使用。原始图片不被覆盖。
+原图和建筑处理脚本需要 Python 3、Pillow、NumPy 和 OpenCV（scripts/requirements-art.txt）；建筑预渲染另使用 Playwright 与 Chrome/Chromium。开发无需重生成素材，已提交工作区内的生成结果可直接使用。原始图片不被覆盖。
 
 - src/data/reference-map.json：18处参考图地点、范围与坐标变换。
+- src/data/landmark-models.json：独立建筑范围、资产和局部灯光。
+- src/data/architecture-tiles.json：未命名街巷的建筑细节图块。
+- src/data/meadow-tiles.json：外围草地景观块，按视野加载。
 - src/data/catalog.ts：演示餐厅、活动与场次。
 - src/data/geographic-pois.json：保存原始来源的地理地标，与插画地点分开。
 - public/art：原图衍生地图、原色对照、水面遮罩和卡片插画。
@@ -48,7 +56,11 @@
 
 ## 文档
 
+- [开发接续与剩余事项](docs/handoff.md)：恢复会话或接续本轮建筑细化时先读。
 - [当前实现](docs/implementation.md)
+- [本轮构件细化](docs/architecture-finishing.md)
+- [全园建筑与实景校正](docs/whole-town-architecture.md)
+- [精细建筑与连续外围](docs/building-layers.md)
 - [原图与实际地图核对](docs/map-reconciliation.md)
 - [地理数据来源与覆盖缺口](docs/geodata-research.md)
 - [技术方案](docs/technical-plan.md)

@@ -1,0 +1,14 @@
+{
+  "counts": {
+    "roof": 337,
+    "gold": 3,
+    "wood": 357,
+    "wall": 325,
+    "glass": 3
+  },
+  "surfaces": 1025,
+  "visibleSurfacePixels": 340211,
+  "namedGroups": 19,
+  "unassignedSurfaces": 480,
+  "note": "Counts describe traced visible surfaces, not physical buildings. Hidden details are not measured."
+}

@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import type { Place } from '../data/catalog'
 import { clampCamera, zoomAt, SCENE, type Camera } from '../lib/map-camera'
+import MeadowLayer from './MeadowLayer.vue'
+import LandmarkLayer from './LandmarkLayer.vue'
+import ArchitectureLayer from './ArchitectureLayer.vue'
+import landmarkModels from '../data/landmark-models.json'
 import AppIcon from './AppIcon.vue'
 import referenceMap from '../data/reference-map.json'
 import { useParkGeography, isGeographicView, type MapView } from '../lib/park-geography'
@@ -27,6 +31,17 @@ const emit = defineEmits<{
 }>()
 const geography = useParkGeography()
 const geographic = computed(() => isGeographicView(props.view))
+const cameraWorld = computed(() =>
+  geographic.value ? ('geographic' as const) : ('illustration' as const),
+)
+const inspectionIndex = ref(-1)
+const showBuildingPicker = ref(false)
+const inspectionTitle = ref<HTMLButtonElement>()
+function closeBuildingPicker() {
+  showBuildingPicker.value = false
+  void nextTick(() => inspectionTitle.value?.focus())
+}
+const inspected = computed(() => landmarkModels.models[inspectionIndex.value])
 const positions = computed(() =>
   geography.points.value.filter((p) => p.name.includes(props.query.trim())),
 )
@@ -62,10 +77,24 @@ const dragging = ref(false)
 const ready = ref(false)
 const pointers = new Map<number, { x: number; y: number }>()
 let observer: ResizeObserver | undefined
+let suppressClick = false
+let dragDistance = 0
 const style = computed(() => ({
   transform: `translate3d(${camera.x}px, ${camera.y}px, 0) scale(${camera.scale})`,
   '--inverse-scale': 1 / camera.scale,
 }))
+const meadowStyle = computed(() => ({
+  backgroundSize: `${384 * camera.scale}px ${384 * camera.scale}px`,
+  backgroundPosition: `${camera.x}px ${camera.y}px`,
+}))
+const townOutOfView = computed(
+  () =>
+    !geographic.value &&
+    (camera.x + SCENE.width * camera.scale < 35 ||
+      camera.x > dimensions.width - 35 ||
+      camera.y + SCENE.height * camera.scale < 145 ||
+      camera.y > dimensions.height - 135),
+)
 const icon: Record<string, string> = {
   performance: 'fan',
   craft: 'flower',
@@ -74,10 +103,12 @@ const icon: Record<string, string> = {
   service: 'bell',
 }
 function setCamera(value: Camera) {
-  Object.assign(camera, clampCamera(value, dimensions.width, dimensions.height))
+  Object.assign(camera, clampCamera(value, dimensions.width, dimensions.height, cameraWorld.value))
   emit('zoom', camera.scale)
 }
 function reset() {
+  showBuildingPicker.value = false
+  inspectionIndex.value = -1
   const { width, height } = dimensions
   const scale = Math.min(width / 1120, (height - 160) / 1040)
   setCamera({ scale, x: width / 2 - 850 * scale, y: (height + 5) / 2 - 605 * scale })
@@ -85,6 +116,7 @@ function reset() {
 watch(
   () => props.view,
   (next, previous) => {
+    showBuildingPicker.value = false
     const previousKind = isGeographicView(previous) ? 'geographic' : 'art'
     const nextKind = isGeographicView(next) ? 'geographic' : 'art'
     if (previousKind === nextKind) return
@@ -119,10 +151,39 @@ function changeZoom(factor: number) {
       dimensions.height / 2,
       dimensions.width,
       dimensions.height,
+      cameraWorld.value,
     ),
   )
 }
+function inspectBuilding(index?: number) {
+  showBuildingPicker.value = false
+  inspectionIndex.value =
+    typeof index === 'number' ? index : (inspectionIndex.value + 1) % landmarkModels.models.length
+  const model = inspected.value!
+  const [x, y, width, height] = model.sourceBounds as [number, number, number, number]
+  const scale = Math.max(
+    0.5,
+    Math.min(3, (dimensions.width - 32) / width, Math.max(180, dimensions.height - 345) / height),
+  )
+  setCamera({
+    scale,
+    x: dimensions.width / 2 - (x + width / 2 + referenceMap.sourceOffset.x) * scale,
+    y: (dimensions.height + 55) / 2 - (y + height / 2 + referenceMap.sourceOffset.y) * scale,
+  })
+}
+function selectBuilding(placeId: string) {
+  const place = props.allPlaces.find((p) => p.id === placeId)
+  if (place) emit('select', place)
+}
+function guardClick(event: MouseEvent) {
+  if (suppressClick) {
+    event.preventDefault()
+    event.stopPropagation()
+    suppressClick = false
+  }
+}
 function focus(place: Place) {
+  inspectionIndex.value = -1
   const scale = Math.max(camera.scale, 0.83)
   setCamera({
     scale,
@@ -138,14 +199,21 @@ watch(
   },
 )
 function down(event: PointerEvent) {
-  if ((event.target as Element).closest('button') || event.button > 0) return
-  viewport.value?.setPointerCapture(event.pointerId)
+  if (pointers.size === 0) {
+    suppressClick = false
+    dragDistance = 0
+  }
+  const button = (event.target as Element).closest('button')
+  if ((button && !button.classList.contains('landmark-model')) || event.button > 0) return
+  ;(button || viewport.value)?.setPointerCapture(event.pointerId)
   pointers.set(event.pointerId, { x: event.clientX, y: event.clientY })
   dragging.value = true
 }
 function move(event: PointerEvent) {
   const old = pointers.get(event.pointerId)
   if (!old) return
+  dragDistance += Math.hypot(event.clientX - old.x, event.clientY - old.y)
+  if (dragDistance > 6 || pointers.size > 1) suppressClick = true
   const previous = [...pointers.values()]
   pointers.set(event.pointerId, { x: event.clientX, y: event.clientY })
   if (pointers.size === 1)
@@ -172,6 +240,7 @@ function move(event: PointerEvent) {
       midY,
       dimensions.width,
       dimensions.height,
+      cameraWorld.value,
     )
     result.x += (c.x + d.x - a.x - b.x) / 2
     result.y += (c.y + d.y - a.y - b.y) / 2
@@ -194,6 +263,7 @@ function wheel(event: WheelEvent) {
       event.clientY - bounds.top,
       dimensions.width,
       dimensions.height,
+      cameraWorld.value,
     ),
   )
 }
@@ -241,12 +311,14 @@ onBeforeUnmount(() => observer?.disconnect())
       'motion-paused': !motion,
       'compact-pins': camera.scale < 0.58,
       'is-geographic': geographic,
+      'has-meadow': !geographic,
     }"
     role="region"
     :aria-label="
       geographic ? '古镇真实地理地图，可拖动缩放' : '古镇示意地图，按原图保留建筑与水系，可拖动缩放'
     "
     tabindex="0"
+    @click.capture="guardClick"
     @pointerdown="down"
     @pointermove="move"
     @pointerup="up"
@@ -256,20 +328,37 @@ onBeforeUnmount(() => observer?.disconnect())
     @keydown="keyboard"
     @dblclick="changeZoom(1.3)"
   >
+    <div v-if="!geographic" class="meadow-backdrop" :style="meadowStyle" aria-hidden="true"></div>
     <div class="map-scene" :style="style">
       <template v-if="!geographic">
+        <MeadowLayer :camera="camera" :width="dimensions.width" :height="dimensions.height" />
         <img
           class="map-art"
           :src="
             view === 'reference'
               ? '/art/puyuan-original-scope.webp'
-              : '/art/puyuan-reference-aligned.webp'
+              : '/art/puyuan-layered-ground.webp'
           "
-          alt="按用户原图古镇范围保留的建筑、桥梁、水系与设施，周边住宅及产业区已排除"
+          alt="原图布局的古镇地面与水系，外围渐变衔接草地，重点建筑以独立图层绘制"
           :width="SCENE.width"
           :height="SCENE.height"
           draggable="false"
           fetchpriority="high"
+        />
+        <ArchitectureLayer
+          v-if="view === 'illustration'"
+          :camera="camera"
+          :width="dimensions.width"
+          :height="dimensions.height"
+        />
+        <LandmarkLayer
+          v-if="view === 'illustration'"
+          :camera="camera"
+          :width="dimensions.width"
+          :height="dimensions.height"
+          :selected-id="selectedId"
+          :highlighted-id="inspected?.id"
+          @select="selectBuilding"
         />
         <div v-if="view === 'illustration'" class="map-water-mask">
           <svg
@@ -310,12 +399,7 @@ onBeforeUnmount(() => observer?.disconnect())
               />
               <path d="M-10-10Q0-25 10-10V13H-10Z" fill="#617b67" />
             </g>
-            <g class="lantern-glows" fill="#edc275">
-              <circle cx="908" cy="669" r="3" />
-              <circle cx="948" cy="677" r="3" />
-              <circle cx="1061" cy="365" r="3" />
-              <circle cx="1193" cy="561" r="3" />
-            </g>
+            <g class="lantern-glows" fill="#edc275"><circle cx="1061" cy="365" r="3" /></g>
             <g class="falling-petals" fill="#d5a39a">
               <path
                 d="M670 756q-4-7 4-7 8 4-4 7M1030 428q-4-8 4-7 7 3-4 7M945 900q-4-8 4-8 8 4-4 8"
@@ -390,7 +474,14 @@ onBeforeUnmount(() => observer?.disconnect())
         v-for="place in geographic ? [] : places"
         :key="place.id"
         class="map-pin"
-        :class="[place.category, { selected: place.id === selectedId, secondary: place.secondary }]"
+        :class="[
+          place.category,
+          {
+            selected: place.id === selectedId,
+            secondary: place.secondary,
+            'under-inspection': view === 'illustration' && inspected?.placeId === place.id,
+          },
+        ]"
         :style="{ left: `${place.point.x}px`, top: `${place.point.y}px` }"
         :aria-label="`查看${place.name}`"
         @click.stop="emit('select', place)"
@@ -418,7 +509,57 @@ onBeforeUnmount(() => observer?.disconnect())
   >
     影像暂时不可用，请切换真实路网。
   </div>
+  <div v-if="inspected && view === 'illustration' && !townOutOfView" class="building-inspection">
+    <button
+      ref="inspectionTitle"
+      class="inspection-title"
+      aria-label="选择要细看的建筑"
+      :aria-expanded="showBuildingPicker"
+      @click="showBuildingPicker = !showBuildingPicker"
+    >
+      <small>古建细赏 · {{ inspectionIndex + 1 }} / {{ landmarkModels.models.length }}</small
+      ><strong>{{ inspected.name }}<AppIcon name="chevron" :size="12" /></strong>
+    </button>
+    <button aria-label="下一处建筑" @click="inspectBuilding()">
+      <AppIcon name="arrow" :size="17" /></button
+    ><button aria-label="退出古建细赏" @click="reset"><AppIcon name="close" :size="16" /></button>
+  </div>
+  <section
+    v-if="showBuildingPicker && inspected && view === 'illustration' && !townOutOfView"
+    class="building-picker"
+    aria-label="古建目录"
+    @keydown.esc.stop="closeBuildingPicker"
+  >
+    <header>
+      <span>古建目录 · {{ landmarkModels.models.length }} 处</span
+      ><button aria-label="关闭古建目录" @click="closeBuildingPicker">
+        <AppIcon name="close" :size="17" />
+      </button>
+    </header>
+    <div>
+      <button
+        v-for="(model, index) in landmarkModels.models"
+        :key="model.id"
+        :class="{ active: inspectionIndex === index }"
+        @click="inspectBuilding(index)"
+      >
+        <span>{{ String(index + 1).padStart(2, '0') }}</span>{{ model.name }}
+      </button>
+    </div>
+  </section>
+  <button v-if="townOutOfView" class="return-to-town" @click="reset">
+    <AppIcon name="map" :size="16" />回到古镇
+  </button>
   <div class="map-tools" aria-label="地图工具">
+    <button
+      v-if="view === 'illustration'"
+      class="map-tool building-tool"
+      aria-label="细看古建"
+      title="细看古建"
+      @click="inspectBuilding()"
+    >
+      <AppIcon name="lantern" :size="22" />
+    </button>
     <button
       class="map-tool locate-tool"
       aria-label="获取我的位置"

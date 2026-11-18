@@ -1,7 +1,7 @@
 {
   "source": "references/puyuan-reference.jpg",
   "source_sha256": "10e9e3b067ce85d910fc225268eb76066194a3bc37f40a787e7da259417f767e",
-  "version": "reference-aligned-2026-11-18",
+  "version": "whole-town-visible-architecture-2026-11-18",
   "scene": {
     "width": 1520,
     "height": 1240
@@ -10,7 +10,29 @@
     "x": -30,
     "y": -180
   },
-  "geometry_operation": "translation only; no warp, rotation, or invented building placement",
+  "geometry_operation": "Source-visible contours remain in their original pixel locations. Original printed labels are preserved; the ambiguous tower silhouette is replaced using first-party photo evidence. No georeferencing inferred.",
   "landmark_count": 18,
+  "independent_model_sites": [
+    "visitor-court",
+    "temple-pagoda",
+    "temple-hall",
+    "zen-courtyard",
+    "waterside-stage",
+    "north-watchtower",
+    "fuma-residence",
+    "zen-gallery",
+    "designer-quarter",
+    "xiangyun-temple",
+    "merchant-hall",
+    "meijing-theater",
+    "night-dining",
+    "storytelling-house",
+    "dayou-bridge-quarter",
+    "pu-family-residence",
+    "dressing-house",
+    "longwan-dining",
+    "food-center"
+  ],
+  "traced_surfaces": 1025,
   "georeferenced": false
 }

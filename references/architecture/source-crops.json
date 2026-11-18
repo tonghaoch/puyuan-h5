@@ -1,0 +1,236 @@
+[
+  {
+    "id": "temple-hall",
+    "label": "福善寺正殿",
+    "file": "source-group-temple-hall.png",
+    "source": "../puyuan-reference.jpg",
+    "pixel_crop_ltrb": [
+      805,
+      620,
+      1035,
+      855
+    ],
+    "meaning": "Visual reference crop, not measured footprint or geographic control point"
+  },
+  {
+    "id": "north-gate",
+    "label": "北更楼",
+    "file": "source-group-north-gate.png",
+    "source": "../puyuan-reference.jpg",
+    "pixel_crop_ltrb": [
+      490,
+      455,
+      605,
+      615
+    ],
+    "meaning": "Visual reference crop, not measured footprint or geographic control point"
+  },
+  {
+    "id": "fuma",
+    "label": "濮驸马第",
+    "file": "source-group-fuma.png",
+    "source": "../puyuan-reference.jpg",
+    "pixel_crop_ltrb": [
+      590,
+      520,
+      865,
+      735
+    ],
+    "meaning": "Visual reference crop, not measured footprint or geographic control point"
+  },
+  {
+    "id": "art-gallery",
+    "label": "禅美术馆",
+    "file": "source-group-art-gallery.png",
+    "source": "../puyuan-reference.jpg",
+    "pixel_crop_ltrb": [
+      985,
+      420,
+      1135,
+      615
+    ],
+    "meaning": "Visual reference crop, not measured footprint or geographic control point"
+  },
+  {
+    "id": "water-stage",
+    "label": "水上舞台",
+    "file": "source-group-water-stage.png",
+    "source": "../puyuan-reference.jpg",
+    "pixel_crop_ltrb": [
+      935,
+      275,
+      1168,
+      420
+    ],
+    "meaning": "Visual reference crop, not measured footprint or geographic control point"
+  },
+  {
+    "id": "food-center",
+    "label": "美食中心",
+    "file": "source-group-food-center.png",
+    "source": "../puyuan-reference.jpg",
+    "pixel_crop_ltrb": [
+      1295,
+      395,
+      1402,
+      512
+    ],
+    "meaning": "Visual reference crop, not measured footprint or geographic control point"
+  },
+  {
+    "id": "designer-house",
+    "label": "设计师之家",
+    "file": "source-group-designer-house.png",
+    "source": "../puyuan-reference.jpg",
+    "pixel_crop_ltrb": [
+      1290,
+      485,
+      1435,
+      710
+    ],
+    "meaning": "Visual reference crop, not measured footprint or geographic control point"
+  },
+  {
+    "id": "xiangyun",
+    "label": "翔云观",
+    "file": "source-group-xiangyun.png",
+    "source": "../puyuan-reference.jpg",
+    "pixel_crop_ltrb": [
+      1100,
+      705,
+      1290,
+      875
+    ],
+    "meaning": "Visual reference crop, not measured footprint or geographic control point"
+  },
+  {
+    "id": "theater",
+    "label": "梅径剧场（源图字样）",
+    "file": "source-group-theater.png",
+    "source": "../puyuan-reference.jpg",
+    "pixel_crop_ltrb": [
+      710,
+      840,
+      900,
+      965
+    ],
+    "meaning": "Visual reference crop, not measured footprint or geographic control point"
+  },
+  {
+    "id": "guildhall",
+    "label": "濮商会馆",
+    "file": "source-group-guildhall.png",
+    "source": "../puyuan-reference.jpg",
+    "pixel_crop_ltrb": [
+      510,
+      860,
+      720,
+      995
+    ],
+    "meaning": "Visual reference crop, not measured footprint or geographic control point"
+  },
+  {
+    "id": "late-dining",
+    "label": "深夜食堂",
+    "file": "source-group-late-dining.png",
+    "source": "../puyuan-reference.jpg",
+    "pixel_crop_ltrb": [
+      785,
+      920,
+      933,
+      1040
+    ],
+    "meaning": "Visual reference crop, not measured footprint or geographic control point"
+  },
+  {
+    "id": "shuchang",
+    "label": "书场",
+    "file": "source-group-shuchang.png",
+    "source": "../puyuan-reference.jpg",
+    "pixel_crop_ltrb": [
+      920,
+      900,
+      1060,
+      1015
+    ],
+    "meaning": "Visual reference crop, not measured footprint or geographic control point"
+  },
+  {
+    "id": "family-court",
+    "label": "濮家大院",
+    "file": "source-group-family-court.png",
+    "source": "../puyuan-reference.jpg",
+    "pixel_crop_ltrb": [
+      935,
+      990,
+      1155,
+      1160
+    ],
+    "meaning": "Visual reference crop, not measured footprint or geographic control point"
+  },
+  {
+    "id": "dayou",
+    "label": "大有桥建筑群",
+    "file": "source-group-dayou.png",
+    "source": "../puyuan-reference.jpg",
+    "pixel_crop_ltrb": [
+      420,
+      935,
+      775,
+      1095
+    ],
+    "meaning": "Visual reference crop, not measured footprint or geographic control point"
+  },
+  {
+    "id": "dragon-bay",
+    "label": "龙湾街美食广场",
+    "file": "source-group-dragon-bay.png",
+    "source": "../puyuan-reference.jpg",
+    "pixel_crop_ltrb": [
+      210,
+      1040,
+      625,
+      1260
+    ],
+    "meaning": "Visual reference crop, not measured footprint or geographic control point"
+  },
+  {
+    "id": "zhuanglou",
+    "label": "妆楼",
+    "file": "source-group-zhuanglou.png",
+    "source": "../puyuan-reference.jpg",
+    "pixel_crop_ltrb": [
+      630,
+      1080,
+      795,
+      1210
+    ],
+    "meaning": "Visual reference crop, not measured footprint or geographic control point"
+  },
+  {
+    "id": "riverside-street",
+    "label": "滨水商街",
+    "file": "source-group-riverside-street.png",
+    "source": "../puyuan-reference.jpg",
+    "pixel_crop_ltrb": [
+      1430,
+      430,
+      1650,
+      735
+    ],
+    "meaning": "Visual reference crop, not measured footprint or geographic control point"
+  },
+  {
+    "id": "youth-quarter",
+    "label": "青年时尚区",
+    "file": "source-group-youth-quarter.png",
+    "source": "../puyuan-reference.jpg",
+    "pixel_crop_ltrb": [
+      1150,
+      210,
+      1375,
+      355
+    ],
+    "meaning": "Visual reference crop, not measured footprint or geographic control point"
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "version": "source-relief-2026-11-18",
+  "source": "10e9e3b067ce85d910fc225268eb76066194a3bc37f40a787e7da259417f767e",
+  "surfaces": 1025,
+  "geometry_sha256": "4e472632940b319d0e032969232e80c7031d63ddbcf04efa23b1d64bad32085b",
+  "observedRoofMarks": 567,
+  "roofShadePatches": 511,
+  "observedOpenings": 2,
+  "sourceTonePatches": 5734,
+  "sourceInkLines": 254,
+  "note": "Source tones and ink lines guide visual finishes inside existing surfaces. They are not new surveyed buildings, openings, or coordinates."
+}

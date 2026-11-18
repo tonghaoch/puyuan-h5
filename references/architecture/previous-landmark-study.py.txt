@@ -1,0 +1,110 @@
+"""Rebuild four source-aligned landmark assets; decorative models, not surveyed geometry."""
+from pathlib import Path
+import math
+from art.architecture import building, slab, paving, project, plane, poly, line, path, ellipse, lantern, pine, wrap
+
+OUT = Path(__file__).resolve().parents[1] / 'public/art/landmarks'
+OUT.mkdir(parents=True, exist_ok=True)
+
+
+def visitor():
+    p=['<g transform="translate(13 64)">',slab(0,0,500,310,5,'#d7d4be'),paving(6,5,490,300,18)]
+    # North wing; two courts and glass lantern-roof atria preserve the source's recognisable form.
+    p += [building(25,15,440,48,36,lanterns=True),building(8,78,66,170,30),building(400,68,72,178,38)]
+    p += [poly(plane(102,90,116,82),'#b6c09d','#a0af89',1),poly(plane(255,87,102,100),'#bac6a5','#9cac84',1)]
+    p += [building(115,106,82,63,38,glass=True),building(277,105,66,87,44,glass=True)]
+    # Glazed roof cap, a separate steel-and-glass skeleton.
+    for x,y,w,d,h in [(115,106,82,63,38),(277,105,66,87,44)]:
+        left=project(x-3,y+d+5,h+2);right=project(x+w+3,y+d+5,h+2)
+        ridge=project(x+w*.5,y+d*.48,h+28)
+        p.append(poly([left,right,ridge],'#bdd3c8','#789c92',1.3))
+        for t in [.2,.4,.6,.8]:
+            p.append(line([(left[0]+(right[0]-left[0])*t,left[1]+(right[1]-left[1])*t),ridge],'#7a9e95',.8))
+    p += [building(28,253,127,45,29,lanterns=True),building(203,257,100,42,37,lanterns=True),building(350,253,122,45,29)]
+    # Entrance moon-gate and a pair of white screen walls.
+    p += [poly([project(161,299),project(193,299),project(193,299,32),project(161,299,32)],'#e9e1c9','#a4a98d',1)]
+    gx,gy=project(177,299,14)
+    p.append(ellipse(gx,gy,10,14,'#73866e'))
+    p.append(path(f'M{gx-18} {gy-23}q18-12 36 0',stroke='#5f7866',width=4))
+    for x,y in [(96,216),(240,210),(371,219)]:
+        px,py=project(x,y);p.append(pine(px,py,.55))
+    p += ['</g>']
+    return wrap(570,300,''.join(p),'游客中心：连廊、双庭院与玻璃中庭')
+
+
+def temple():
+    p=['<g transform="translate(22 105)">',slab(0,0,310,220,9,'#ddd4b7'),paving(10,8,290,207,16)]
+    # Broad stone staircase and balustrades, double-eaved golden main hall.
+    for i in range(5):
+        p.append(slab(100-i*3,191+i*5,110+i*6,7,3,'#e1d8bc'))
+    p += [building(22,20,263,140,51,gold=True,lanterns=True),building(56,44,193,80,40,gold=True,base_z=54)]
+    p.append(poly([project(131,163,10),project(174,163,10),project(174,163,47),project(131,163,47)],'#64583d'))
+    for xx in [40,82,123,185,225,267]:
+        p.append(line([project(xx,164,9),project(xx,164,45)],'#9b7247',5))
+        px,py=project(xx,164,40);p.append(lantern(px,py,.72))
+    for xx in [16,294]:
+        px,py=project(xx,188);p += [ellipse(px,py,9,4,'#aaa98a'),path(f'M{px-7} {py-1}v-11q7-8 14 0v11',fill='#bbbba0',stroke='#8c9a7c',width=1)]
+    p += ['</g>']
+    return wrap(390,255,''.join(p),'福善寺正殿：重檐、金色瓦面、木柱与石阶')
+
+
+def pagoda():
+    p=[]
+    cx=130
+    p.append(ellipse(cx+17,539,92,21,'#486448',extra='opacity=".12"'))
+    for i in range(4):
+        y=539-i*6;r=82-i*5
+        pts=[(cx+math.cos(a*math.pi/4)*r,y+math.sin(a*math.pi/4)*r*.35) for a in range(8)]
+        p.append(poly(pts,'#d8ceb0','#b3ac8c',1))
+    # Seven visible storeys, an octagonal drum and diminishing eaves.
+    for level in range(7):
+        y=514-level*61;w=66-level*5;h=42
+        points=[(cx-w,y-8),(cx-w*.45,y+9),(cx+w*.45,y+9),(cx+w,y-8),(cx+w,y-h),(cx+w*.45,y-h-15),(cx-w*.45,y-h-15),(cx-w,y-h)]
+        p.append(poly(points,'#d4c09a','#9b9475',1))
+        p.append(poly([(cx+w*.45,y+9),(cx+w,y-8),(cx+w,y-h),(cx+w*.45,y-h-15)],'#a7a582'))
+        for frac in [-.7,-.3,.3,.7]:
+            x=cx+w*frac
+            p.append(path(f'M{x-4} {y-5}v-21q4-8 8 0v21Z',fill='#596a55',stroke='#aa956a',width=1))
+        p.append(path(f'M{cx-w} {y-9}Q{cx} {y+19} {cx+w} {y-9}',stroke='#a88c5b',width=4))
+        for frac in [-.9,-.6,-.3,0,.3,.6,.9]:
+            x=cx+w*frac; yy=y+9-abs(frac)*17
+            p.append(line([(x,yy),(x,yy-9)],'#a88c5b',1.8))
+        ry=y-h-9;rw=w+20
+        roof=[(cx-rw,ry+5),(cx-rw*.57,ry-8),(cx-9,ry-32),(cx+9,ry-32),(cx+rw*.57,ry-8),(cx+rw,ry+5),(cx+rw*.6,ry+20),(cx,ry+27),(cx-rw*.6,ry+20)]
+        p.append(poly(roof,'url(#jadeRoof)','#3d5d50',1))
+        for j in range(1,18):
+            f=j/18
+            p.append(line([(cx-8+16*f,ry-30),(cx-rw+rw*2*f,ry+10+17*math.sin(math.pi*f))],'#a2af91',.65))
+        p.append(path(f'M{cx-rw-2} {ry-1}Q{cx-rw} {ry+9} {cx-rw+13} {ry+11}Q{cx} {ry+42} {cx+rw-13} {ry+11}Q{cx+rw} {ry+9} {cx+rw+2} {ry-1}',stroke='#c4c49c',width=2.2))
+        for f in [-1,1]:
+            p.append(lantern(cx+f*(rw-5),ry+9,.34))
+    p += [line([(cx,80),(cx,20)],'#b7a16b',3),ellipse(cx,50,5,6,'#c9b57a'),ellipse(cx,34,4,5,'#c9b57a'),path(f'M{cx} 9l-5 16h10Z',fill='#cbb478')]
+    return wrap(270,580,''.join(p),'寺塔：七层八角重檐、栏杆、瓦脊与檐下灯饰')
+
+
+def courtyard():
+    p=['<g transform="translate(22 90)">',slab(0,0,380,415,8,'#d4d0b6'),paving(8,8,365,399,18)]
+    # Layered square compound: back wings first, then garden and front wings.
+    p += [building(18,20,343,72,63,lanterns=True,timber=True),building(28,104,72,235,57,timber=True)]
+    p += [poly(plane(111,113,159,212),'#a7b48b','#8e9f76',1),paving(126,127,129,180,16)]
+    # Inner lawn, reflective pool, courtyard bridge and bonsai islands.
+    p += [poly(plane(139,145,98,133),'#a2b18a'),poly(plane(147,154,82,65),'#8fb3a1','#c0c6a4',2)]
+    for yy in [170,191,207]:
+        p.append(line([project(153,yy),project(217,yy+2)],'#d8e5c4',.8))
+    p += [poly(plane(139,231,96,12),'#d2c49e','#a89b75',1),building(148,264,75,47,37,lanterns=True)]
+    for x,y in [(125,140),(251,153),(123,291),(251,297)]:
+        px,py=project(x,y);p.append(pine(px,py,.55))
+    p += [building(279,103,71,235,57,timber=True),building(16,347,347,65,58,lanterns=True,timber=True)]
+    # Visible timber gallery under the front eave, at two levels.
+    for z in [7,26]:
+        p.append(line([project(20,413,z),project(359,413,z)],'#8c7351',1.5))
+    for x in range(25,360,16):
+        p.append(line([project(x,413,7),project(x,413,30)],'#a1865e',1))
+    p += [building(45,28,291,54,40,base_z=62,timber=True),building(47,113,48,209,36,base_z=58,timber=True),building(285,113,48,209,36,base_z=58,timber=True),building(42,333,295,49,40,base_z=58,timber=True,lanterns=True)]
+    p += ['</g>']
+    return wrap(470,365,''.join(p),'禅意酒店：层叠方形院落、木构回廊、庭园与水池')
+
+
+for name,render in [('visitor-court',visitor),('temple-hall',temple),('temple-pagoda',pagoda),('zen-courtyard',courtyard)]:
+    (OUT/f'{name}.svg').write_text(render())
+    print(f'Generated {name}.svg')

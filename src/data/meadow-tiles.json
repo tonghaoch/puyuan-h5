@@ -1,0 +1,308 @@
+{
+  "tiles": [
+    {
+      "id": "-2_-2",
+      "x": -1536,
+      "y": -1536,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/-2_-2.svg"
+    },
+    {
+      "id": "-1_-2",
+      "x": -768,
+      "y": -1536,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/-1_-2.svg"
+    },
+    {
+      "id": "0_-2",
+      "x": 0,
+      "y": -1536,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/0_-2.svg"
+    },
+    {
+      "id": "1_-2",
+      "x": 768,
+      "y": -1536,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/1_-2.svg"
+    },
+    {
+      "id": "2_-2",
+      "x": 1536,
+      "y": -1536,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/2_-2.svg"
+    },
+    {
+      "id": "3_-2",
+      "x": 2304,
+      "y": -1536,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/3_-2.svg"
+    },
+    {
+      "id": "-2_-1",
+      "x": -1536,
+      "y": -768,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/-2_-1.svg"
+    },
+    {
+      "id": "-1_-1",
+      "x": -768,
+      "y": -768,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/-1_-1.svg"
+    },
+    {
+      "id": "0_-1",
+      "x": 0,
+      "y": -768,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/0_-1.svg"
+    },
+    {
+      "id": "1_-1",
+      "x": 768,
+      "y": -768,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/1_-1.svg"
+    },
+    {
+      "id": "2_-1",
+      "x": 1536,
+      "y": -768,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/2_-1.svg"
+    },
+    {
+      "id": "3_-1",
+      "x": 2304,
+      "y": -768,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/3_-1.svg"
+    },
+    {
+      "id": "-2_0",
+      "x": -1536,
+      "y": 0,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/-2_0.svg"
+    },
+    {
+      "id": "-1_0",
+      "x": -768,
+      "y": 0,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/-1_0.svg"
+    },
+    {
+      "id": "0_0",
+      "x": 0,
+      "y": 0,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/0_0.svg"
+    },
+    {
+      "id": "1_0",
+      "x": 768,
+      "y": 0,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/1_0.svg"
+    },
+    {
+      "id": "2_0",
+      "x": 1536,
+      "y": 0,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/2_0.svg"
+    },
+    {
+      "id": "3_0",
+      "x": 2304,
+      "y": 0,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/3_0.svg"
+    },
+    {
+      "id": "-3_1",
+      "x": -2304,
+      "y": 768,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/-3_1.svg"
+    },
+    {
+      "id": "-2_1",
+      "x": -1536,
+      "y": 768,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/-2_1.svg"
+    },
+    {
+      "id": "-1_1",
+      "x": -768,
+      "y": 768,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/-1_1.svg"
+    },
+    {
+      "id": "0_1",
+      "x": 0,
+      "y": 768,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/0_1.svg"
+    },
+    {
+      "id": "1_1",
+      "x": 768,
+      "y": 768,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/1_1.svg"
+    },
+    {
+      "id": "2_1",
+      "x": 1536,
+      "y": 768,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/2_1.svg"
+    },
+    {
+      "id": "3_1",
+      "x": 2304,
+      "y": 768,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/3_1.svg"
+    },
+    {
+      "id": "-2_2",
+      "x": -1536,
+      "y": 1536,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/-2_2.svg"
+    },
+    {
+      "id": "-1_2",
+      "x": -768,
+      "y": 1536,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/-1_2.svg"
+    },
+    {
+      "id": "0_2",
+      "x": 0,
+      "y": 1536,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/0_2.svg"
+    },
+    {
+      "id": "1_2",
+      "x": 768,
+      "y": 1536,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/1_2.svg"
+    },
+    {
+      "id": "2_2",
+      "x": 1536,
+      "y": 1536,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/2_2.svg"
+    },
+    {
+      "id": "3_2",
+      "x": 2304,
+      "y": 1536,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/3_2.svg"
+    },
+    {
+      "id": "4_2",
+      "x": 3072,
+      "y": 1536,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/4_2.svg"
+    },
+    {
+      "id": "-2_3",
+      "x": -1536,
+      "y": 2304,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/-2_3.svg"
+    },
+    {
+      "id": "-1_3",
+      "x": -768,
+      "y": 2304,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/-1_3.svg"
+    },
+    {
+      "id": "1_3",
+      "x": 768,
+      "y": 2304,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/1_3.svg"
+    },
+    {
+      "id": "2_3",
+      "x": 1536,
+      "y": 2304,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/2_3.svg"
+    },
+    {
+      "id": "3_3",
+      "x": 2304,
+      "y": 2304,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/3_3.svg"
+    },
+    {
+      "id": "4_3",
+      "x": 3072,
+      "y": 2304,
+      "width": 768,
+      "height": 768,
+      "src": "/art/meadow/4_3.svg"
+    }
+  ]
+}

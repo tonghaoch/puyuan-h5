@@ -1,7 +1,14 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { shanghaiDate, shiftDay, sessionStatus } from '../src/lib/time.ts'
-import { zoomAt, clampCamera, MIN_SCALE, MAX_SCALE } from '../src/lib/map-camera.ts'
+import {
+  zoomAt,
+  clampCamera,
+  MIN_SCALE,
+  MAX_SCALE,
+  cameraBounds,
+  visibleScene,
+} from '../src/lib/map-camera.ts'
 
 test('Shanghai day changes at UTC 16:00 rather than the device local midnight', () => {
   assert.equal(shanghaiDate(new Date('2026-11-17T15:59:59Z')), '2026-11-17')
@@ -26,14 +33,23 @@ test('zoom preserves the world point beneath the pointer until scene limits inte
   assert.ok(Math.abs((point.x - next.x) / next.scale - before.x) < 1e-8)
   assert.ok(Math.abs((point.y - next.y) / next.scale - before.y) < 1e-8)
 })
-test('extreme zoom and pan cannot lose the scene', () => {
+test('expanded camera retains a bounded meadow and gives geography its own limits', () => {
   const zoomIn = zoomAt({ x: 0, y: 0, scale: 0.7 }, 1000, 200, 300, 390, 700)
   const zoomOut = zoomAt(zoomIn, 0.0001, 200, 300, 390, 700)
   assert.equal(zoomIn.scale, MAX_SCALE)
   assert.equal(zoomOut.scale, MIN_SCALE)
   const clamped = clampCamera({ x: 1e9, y: -1e9, scale: 1 }, 390, 700)
-  assert.ok(clamped.x < 390)
-  assert.ok(clamped.y > -1400)
+  const world = cameraBounds('illustration')
+  assert.ok(clamped.x + world.left <= 0)
+  assert.ok(clamped.x + world.right >= 390)
+  assert.ok(clamped.y + world.top <= 0)
+  assert.ok(clamped.y + world.bottom >= 700)
+  assert.ok(clamped.x > 390, 'the town may leave the viewport so the meadow can be explored')
+  const real = clampCamera({ x: 1e9, y: -1e9, scale: 8 }, 390, 700, 'geographic')
+  assert.equal(real.scale, 1.8)
+  assert.ok(real.x < 390, 'decorative margins do not alter the geographic map')
+  const view = visibleScene({ x: -300, y: -200, scale: 2 }, 400, 600, 0)
+  assert.deepEqual(view, { left: 150, top: 100, right: 350, bottom: 400 })
 })
 
 test('geographic location distinguishes inside, outside, uncertainty and stale fixes', async () => {
@@ -125,4 +141,36 @@ test('satellite image uses service-returned projected extent in the same frame a
   ]
   const expected = frame.project(point)
   assert.ok(Math.hypot(imagePosition[0]! - expected[0], imagePosition[1]! - expected[1]) < 1e-8)
+})
+
+test('architecture coverage owns each visible surface once and includes every reference location', async () => {
+  const { readFile, access } = await import('node:fs/promises')
+  const read = async (path: string) =>
+    JSON.parse(await readFile(new URL(path, import.meta.url), 'utf8'))
+  const reference = await read('../src/data/reference-map.json')
+  const models = (await read('../src/data/landmark-models.json')).models
+  const atlas = await read('../src/data/architecture-tiles.json')
+  const surfaces = (await read('../references/architecture/visible-surfaces.json')).features
+  const owners = new Set(models.map((m: { id: string }) => m.id))
+  assert.equal(models.length, 19)
+  for (const landmark of reference.landmarks)
+    assert.ok(
+      models.some((m: { placeId: string }) => m.placeId === landmark.id),
+      landmark.name,
+    )
+  const named = surfaces.filter((f: { owner: string | null }) => f.owner !== null)
+  for (const surface of named) assert.ok(owners.has(surface.owner))
+  assert.equal(
+    models.reduce((sum: number, m: { surfaceCount: number }) => sum + m.surfaceCount, 0),
+    named.length,
+  )
+  assert.equal(atlas.surfaceCount, surfaces.length - named.length)
+  assert.equal(new Set(surfaces.map((f: { id: string }) => f.id)).size, surfaces.length)
+  for (const model of models) {
+    for (const key of ['asset', 'overviewAsset', 'sourceAsset', 'heroAsset'])
+      await access(new URL(`../public${model[key]}`, import.meta.url))
+  }
+  for (const tile of atlas.tiles)
+    for (const key of ['asset', 'overviewAsset', 'sourceAsset'])
+      await access(new URL(`../public${tile[key]}`, import.meta.url))
 })
