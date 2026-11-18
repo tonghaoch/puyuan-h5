@@ -1,0 +1,4762 @@
+{
+  "type": "FeatureCollection",
+  "name": "Puyuan OSM reference: roads",
+  "attribution": "© OpenStreetMap contributors",
+  "license": "https://opendatacommons.org/licenses/odbl/1-0/",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "way/410542565",
+      "properties": {
+        "highway": "unclassified",
+        "osm_type": "way",
+        "osm_id": 410542565,
+        "osm_version": 4,
+        "osm_timestamp": "2024-05-16T13:38:55Z",
+        "source_url": "https://www.openstreetmap.org/way/410542565",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.636147,
+            30.6799866
+          ],
+          [
+            120.6359969,
+            30.6800018
+          ],
+          [
+            120.6357353,
+            30.6799446
+          ],
+          [
+            120.6343038,
+            30.6796048
+          ],
+          [
+            120.6328017,
+            30.6793895
+          ],
+          [
+            120.6323028,
+            30.679188
+          ],
+          [
+            120.6319213,
+            30.6791377
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/410542573",
+      "properties": {
+        "highway": "pedestrian",
+        "name": "北横街",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 410542573,
+        "osm_version": 6,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/410542573",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6315954,
+            30.6815726
+          ],
+          [
+            120.6315306,
+            30.6815547
+          ],
+          [
+            120.6307142,
+            30.6812334
+          ],
+          [
+            120.6305871,
+            30.6811855
+          ],
+          [
+            120.6299368,
+            30.6809402
+          ],
+          [
+            120.629874,
+            30.6809165
+          ],
+          [
+            120.6296968,
+            30.6808496
+          ],
+          [
+            120.6294544,
+            30.6807582
+          ],
+          [
+            120.629254,
+            30.6806667
+          ],
+          [
+            120.6286537,
+            30.6804887
+          ],
+          [
+            120.6284772,
+            30.6804352
+          ],
+          [
+            120.6280856,
+            30.6803476
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/410542601",
+      "properties": {
+        "highway": "unclassified",
+        "osm_type": "way",
+        "osm_id": 410542601,
+        "osm_version": 3,
+        "osm_timestamp": "2025-06-04T04:25:07Z",
+        "source_url": "https://www.openstreetmap.org/way/410542601",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6299536,
+            30.6742233
+          ],
+          [
+            120.6299256,
+            30.6743728
+          ],
+          [
+            120.6296368,
+            30.6755309
+          ],
+          [
+            120.6296573,
+            30.6759141
+          ],
+          [
+            120.6296681,
+            30.6761168
+          ],
+          [
+            120.629754,
+            30.6769612
+          ],
+          [
+            120.6297475,
+            30.6770577
+          ],
+          [
+            120.6297098,
+            30.6776205
+          ],
+          [
+            120.6296618,
+            30.6781115
+          ],
+          [
+            120.6296132,
+            30.678955
+          ],
+          [
+            120.6295563,
+            30.6794571
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/965359485",
+      "properties": {
+        "highway": "tertiary",
+        "oneway": "yes",
+        "osm_type": "way",
+        "osm_id": 965359485,
+        "osm_version": 5,
+        "osm_timestamp": "2025-05-27T18:15:23Z",
+        "source_url": "https://www.openstreetmap.org/way/965359485",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6218584,
+            30.6840122
+          ],
+          [
+            120.6226946,
+            30.6842375
+          ],
+          [
+            120.6229509,
+            30.6842974
+          ],
+          [
+            120.6239635,
+            30.6845589
+          ],
+          [
+            120.6247274,
+            30.684728
+          ],
+          [
+            120.6253942,
+            30.6848393
+          ],
+          [
+            120.6259266,
+            30.6849395
+          ],
+          [
+            120.6262776,
+            30.6850502
+          ],
+          [
+            120.6266359,
+            30.6852023
+          ],
+          [
+            120.6269652,
+            30.6853908
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/965359486",
+      "properties": {
+        "bridge": "yes",
+        "highway": "tertiary",
+        "layer": "1",
+        "oneway": "yes",
+        "osm_type": "way",
+        "osm_id": 965359486,
+        "osm_version": 3,
+        "osm_timestamp": "2024-08-12T02:13:53Z",
+        "source_url": "https://www.openstreetmap.org/way/965359486",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6271182,
+            30.6855868
+          ],
+          [
+            120.6269145,
+            30.6854524
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/965359521",
+      "properties": {
+        "highway": "tertiary",
+        "oneway": "yes",
+        "osm_type": "way",
+        "osm_id": 965359521,
+        "osm_version": 4,
+        "osm_timestamp": "2025-05-27T18:15:23Z",
+        "source_url": "https://www.openstreetmap.org/way/965359521",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6271072,
+            30.6869189
+          ],
+          [
+            120.6271196,
+            30.6868251
+          ],
+          [
+            120.6271838,
+            30.6863418
+          ],
+          [
+            120.6272415,
+            30.6859124
+          ],
+          [
+            120.6272344,
+            30.6857863
+          ],
+          [
+            120.6272022,
+            30.6857217
+          ],
+          [
+            120.6271182,
+            30.6855868
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/965394386",
+      "properties": {
+        "highway": "residential",
+        "source": "maxar",
+        "osm_type": "way",
+        "osm_id": 965394386,
+        "osm_version": 1,
+        "osm_timestamp": "2021-07-18T16:00:56Z",
+        "source_url": "https://www.openstreetmap.org/way/965394386",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6259985,
+            30.6768363
+          ],
+          [
+            120.6261111,
+            30.6777404
+          ],
+          [
+            120.6261219,
+            30.6778465
+          ],
+          [
+            120.6262184,
+            30.6786481
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/965394387",
+      "properties": {
+        "highway": "residential",
+        "source": "maxar",
+        "osm_type": "way",
+        "osm_id": 965394387,
+        "osm_version": 1,
+        "osm_timestamp": "2021-07-18T16:00:56Z",
+        "source_url": "https://www.openstreetmap.org/way/965394387",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6275004,
+            30.6774913
+          ],
+          [
+            120.6277042,
+            30.677948
+          ],
+          [
+            120.6276559,
+            30.6780357
+          ],
+          [
+            120.6275218,
+            30.6781694
+          ],
+          [
+            120.6273395,
+            30.6784693
+          ],
+          [
+            120.6272912,
+            30.6787451
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/965394394",
+      "properties": {
+        "highway": "unclassified",
+        "name": "海云路",
+        "source": "maxar",
+        "osm_type": "way",
+        "osm_id": 965394394,
+        "osm_version": 3,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/965394394",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6247274,
+            30.684728
+          ],
+          [
+            120.6247161,
+            30.6848025
+          ],
+          [
+            120.6244995,
+            30.6862246
+          ],
+          [
+            120.6243667,
+            30.6872462
+          ],
+          [
+            120.6242267,
+            30.6880823
+          ],
+          [
+            120.6239337,
+            30.6890097
+          ],
+          [
+            120.6235572,
+            30.6902307
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/965394395",
+      "properties": {
+        "highway": "unclassified",
+        "source": "maxar",
+        "osm_type": "way",
+        "osm_id": 965394395,
+        "osm_version": 3,
+        "osm_timestamp": "2025-05-27T18:15:23Z",
+        "source_url": "https://www.openstreetmap.org/way/965394395",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6252677,
+            30.6810654
+          ],
+          [
+            120.6245989,
+            30.6809049
+          ],
+          [
+            120.6245506,
+            30.6808541
+          ],
+          [
+            120.6244272,
+            30.680725
+          ],
+          [
+            120.6243682,
+            30.6806973
+          ],
+          [
+            120.6241536,
+            30.6806189
+          ],
+          [
+            120.6240721,
+            30.6805917
+          ],
+          [
+            120.6239463,
+            30.6805497
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/965394397",
+      "properties": {
+        "highway": "residential",
+        "name": "观前街",
+        "source": "maxar",
+        "osm_type": "way",
+        "osm_id": 965394397,
+        "osm_version": 5,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/965394397",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6304461,
+            30.6821827
+          ],
+          [
+            120.6312185,
+            30.6823533
+          ],
+          [
+            120.6313299,
+            30.6823746
+          ],
+          [
+            120.6319409,
+            30.6824732
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/965394398",
+      "properties": {
+        "highway": "pedestrian",
+        "source": "maxar",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 965394398,
+        "osm_version": 4,
+        "osm_timestamp": "2025-06-04T04:25:07Z",
+        "source_url": "https://www.openstreetmap.org/way/965394398",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6289118,
+            30.6824748
+          ],
+          [
+            120.629384,
+            30.6818385
+          ],
+          [
+            120.6294161,
+            30.6817922
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/965394400",
+      "properties": {
+        "highway": "unclassified",
+        "source": "maxar",
+        "osm_type": "way",
+        "osm_id": 965394400,
+        "osm_version": 1,
+        "osm_timestamp": "2021-07-18T16:00:56Z",
+        "source_url": "https://www.openstreetmap.org/way/965394400",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6329619,
+            30.681869
+          ],
+          [
+            120.6329351,
+            30.681524
+          ],
+          [
+            120.6328975,
+            30.6808958
+          ],
+          [
+            120.6328385,
+            30.6805038
+          ],
+          [
+            120.6328017,
+            30.6793895
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/965394401",
+      "properties": {
+        "highway": "residential",
+        "source": "maxar",
+        "osm_type": "way",
+        "osm_id": 965394401,
+        "osm_version": 2,
+        "osm_timestamp": "2024-05-16T13:38:55Z",
+        "source_url": "https://www.openstreetmap.org/way/965394401",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6352616,
+            30.6827534
+          ],
+          [
+            120.6350219,
+            30.6826901
+          ],
+          [
+            120.634523,
+            30.6824733
+          ],
+          [
+            120.6344855,
+            30.682441
+          ],
+          [
+            120.6347322,
+            30.6818141
+          ],
+          [
+            120.6351668,
+            30.680785
+          ],
+          [
+            120.6352472,
+            30.6807803
+          ],
+          [
+            120.6357622,
+            30.6809187
+          ],
+          [
+            120.6361646,
+            30.6810248
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/965496962",
+      "properties": {
+        "highway": "unclassified",
+        "osm_type": "way",
+        "osm_id": 965496962,
+        "osm_version": 2,
+        "osm_timestamp": "2025-06-04T04:25:07Z",
+        "source_url": "https://www.openstreetmap.org/way/965496962",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.635746,
+            30.6821007
+          ],
+          [
+            120.6353171,
+            30.6819794
+          ],
+          [
+            120.6347322,
+            30.6818141
+          ],
+          [
+            120.6338854,
+            30.6815748
+          ],
+          [
+            120.633552,
+            30.6815471
+          ],
+          [
+            120.6329351,
+            30.681524
+          ],
+          [
+            120.6326265,
+            30.6814808
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/965496963",
+      "properties": {
+        "bridge": "yes",
+        "highway": "unclassified",
+        "layer": "1",
+        "osm_type": "way",
+        "osm_id": 965496963,
+        "osm_version": 2,
+        "osm_timestamp": "2025-06-04T04:25:07Z",
+        "source_url": "https://www.openstreetmap.org/way/965496963",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6326265,
+            30.6814808
+          ],
+          [
+            120.6315954,
+            30.6815726
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/965496970",
+      "properties": {
+        "highway": "unclassified",
+        "osm_type": "way",
+        "osm_id": 965496970,
+        "osm_version": 1,
+        "osm_timestamp": "2021-07-19T03:49:09Z",
+        "source_url": "https://www.openstreetmap.org/way/965496970",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6316261,
+            30.6791034
+          ],
+          [
+            120.6296132,
+            30.678955
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/965496971",
+      "properties": {
+        "bridge": "yes",
+        "highway": "unclassified",
+        "layer": "1",
+        "osm_type": "way",
+        "osm_id": 965496971,
+        "osm_version": 1,
+        "osm_timestamp": "2021-07-19T03:49:09Z",
+        "source_url": "https://www.openstreetmap.org/way/965496971",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6319213,
+            30.6791377
+          ],
+          [
+            120.6316261,
+            30.6791034
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/967162073",
+      "properties": {
+        "highway": "unclassified",
+        "source": "digitalglobe",
+        "osm_type": "way",
+        "osm_id": 967162073,
+        "osm_version": 2,
+        "osm_timestamp": "2024-05-16T13:38:55Z",
+        "source_url": "https://www.openstreetmap.org/way/967162073",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6342521,
+            30.674887
+          ],
+          [
+            120.6340919,
+            30.6753923
+          ],
+          [
+            120.6339298,
+            30.6756433
+          ],
+          [
+            120.6333601,
+            30.6765252
+          ],
+          [
+            120.6330674,
+            30.6774203
+          ],
+          [
+            120.632907,
+            30.6781277
+          ],
+          [
+            120.6328017,
+            30.6793895
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1277954775",
+      "properties": {
+        "highway": "pedestrian",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1277954775,
+        "osm_version": 4,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1277954775",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.629459,
+            30.6825932
+          ],
+          [
+            120.6295282,
+            30.6825205
+          ],
+          [
+            120.629645,
+            30.6821391
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1277954776",
+      "properties": {
+        "highway": "pedestrian",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1277954776,
+        "osm_version": 3,
+        "osm_timestamp": "2025-06-04T04:25:07Z",
+        "source_url": "https://www.openstreetmap.org/way/1277954776",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6310164,
+            30.6793885
+          ],
+          [
+            120.6309024,
+            30.6800244
+          ],
+          [
+            120.6308654,
+            30.6804484
+          ],
+          [
+            120.6308069,
+            30.6807187
+          ],
+          [
+            120.6306867,
+            30.6809519
+          ],
+          [
+            120.6305871,
+            30.6811855
+          ],
+          [
+            120.6305049,
+            30.6815348
+          ],
+          [
+            120.6304649,
+            30.6816514
+          ],
+          [
+            120.6302985,
+            30.681927
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1277954777",
+      "properties": {
+        "highway": "residential",
+        "osm_type": "way",
+        "osm_id": 1277954777,
+        "osm_version": 2,
+        "osm_timestamp": "2024-08-12T02:13:53Z",
+        "source_url": "https://www.openstreetmap.org/way/1277954777",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6252677,
+            30.6810654
+          ],
+          [
+            120.6244032,
+            30.6833852
+          ],
+          [
+            120.6240987,
+            30.6841979
+          ],
+          [
+            120.6239635,
+            30.6845589
+          ],
+          [
+            120.6239416,
+            30.6846207
+          ],
+          [
+            120.6234674,
+            30.6859616
+          ],
+          [
+            120.6231195,
+            30.686945
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1277954778",
+      "properties": {
+        "highway": "residential",
+        "osm_type": "way",
+        "osm_id": 1277954778,
+        "osm_version": 2,
+        "osm_timestamp": "2025-05-27T18:15:23Z",
+        "source_url": "https://www.openstreetmap.org/way/1277954778",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6224863,
+            30.6827402
+          ],
+          [
+            120.6225929,
+            30.6828575
+          ],
+          [
+            120.6226431,
+            30.6829128
+          ],
+          [
+            120.6229981,
+            30.6830454
+          ],
+          [
+            120.6231451,
+            30.6830809
+          ],
+          [
+            120.6237779,
+            30.6832339
+          ],
+          [
+            120.6244032,
+            30.6833852
+          ],
+          [
+            120.6250235,
+            30.6835467
+          ],
+          [
+            120.6256305,
+            30.6837047
+          ],
+          [
+            120.6258748,
+            30.6837683
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1277954780",
+      "properties": {
+        "highway": "residential",
+        "osm_type": "way",
+        "osm_id": 1277954780,
+        "osm_version": 1,
+        "osm_timestamp": "2024-04-29T01:02:22Z",
+        "source_url": "https://www.openstreetmap.org/way/1277954780",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6228754,
+            30.6838639
+          ],
+          [
+            120.6235018,
+            30.684035
+          ],
+          [
+            120.6240987,
+            30.6841979
+          ],
+          [
+            120.6247294,
+            30.6843701
+          ],
+          [
+            120.6253151,
+            30.6845301
+          ],
+          [
+            120.6255992,
+            30.6846077
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1277954781",
+      "properties": {
+        "highway": "residential",
+        "osm_type": "way",
+        "osm_id": 1277954781,
+        "osm_version": 1,
+        "osm_timestamp": "2024-04-29T01:02:22Z",
+        "source_url": "https://www.openstreetmap.org/way/1277954781",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6247294,
+            30.6843701
+          ],
+          [
+            120.6250235,
+            30.6835467
+          ],
+          [
+            120.6258654,
+            30.6811899
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1277954782",
+      "properties": {
+        "highway": "residential",
+        "osm_type": "way",
+        "osm_id": 1277954782,
+        "osm_version": 1,
+        "osm_timestamp": "2024-04-29T01:02:22Z",
+        "source_url": "https://www.openstreetmap.org/way/1277954782",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6241889,
+            30.6820413
+          ],
+          [
+            120.6237779,
+            30.6832339
+          ],
+          [
+            120.6235018,
+            30.684035
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1277954783",
+      "properties": {
+        "highway": "residential",
+        "osm_type": "way",
+        "osm_id": 1277954783,
+        "osm_version": 2,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1277954783",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6259869,
+            30.6827723
+          ],
+          [
+            120.625967,
+            30.6828243
+          ],
+          [
+            120.6256305,
+            30.6837047
+          ],
+          [
+            120.6253151,
+            30.6845301
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1277954784",
+      "properties": {
+        "highway": "service",
+        "osm_type": "way",
+        "osm_id": 1277954784,
+        "osm_version": 2,
+        "osm_timestamp": "2024-05-15T14:42:57Z",
+        "source_url": "https://www.openstreetmap.org/way/1277954784",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6313625,
+            30.6822448
+          ],
+          [
+            120.6313299,
+            30.6823746
+          ],
+          [
+            120.6311555,
+            30.6832145
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1283295018",
+      "properties": {
+        "highway": "pedestrian",
+        "source": "maxar",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1283295018,
+        "osm_version": 2,
+        "osm_timestamp": "2025-06-04T04:25:07Z",
+        "source_url": "https://www.openstreetmap.org/way/1283295018",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6292558,
+            30.6834798
+          ],
+          [
+            120.6292498,
+            30.683728
+          ],
+          [
+            120.6295931,
+            30.6840093
+          ],
+          [
+            120.6296467,
+            30.6841662
+          ],
+          [
+            120.6296699,
+            30.6846875
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1283295031",
+      "properties": {
+        "bridge": "yes",
+        "highway": "service",
+        "layer": "1",
+        "osm_type": "way",
+        "osm_id": 1283295031,
+        "osm_version": 1,
+        "osm_timestamp": "2024-05-15T14:42:57Z",
+        "source_url": "https://www.openstreetmap.org/way/1283295031",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6313923,
+            30.6821064
+          ],
+          [
+            120.6313625,
+            30.6822448
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1283295032",
+      "properties": {
+        "highway": "secondary",
+        "oneway": "yes",
+        "osm_type": "way",
+        "osm_id": 1283295032,
+        "osm_version": 2,
+        "osm_timestamp": "2025-05-27T18:15:23Z",
+        "source_url": "https://www.openstreetmap.org/way/1283295032",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6234597,
+            30.6811995
+          ],
+          [
+            120.6239463,
+            30.6805497
+          ],
+          [
+            120.6241905,
+            30.6800585
+          ],
+          [
+            120.6243821,
+            30.6795054
+          ],
+          [
+            120.6243973,
+            30.6793239
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1283295033",
+      "properties": {
+        "bridge": "yes",
+        "highway": "secondary",
+        "layer": "1",
+        "oneway": "yes",
+        "osm_type": "way",
+        "osm_id": 1283295033,
+        "osm_version": 2,
+        "osm_timestamp": "2025-05-27T18:15:23Z",
+        "source_url": "https://www.openstreetmap.org/way/1283295033",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6243973,
+            30.6793239
+          ],
+          [
+            120.6243961,
+            30.6790611
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1283295038",
+      "properties": {
+        "highway": "pedestrian",
+        "source": "maxar",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1283295038,
+        "osm_version": 3,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1283295038",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6292558,
+            30.6834798
+          ],
+          [
+            120.6293071,
+            30.683256
+          ],
+          [
+            120.629459,
+            30.6825932
+          ],
+          [
+            120.6294161,
+            30.6825747
+          ],
+          [
+            120.6291776,
+            30.6825205
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1283295039",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "name": "祈福桥",
+        "source": "maxar",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1283295039,
+        "osm_version": 3,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1283295039",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6291776,
+            30.6825205
+          ],
+          [
+            120.6289118,
+            30.6824748
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1283295040",
+      "properties": {
+        "bridge": "yes",
+        "highway": "residential",
+        "layer": "1",
+        "source": "maxar",
+        "osm_type": "way",
+        "osm_id": 1283295040,
+        "osm_version": 1,
+        "osm_timestamp": "2024-05-15T14:42:57Z",
+        "source_url": "https://www.openstreetmap.org/way/1283295040",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.627112,
+            30.6813454
+          ],
+          [
+            120.6272094,
+            30.6813568
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1283295041",
+      "properties": {
+        "highway": "pedestrian",
+        "name": "乐里街",
+        "source": "maxar",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1283295041,
+        "osm_version": 3,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1283295041",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6294688,
+            30.6816384
+          ],
+          [
+            120.6296968,
+            30.6808496
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1283295042",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "name": "永乐桥",
+        "source": "maxar",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1283295042,
+        "osm_version": 3,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1283295042",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6294161,
+            30.6817922
+          ],
+          [
+            120.6294688,
+            30.6816384
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1283295043",
+      "properties": {
+        "highway": "pedestrian",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1283295043,
+        "osm_version": 2,
+        "osm_timestamp": "2025-06-04T04:25:07Z",
+        "source_url": "https://www.openstreetmap.org/way/1283295043",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6297131,
+            30.6817203
+          ],
+          [
+            120.6298394,
+            30.6813732
+          ],
+          [
+            120.6299368,
+            30.6809402
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1283295044",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1283295044,
+        "osm_version": 2,
+        "osm_timestamp": "2025-06-04T04:25:07Z",
+        "source_url": "https://www.openstreetmap.org/way/1283295044",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6296792,
+            30.6818501
+          ],
+          [
+            120.6297131,
+            30.6817203
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1283295045",
+      "properties": {
+        "highway": "pedestrian",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1283295045,
+        "osm_version": 2,
+        "osm_timestamp": "2025-06-04T04:25:07Z",
+        "source_url": "https://www.openstreetmap.org/way/1283295045",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6302476,
+            30.6820592
+          ],
+          [
+            120.6302242,
+            30.68211
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1283295046",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "name": "御桥",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1283295046,
+        "osm_version": 3,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1283295046",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6302985,
+            30.681927
+          ],
+          [
+            120.6302476,
+            30.6820592
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1283295047",
+      "properties": {
+        "highway": "residential",
+        "source": "maxar",
+        "osm_type": "way",
+        "osm_id": 1283295047,
+        "osm_version": 1,
+        "osm_timestamp": "2024-05-15T14:42:57Z",
+        "source_url": "https://www.openstreetmap.org/way/1283295047",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6272094,
+            30.6813568
+          ],
+          [
+            120.6276798,
+            30.6814169
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1283295048",
+      "properties": {
+        "bridge": "yes",
+        "highway": "residential",
+        "layer": "1",
+        "name": "朝阳桥",
+        "source": "maxar",
+        "osm_type": "way",
+        "osm_id": 1283295048,
+        "osm_version": 2,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1283295048",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6276798,
+            30.6814169
+          ],
+          [
+            120.6280726,
+            30.681471
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1283295051",
+      "properties": {
+        "highway": "pedestrian",
+        "name": "观前街",
+        "source": "maxar",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1283295051,
+        "osm_version": 3,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1283295051",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6280726,
+            30.681471
+          ],
+          [
+            120.6281447,
+            30.6814861
+          ],
+          [
+            120.6283555,
+            30.681546
+          ],
+          [
+            120.629384,
+            30.6818385
+          ],
+          [
+            120.6294287,
+            30.6818448
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1283295052",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "source": "maxar",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1283295052,
+        "osm_version": 2,
+        "osm_timestamp": "2025-06-04T04:25:07Z",
+        "source_url": "https://www.openstreetmap.org/way/1283295052",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6294287,
+            30.6818448
+          ],
+          [
+            120.6295771,
+            30.6818955
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1283295055",
+      "properties": {
+        "highway": "residential",
+        "source": "maxar",
+        "osm_type": "way",
+        "osm_id": 1283295055,
+        "osm_version": 2,
+        "osm_timestamp": "2025-06-04T04:25:07Z",
+        "source_url": "https://www.openstreetmap.org/way/1283295055",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6320761,
+            30.6824633
+          ],
+          [
+            120.6322861,
+            30.6825009
+          ],
+          [
+            120.6323451,
+            30.6825286
+          ],
+          [
+            120.6326187,
+            30.6829576
+          ],
+          [
+            120.6326803,
+            30.6830797
+          ],
+          [
+            120.632742,
+            30.6832021
+          ],
+          [
+            120.6328493,
+            30.6833635
+          ],
+          [
+            120.6332624,
+            30.6838156
+          ],
+          [
+            120.6335735,
+            30.6838894
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1283295056",
+      "properties": {
+        "bridge": "yes",
+        "highway": "residential",
+        "layer": "1",
+        "source": "maxar",
+        "osm_type": "way",
+        "osm_id": 1283295056,
+        "osm_version": 1,
+        "osm_timestamp": "2024-05-15T14:42:57Z",
+        "source_url": "https://www.openstreetmap.org/way/1283295056",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6319409,
+            30.6824732
+          ],
+          [
+            120.6320761,
+            30.6824633
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1283631060",
+      "properties": {
+        "highway": "unclassified",
+        "osm_type": "way",
+        "osm_id": 1283631060,
+        "osm_version": 1,
+        "osm_timestamp": "2024-05-16T13:38:55Z",
+        "source_url": "https://www.openstreetmap.org/way/1283631060",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6317811,
+            30.6894605
+          ],
+          [
+            120.6317941,
+            30.6885573
+          ],
+          [
+            120.6317938,
+            30.6884958
+          ],
+          [
+            120.631787,
+            30.6873455
+          ],
+          [
+            120.6319157,
+            30.6863645
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1307152476",
+      "properties": {
+        "highway": "residential",
+        "osm_type": "way",
+        "osm_id": 1307152476,
+        "osm_version": 2,
+        "osm_timestamp": "2025-05-27T18:15:23Z",
+        "source_url": "https://www.openstreetmap.org/way/1307152476",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6244995,
+            30.6862246
+          ],
+          [
+            120.6234674,
+            30.6859616
+          ],
+          [
+            120.6224048,
+            30.6856654
+          ],
+          [
+            120.6210692,
+            30.6853151
+          ],
+          [
+            120.6210037,
+            30.6852981
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1307152479",
+      "properties": {
+        "bridge": "yes",
+        "highway": "tertiary",
+        "layer": "1",
+        "oneway": "yes",
+        "osm_type": "way",
+        "osm_id": 1307152479,
+        "osm_version": 1,
+        "osm_timestamp": "2024-08-12T02:13:53Z",
+        "source_url": "https://www.openstreetmap.org/way/1307152479",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6269652,
+            30.6853908
+          ],
+          [
+            120.6271736,
+            30.6855433
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1307152480",
+      "properties": {
+        "highway": "tertiary",
+        "oneway": "yes",
+        "osm_type": "way",
+        "osm_id": 1307152480,
+        "osm_version": 3,
+        "osm_timestamp": "2025-06-04T04:37:42Z",
+        "source_url": "https://www.openstreetmap.org/way/1307152480",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6269145,
+            30.6854524
+          ],
+          [
+            120.6266821,
+            30.6853116
+          ],
+          [
+            120.6263919,
+            30.6851655
+          ],
+          [
+            120.6261337,
+            30.685088
+          ],
+          [
+            120.6259459,
+            30.6850316
+          ],
+          [
+            120.6255583,
+            30.6849494
+          ],
+          [
+            120.6247161,
+            30.6848025
+          ],
+          [
+            120.6239416,
+            30.6846207
+          ],
+          [
+            120.6229176,
+            30.6843679
+          ],
+          [
+            120.6218015,
+            30.6840729
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1390162157",
+      "properties": {
+        "highway": "tertiary",
+        "oneway": "yes",
+        "osm_type": "way",
+        "osm_id": 1390162157,
+        "osm_version": 1,
+        "osm_timestamp": "2025-05-27T18:15:23Z",
+        "source_url": "https://www.openstreetmap.org/way/1390162157",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6271736,
+            30.6855433
+          ],
+          [
+            120.6272916,
+            30.6857094
+          ],
+          [
+            120.6273345,
+            30.6858662
+          ],
+          [
+            120.6273238,
+            30.6860569
+          ],
+          [
+            120.6272605,
+            30.6865255
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1390162181",
+      "properties": {
+        "highway": "service",
+        "oneway": "yes",
+        "osm_type": "way",
+        "osm_id": 1390162181,
+        "osm_version": 2,
+        "osm_timestamp": "2025-05-28T11:55:30Z",
+        "source_url": "https://www.openstreetmap.org/way/1390162181",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6277617,
+            30.6865962
+          ],
+          [
+            120.6272605,
+            30.6865255
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1390162182",
+      "properties": {
+        "highway": "service",
+        "oneway": "yes",
+        "osm_type": "way",
+        "osm_id": 1390162182,
+        "osm_version": 2,
+        "osm_timestamp": "2025-05-28T11:55:30Z",
+        "source_url": "https://www.openstreetmap.org/way/1390162182",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6283011,
+            30.6869623
+          ],
+          [
+            120.6283432,
+            30.6867786
+          ],
+          [
+            120.6283003,
+            30.6866956
+          ],
+          [
+            120.6282037,
+            30.6866586
+          ],
+          [
+            120.6277617,
+            30.6865962
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1390425534",
+      "properties": {
+        "highway": "tertiary",
+        "oneway": "yes",
+        "osm_type": "way",
+        "osm_id": 1390425534,
+        "osm_version": 1,
+        "osm_timestamp": "2025-05-28T11:55:30Z",
+        "source_url": "https://www.openstreetmap.org/way/1390425534",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6272605,
+            30.6865255
+          ],
+          [
+            120.6272185,
+            30.6868361
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391987336",
+      "properties": {
+        "highway": "pedestrian",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1391987336,
+        "osm_version": 2,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1391987336",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6295563,
+            30.6794571
+          ],
+          [
+            120.6294314,
+            30.6799082
+          ],
+          [
+            120.6293915,
+            30.6802134
+          ],
+          [
+            120.629254,
+            30.6806667
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391987337",
+      "properties": {
+        "highway": "pedestrian",
+        "name": "观前街",
+        "source": "maxar",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1391987337,
+        "osm_version": 2,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1391987337",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6295771,
+            30.6818955
+          ],
+          [
+            120.6296651,
+            30.6819291
+          ],
+          [
+            120.6298828,
+            30.6819981
+          ],
+          [
+            120.6302242,
+            30.68211
+          ],
+          [
+            120.6304461,
+            30.6821827
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391987338",
+      "properties": {
+        "highway": "service",
+        "osm_type": "way",
+        "osm_id": 1391987338,
+        "osm_version": 1,
+        "osm_timestamp": "2025-06-04T04:25:07Z",
+        "source_url": "https://www.openstreetmap.org/way/1391987338",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6314316,
+            30.6873065
+          ],
+          [
+            120.6314369,
+            30.6872736
+          ],
+          [
+            120.6314443,
+            30.6872265
+          ],
+          [
+            120.6316665,
+            30.6872527
+          ],
+          [
+            120.6316931,
+            30.6871041
+          ],
+          [
+            120.6317249,
+            30.6869262
+          ],
+          [
+            120.6317558,
+            30.6867536
+          ],
+          [
+            120.631785,
+            30.6865906
+          ],
+          [
+            120.6318147,
+            30.6864247
+          ],
+          [
+            120.6307387,
+            30.6862867
+          ],
+          [
+            120.6296538,
+            30.6861475
+          ],
+          [
+            120.6296235,
+            30.6863411
+          ],
+          [
+            120.6295996,
+            30.686494
+          ],
+          [
+            120.6295739,
+            30.6866583
+          ],
+          [
+            120.6295491,
+            30.6868175
+          ],
+          [
+            120.6295449,
+            30.6868443
+          ],
+          [
+            120.6295536,
+            30.686953
+          ],
+          [
+            120.6296146,
+            30.6869979
+          ],
+          [
+            120.6305975,
+            30.6871207
+          ],
+          [
+            120.6314443,
+            30.6872265
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391987340",
+      "properties": {
+        "highway": "service",
+        "service": "parking_aisle",
+        "osm_type": "way",
+        "osm_id": 1391987340,
+        "osm_version": 1,
+        "osm_timestamp": "2025-06-04T04:25:07Z",
+        "source_url": "https://www.openstreetmap.org/way/1391987340",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6295739,
+            30.6866583
+          ],
+          [
+            120.630653,
+            30.6867927
+          ],
+          [
+            120.6317249,
+            30.6869262
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391987341",
+      "properties": {
+        "highway": "service",
+        "service": "parking_aisle",
+        "osm_type": "way",
+        "osm_id": 1391987341,
+        "osm_version": 1,
+        "osm_timestamp": "2025-06-04T04:25:07Z",
+        "source_url": "https://www.openstreetmap.org/way/1391987341",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6295996,
+            30.686494
+          ],
+          [
+            120.6306815,
+            30.6866242
+          ],
+          [
+            120.6317558,
+            30.6867536
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391987342",
+      "properties": {
+        "highway": "service",
+        "service": "parking_aisle",
+        "osm_type": "way",
+        "osm_id": 1391987342,
+        "osm_version": 1,
+        "osm_timestamp": "2025-06-04T04:25:07Z",
+        "source_url": "https://www.openstreetmap.org/way/1391987342",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6296235,
+            30.6863411
+          ],
+          [
+            120.6307083,
+            30.6864663
+          ],
+          [
+            120.631785,
+            30.6865906
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391987343",
+      "properties": {
+        "highway": "service",
+        "osm_type": "way",
+        "osm_id": 1391987343,
+        "osm_version": 1,
+        "osm_timestamp": "2025-06-04T04:25:07Z",
+        "source_url": "https://www.openstreetmap.org/way/1391987343",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6305818,
+            30.6872133
+          ],
+          [
+            120.630588,
+            30.6871764
+          ],
+          [
+            120.6305975,
+            30.6871207
+          ],
+          [
+            120.6306245,
+            30.6869612
+          ],
+          [
+            120.630653,
+            30.6867927
+          ],
+          [
+            120.6306815,
+            30.6866242
+          ],
+          [
+            120.6307083,
+            30.6864663
+          ],
+          [
+            120.6307387,
+            30.6862867
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391987344",
+      "properties": {
+        "highway": "footway",
+        "osm_type": "way",
+        "osm_id": 1391987344,
+        "osm_version": 1,
+        "osm_timestamp": "2025-06-04T04:25:07Z",
+        "source_url": "https://www.openstreetmap.org/way/1391987344",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6295449,
+            30.6868443
+          ],
+          [
+            120.6293359,
+            30.686821
+          ],
+          [
+            120.6287909,
+            30.6867627
+          ],
+          [
+            120.6288248,
+            30.6864883
+          ],
+          [
+            120.6289147,
+            30.6857616
+          ],
+          [
+            120.6290262,
+            30.6857739
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391987345",
+      "properties": {
+        "area": "yes",
+        "highway": "pedestrian",
+        "name": "牌楼广场",
+        "osm_type": "way",
+        "osm_id": 1391987345,
+        "osm_version": 2,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1391987345",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              120.6285644,
+              30.6869921
+            ],
+            [
+              120.6286193,
+              30.6865936
+            ],
+            [
+              120.6282823,
+              30.6865593
+            ],
+            [
+              120.6282994,
+              30.6864349
+            ],
+            [
+              120.6288248,
+              30.6864883
+            ],
+            [
+              120.6290317,
+              30.6865093
+            ],
+            [
+              120.629003,
+              30.6867186
+            ],
+            [
+              120.6293452,
+              30.6867534
+            ],
+            [
+              120.6293359,
+              30.686821
+            ],
+            [
+              120.6293302,
+              30.6868624
+            ],
+            [
+              120.6289815,
+              30.6868269
+            ],
+            [
+              120.6289533,
+              30.6870317
+            ],
+            [
+              120.6285644,
+              30.6869921
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391987346",
+      "properties": {
+        "highway": "pedestrian",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1391987346,
+        "osm_version": 2,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1391987346",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6293925,
+            30.6852338
+          ],
+          [
+            120.6294212,
+            30.6850352
+          ],
+          [
+            120.6293147,
+            30.6850234
+          ],
+          [
+            120.6287809,
+            30.684964
+          ],
+          [
+            120.6286637,
+            30.684951
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391987347",
+      "properties": {
+        "highway": "pedestrian",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1391987347,
+        "osm_version": 2,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1391987347",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6296699,
+            30.6846875
+          ],
+          [
+            120.6299069,
+            30.6846986
+          ],
+          [
+            120.6300555,
+            30.6847765
+          ],
+          [
+            120.6309688,
+            30.6848793
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391987348",
+      "properties": {
+        "highway": "pedestrian",
+        "name": "寺湾街",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1391987348,
+        "osm_version": 3,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1391987348",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6293147,
+            30.6850234
+          ],
+          [
+            120.6292762,
+            30.6847297
+          ],
+          [
+            120.6293378,
+            30.6843277
+          ],
+          [
+            120.6293378,
+            30.6842622
+          ],
+          [
+            120.6293016,
+            30.6841936
+          ],
+          [
+            120.6291421,
+            30.6839318
+          ],
+          [
+            120.6290986,
+            30.6838882
+          ],
+          [
+            120.6289899,
+            30.6838321
+          ],
+          [
+            120.6288332,
+            30.6837757
+          ],
+          [
+            120.6284771,
+            30.6836532
+          ],
+          [
+            120.6281237,
+            30.6835702
+          ],
+          [
+            120.6279968,
+            30.6835515
+          ],
+          [
+            120.6278374,
+            30.6836045
+          ],
+          [
+            120.627667,
+            30.6836482
+          ],
+          [
+            120.6275876,
+            30.6836441
+          ],
+          [
+            120.6274242,
+            30.6836357
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391987349",
+      "properties": {
+        "highway": "pedestrian",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1391987349,
+        "osm_version": 1,
+        "osm_timestamp": "2025-06-04T04:25:07Z",
+        "source_url": "https://www.openstreetmap.org/way/1391987349",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6275876,
+            30.6836441
+          ],
+          [
+            120.6274822,
+            30.6840284
+          ],
+          [
+            120.6274242,
+            30.6840565
+          ],
+          [
+            120.6273698,
+            30.6841593
+          ],
+          [
+            120.6273191,
+            30.684178
+          ],
+          [
+            120.6272828,
+            30.6843713
+          ],
+          [
+            120.6271995,
+            30.6844149
+          ],
+          [
+            120.6266993,
+            30.6843401
+          ],
+          [
+            120.6267138,
+            30.6841843
+          ],
+          [
+            120.6267863,
+            30.684069
+          ],
+          [
+            120.6269059,
+            30.683564
+          ],
+          [
+            120.6270001,
+            30.6829967
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391987350",
+      "properties": {
+        "highway": "pedestrian",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1391987350,
+        "osm_version": 2,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1391987350",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6272202,
+            30.6827554
+          ],
+          [
+            120.627388,
+            30.6824481
+          ],
+          [
+            120.6274858,
+            30.6824388
+          ],
+          [
+            120.6275427,
+            30.6822215
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391987351",
+      "properties": {
+        "highway": "pedestrian",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1391987351,
+        "osm_version": 2,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1391987351",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6274943,
+            30.6831555
+          ],
+          [
+            120.6280295,
+            30.6832773
+          ],
+          [
+            120.6280548,
+            30.6832024
+          ],
+          [
+            120.6281454,
+            30.6831183
+          ],
+          [
+            120.6282179,
+            30.683137
+          ],
+          [
+            120.6282433,
+            30.6830622
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391987352",
+      "properties": {
+        "highway": "pedestrian",
+        "name": "蜡烛街",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1391987352,
+        "osm_version": 2,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1391987352",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6286558,
+            30.6833664
+          ],
+          [
+            120.6287073,
+            30.6832917
+          ],
+          [
+            120.6287435,
+            30.6831526
+          ],
+          [
+            120.6287579,
+            30.6829843
+          ],
+          [
+            120.6288268,
+            30.6827006
+          ],
+          [
+            120.6288413,
+            30.6825292
+          ],
+          [
+            120.6289118,
+            30.6824748
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391987353",
+      "properties": {
+        "highway": "pedestrian",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1391987353,
+        "osm_version": 1,
+        "osm_timestamp": "2025-06-04T04:25:07Z",
+        "source_url": "https://www.openstreetmap.org/way/1391987353",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.629459,
+            30.6825932
+          ],
+          [
+            120.6298235,
+            30.6825946
+          ],
+          [
+            120.6301327,
+            30.6826116
+          ],
+          [
+            120.6303139,
+            30.6826225
+          ],
+          [
+            120.6304541,
+            30.682685
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391987354",
+      "properties": {
+        "highway": "pedestrian",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1391987354,
+        "osm_version": 2,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1391987354",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6301327,
+            30.6826116
+          ],
+          [
+            120.6301814,
+            30.6823273
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391987355",
+      "properties": {
+        "highway": "pedestrian",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1391987355,
+        "osm_version": 1,
+        "osm_timestamp": "2025-06-04T04:25:07Z",
+        "source_url": "https://www.openstreetmap.org/way/1391987355",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6315306,
+            30.6815547
+          ],
+          [
+            120.6316304,
+            30.6814816
+          ],
+          [
+            120.6314994,
+            30.6809843
+          ],
+          [
+            120.63119,
+            30.6808457
+          ],
+          [
+            120.6308069,
+            30.6807187
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391987356",
+      "properties": {
+        "highway": "pedestrian",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1391987356,
+        "osm_version": 1,
+        "osm_timestamp": "2025-06-04T04:25:07Z",
+        "source_url": "https://www.openstreetmap.org/way/1391987356",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.63119,
+            30.6808457
+          ],
+          [
+            120.6312815,
+            30.6803699
+          ],
+          [
+            120.6313992,
+            30.6794369
+          ],
+          [
+            120.6310164,
+            30.6793885
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391987357",
+      "properties": {
+        "highway": "pedestrian",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1391987357,
+        "osm_version": 1,
+        "osm_timestamp": "2025-06-04T04:25:07Z",
+        "source_url": "https://www.openstreetmap.org/way/1391987357",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.629874,
+            30.6809165
+          ],
+          [
+            120.6299833,
+            30.6806471
+          ],
+          [
+            120.6300835,
+            30.679909
+          ],
+          [
+            120.6298046,
+            30.6798566
+          ],
+          [
+            120.6295389,
+            30.6799315
+          ],
+          [
+            120.6294314,
+            30.6799082
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391987358",
+      "properties": {
+        "highway": "pedestrian",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1391987358,
+        "osm_version": 2,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1391987358",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6283929,
+            30.6815145
+          ],
+          [
+            120.6283555,
+            30.681546
+          ],
+          [
+            120.6282034,
+            30.682018
+          ],
+          [
+            120.6281012,
+            30.6823107
+          ],
+          [
+            120.6287155,
+            30.6824718
+          ],
+          [
+            120.6289118,
+            30.6824748
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391987359",
+      "properties": {
+        "highway": "pedestrian",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1391987359,
+        "osm_version": 1,
+        "osm_timestamp": "2025-06-04T04:25:07Z",
+        "source_url": "https://www.openstreetmap.org/way/1391987359",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6290262,
+            30.6857739
+          ],
+          [
+            120.6290479,
+            30.6856773
+          ],
+          [
+            120.6293161,
+            30.6857115
+          ],
+          [
+            120.6293188,
+            30.6856725
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391987360",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1391987360,
+        "osm_version": 1,
+        "osm_timestamp": "2025-06-04T04:25:07Z",
+        "source_url": "https://www.openstreetmap.org/way/1391987360",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6293188,
+            30.6856725
+          ],
+          [
+            120.6293925,
+            30.6852338
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391987361",
+      "properties": {
+        "highway": "footway",
+        "osm_type": "way",
+        "osm_id": 1391987361,
+        "osm_version": 1,
+        "osm_timestamp": "2025-06-04T04:25:07Z",
+        "source_url": "https://www.openstreetmap.org/way/1391987361",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6309688,
+            30.6848793
+          ],
+          [
+            120.6314438,
+            30.6848886
+          ],
+          [
+            120.631596,
+            30.6848886
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391987362",
+      "properties": {
+        "highway": "footway",
+        "osm_type": "way",
+        "osm_id": 1391987362,
+        "osm_version": 1,
+        "osm_timestamp": "2025-06-04T04:25:07Z",
+        "source_url": "https://www.openstreetmap.org/way/1391987362",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6292558,
+            30.6834798
+          ],
+          [
+            120.629839,
+            30.6835067
+          ],
+          [
+            120.62985,
+            30.6833867
+          ],
+          [
+            120.6298838,
+            30.6830165
+          ],
+          [
+            120.6300823,
+            30.6830299
+          ],
+          [
+            120.630272,
+            30.6830426
+          ],
+          [
+            120.6302376,
+            30.6834207
+          ],
+          [
+            120.6302104,
+            30.6837193
+          ],
+          [
+            120.6298221,
+            30.6836932
+          ],
+          [
+            120.629839,
+            30.6835067
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391987363",
+      "properties": {
+        "highway": "footway",
+        "osm_type": "way",
+        "osm_id": 1391987363,
+        "osm_version": 1,
+        "osm_timestamp": "2025-06-04T04:25:07Z",
+        "source_url": "https://www.openstreetmap.org/way/1391987363",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.62985,
+            30.6833867
+          ],
+          [
+            120.6302376,
+            30.6834207
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391987364",
+      "properties": {
+        "highway": "footway",
+        "osm_type": "way",
+        "osm_id": 1391987364,
+        "osm_version": 1,
+        "osm_timestamp": "2025-06-04T04:25:07Z",
+        "source_url": "https://www.openstreetmap.org/way/1391987364",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6302104,
+            30.6837193
+          ],
+          [
+            120.630275,
+            30.6837246
+          ],
+          [
+            120.630234,
+            30.684096
+          ],
+          [
+            120.6299354,
+            30.6840716
+          ],
+          [
+            120.6296661,
+            30.6840496
+          ],
+          [
+            120.6297065,
+            30.6836838
+          ],
+          [
+            120.6298221,
+            30.6836932
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391987365",
+      "properties": {
+        "highway": "footway",
+        "osm_type": "way",
+        "osm_id": 1391987365,
+        "osm_version": 1,
+        "osm_timestamp": "2025-06-04T04:25:07Z",
+        "source_url": "https://www.openstreetmap.org/way/1391987365",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6299354,
+            30.6840716
+          ],
+          [
+            120.6299322,
+            30.6841599
+          ],
+          [
+            120.6298428,
+            30.6841575
+          ],
+          [
+            120.629839,
+            30.6842598
+          ],
+          [
+            120.6298783,
+            30.684361
+          ],
+          [
+            120.629905,
+            30.6843737
+          ],
+          [
+            120.6299002,
+            30.6844326
+          ],
+          [
+            120.6299303,
+            30.6844336
+          ],
+          [
+            120.6299723,
+            30.6844749
+          ],
+          [
+            120.6299711,
+            30.6845566
+          ],
+          [
+            120.6299146,
+            30.6846051
+          ],
+          [
+            120.6298149,
+            30.684601
+          ],
+          [
+            120.6297681,
+            30.6845545
+          ],
+          [
+            120.6297681,
+            30.684476
+          ],
+          [
+            120.6298161,
+            30.6844295
+          ],
+          [
+            120.6299002,
+            30.6844326
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391987366",
+      "properties": {
+        "highway": "footway",
+        "osm_type": "way",
+        "osm_id": 1391987366,
+        "osm_version": 2,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1391987366",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6300823,
+            30.6830299
+          ],
+          [
+            120.630094,
+            30.6828613
+          ],
+          [
+            120.6302922,
+            30.6828712
+          ],
+          [
+            120.6303139,
+            30.6826225
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391987367",
+      "properties": {
+        "highway": "residential",
+        "osm_type": "way",
+        "osm_id": 1391987367,
+        "osm_version": 1,
+        "osm_timestamp": "2025-06-04T04:25:07Z",
+        "source_url": "https://www.openstreetmap.org/way/1391987367",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6304541,
+            30.682685
+          ],
+          [
+            120.6306943,
+            30.6827079
+          ],
+          [
+            120.6307451,
+            30.6827204
+          ],
+          [
+            120.6307777,
+            30.6827734
+          ],
+          [
+            120.6307813,
+            30.6831318
+          ],
+          [
+            120.6308103,
+            30.6831692
+          ],
+          [
+            120.6311555,
+            30.6832145
+          ],
+          [
+            120.6319629,
+            30.683322
+          ],
+          [
+            120.6326803,
+            30.6830797
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391989196",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "name": "侍郎桥",
+        "osm_type": "way",
+        "osm_id": 1391989196,
+        "osm_version": 2,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1391989196",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.628946,
+            30.6836712
+          ],
+          [
+            120.6291513,
+            30.6835162
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391989198",
+      "properties": {
+        "highway": "footway",
+        "osm_type": "way",
+        "osm_id": 1391989198,
+        "osm_version": 1,
+        "osm_timestamp": "2025-06-04T04:37:42Z",
+        "source_url": "https://www.openstreetmap.org/way/1391989198",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6261337,
+            30.685088
+          ],
+          [
+            120.6261193,
+            30.6852103
+          ],
+          [
+            120.6255225,
+            30.6851514
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391989199",
+      "properties": {
+        "highway": "service",
+        "osm_type": "way",
+        "osm_id": 1391989199,
+        "osm_version": 1,
+        "osm_timestamp": "2025-06-04T04:37:42Z",
+        "source_url": "https://www.openstreetmap.org/way/1391989199",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6255583,
+            30.6849494
+          ],
+          [
+            120.6255225,
+            30.6851514
+          ],
+          [
+            120.6254384,
+            30.6857267
+          ],
+          [
+            120.6254315,
+            30.6857742
+          ],
+          [
+            120.6253682,
+            30.6862073
+          ],
+          [
+            120.6254745,
+            30.686222
+          ],
+          [
+            120.6253613,
+            30.6870833
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391989200",
+      "properties": {
+        "highway": "footway",
+        "surface": "paving_stones",
+        "osm_type": "way",
+        "osm_id": 1391989200,
+        "osm_version": 1,
+        "osm_timestamp": "2025-06-04T04:37:42Z",
+        "source_url": "https://www.openstreetmap.org/way/1391989200",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6254384,
+            30.6857267
+          ],
+          [
+            120.6260042,
+            30.6857918
+          ],
+          [
+            120.6259698,
+            30.6860128
+          ],
+          [
+            120.6259101,
+            30.686396
+          ],
+          [
+            120.6260677,
+            30.6864145
+          ],
+          [
+            120.6260217,
+            30.6867048
+          ],
+          [
+            120.6258498,
+            30.6866847
+          ],
+          [
+            120.6256586,
+            30.6866622
+          ],
+          [
+            120.6257046,
+            30.6863719
+          ],
+          [
+            120.6259101,
+            30.686396
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391989201",
+      "properties": {
+        "highway": "footway",
+        "surface": "paving_stones",
+        "osm_type": "way",
+        "osm_id": 1391989201,
+        "osm_version": 1,
+        "osm_timestamp": "2025-06-04T04:37:42Z",
+        "source_url": "https://www.openstreetmap.org/way/1391989201",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6258498,
+            30.6866847
+          ],
+          [
+            120.6257249,
+            30.6875522
+          ],
+          [
+            120.6259894,
+            30.6875808
+          ],
+          [
+            120.6259291,
+            30.6879929
+          ],
+          [
+            120.6253844,
+            30.687934
+          ],
+          [
+            120.6254447,
+            30.6875219
+          ],
+          [
+            120.6257249,
+            30.6875522
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020782",
+      "properties": {
+        "highway": "pedestrian",
+        "name": "寺湾街",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1416020782,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020782",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6271438,
+            30.6835969
+          ],
+          [
+            120.6269871,
+            30.6835752
+          ],
+          [
+            120.6269059,
+            30.683564
+          ],
+          [
+            120.6267356,
+            30.6834986
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020783",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "name": "寺湾街",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1416020783,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020783",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6274242,
+            30.6836357
+          ],
+          [
+            120.6271438,
+            30.6835969
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020784",
+      "properties": {
+        "highway": "pedestrian",
+        "osm_type": "way",
+        "osm_id": 1416020784,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020784",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6290479,
+            30.6856773
+          ],
+          [
+            120.6286787,
+            30.6855909
+          ],
+          [
+            120.6286856,
+            30.6855486
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020785",
+      "properties": {
+        "highway": "pedestrian",
+        "osm_type": "way",
+        "osm_id": 1416020785,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020785",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6287386,
+            30.685201
+          ],
+          [
+            120.6287809,
+            30.684964
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020786",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "name": "北廊桥",
+        "osm_type": "way",
+        "osm_id": 1416020786,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020786",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6286856,
+            30.6855486
+          ],
+          [
+            120.6287386,
+            30.685201
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020787",
+      "properties": {
+        "highway": "pedestrian",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1416020787,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020787",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6294212,
+            30.6850352
+          ],
+          [
+            120.6294937,
+            30.6850477
+          ],
+          [
+            120.6294792,
+            30.6848606
+          ],
+          [
+            120.6294973,
+            30.6848045
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020788",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "name": "鸣凤桥",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1416020788,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020788",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6294973,
+            30.6848045
+          ],
+          [
+            120.6296699,
+            30.6846875
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020789",
+      "properties": {
+        "highway": "pedestrian",
+        "osm_type": "way",
+        "osm_id": 1416020789,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020789",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6291513,
+            30.6835162
+          ],
+          [
+            120.6292558,
+            30.6834798
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020790",
+      "properties": {
+        "highway": "pedestrian",
+        "osm_type": "way",
+        "osm_id": 1416020790,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020790",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6288332,
+            30.6837757
+          ],
+          [
+            120.6289187,
+            30.6836918
+          ],
+          [
+            120.628946,
+            30.6836712
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020791",
+      "properties": {
+        "highway": "pedestrian",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1416020791,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020791",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6279678,
+            30.6830061
+          ],
+          [
+            120.6282433,
+            30.6830622
+          ],
+          [
+            120.6287435,
+            30.6831526
+          ],
+          [
+            120.6288198,
+            30.6831864
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020792",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1416020792,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020792",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6285423,
+            30.6835307
+          ],
+          [
+            120.6286558,
+            30.6833664
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020793",
+      "properties": {
+        "highway": "pedestrian",
+        "name": "蜡烛街",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1416020793,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020793",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6284771,
+            30.6836532
+          ],
+          [
+            120.6285423,
+            30.6835307
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020794",
+      "properties": {
+        "highway": "pedestrian",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1416020794,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020794",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.629099,
+            30.68322
+          ],
+          [
+            120.6293071,
+            30.683256
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020795",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1416020795,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020795",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6288198,
+            30.6831864
+          ],
+          [
+            120.629099,
+            30.68322
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020797",
+      "properties": {
+        "highway": "pedestrian",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1416020797,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020797",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6296871,
+            30.6819907
+          ],
+          [
+            120.6296651,
+            30.6819291
+          ],
+          [
+            120.6296792,
+            30.6818501
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020798",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "name": "香烛桥",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1416020798,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020798",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.629645,
+            30.6821391
+          ],
+          [
+            120.6296871,
+            30.6819907
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020799",
+      "properties": {
+        "highway": "pedestrian",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1416020799,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020799",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6302143,
+            30.6821763
+          ],
+          [
+            120.6302242,
+            30.68211
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020800",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1416020800,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020800",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6301814,
+            30.6823273
+          ],
+          [
+            120.6302143,
+            30.6821763
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020801",
+      "properties": {
+        "highway": "pedestrian",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1416020801,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020801",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6286537,
+            30.6804887
+          ],
+          [
+            120.628441,
+            30.6813478
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020802",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "name": "大有桥",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1416020802,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020802",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.628441,
+            30.6813478
+          ],
+          [
+            120.6283929,
+            30.6815145
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020803",
+      "properties": {
+        "highway": "pedestrian",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1416020803,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020803",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6269871,
+            30.6835752
+          ],
+          [
+            120.6271234,
+            30.6830747
+          ],
+          [
+            120.6271711,
+            30.6828778
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020804",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "name": "碧水桥",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1416020804,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020804",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6271711,
+            30.6828778
+          ],
+          [
+            120.6272202,
+            30.6827554
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020805",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "name": "功德桥",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1416020805,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020805",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6276835,
+            30.6819276
+          ],
+          [
+            120.6279606,
+            30.681965
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020806",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "name": "西庙桥",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1416020806,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020806",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6275427,
+            30.6822215
+          ],
+          [
+            120.6275837,
+            30.6820648
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020807",
+      "properties": {
+        "highway": "pedestrian",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1416020807,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020807",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6279606,
+            30.681965
+          ],
+          [
+            120.6282034,
+            30.682018
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020808",
+      "properties": {
+        "highway": "pedestrian",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1416020808,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020808",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6275837,
+            30.6820648
+          ],
+          [
+            120.6275909,
+            30.6819151
+          ],
+          [
+            120.6276835,
+            30.6819276
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020809",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "name": "秀桐桥",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1416020809,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020809",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6273952,
+            30.6831346
+          ],
+          [
+            120.6274943,
+            30.6831555
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020810",
+      "properties": {
+        "highway": "pedestrian",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1416020810,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020810",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6271234,
+            30.6830747
+          ],
+          [
+            120.6273952,
+            30.6831346
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020812",
+      "properties": {
+        "highway": "secondary",
+        "name": "中兴路",
+        "oneway": "yes",
+        "osm_type": "way",
+        "osm_id": 1416020812,
+        "osm_version": 2,
+        "osm_timestamp": "2026-01-25T11:45:04Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020812",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6245175,
+            30.67929
+          ],
+          [
+            120.6245177,
+            30.67934
+          ],
+          [
+            120.6244487,
+            30.6797662
+          ],
+          [
+            120.6243306,
+            30.6802137
+          ],
+          [
+            120.6240721,
+            30.6805917
+          ],
+          [
+            120.6225929,
+            30.6828575
+          ],
+          [
+            120.6223259,
+            30.6832772
+          ],
+          [
+            120.6218584,
+            30.6840122
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020813",
+      "properties": {
+        "bridge": "yes",
+        "highway": "secondary",
+        "layer": "1",
+        "name": "中兴路",
+        "oneway": "yes",
+        "osm_type": "way",
+        "osm_id": 1416020813,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020813",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6245163,
+            30.6790285
+          ],
+          [
+            120.6245175,
+            30.67929
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1453306980",
+      "properties": {
+        "highway": "secondary",
+        "oneway": "yes",
+        "osm_type": "way",
+        "osm_id": 1453306980,
+        "osm_version": 1,
+        "osm_timestamp": "2025-11-24T11:22:29Z",
+        "source_url": "https://www.openstreetmap.org/way/1453306980",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6243961,
+            30.6790611
+          ],
+          [
+            120.624441,
+            30.6787593
+          ],
+          [
+            120.62444,
+            30.6784874
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1453306982",
+      "properties": {
+        "highway": "secondary",
+        "name": "中兴路",
+        "oneway": "yes",
+        "osm_type": "way",
+        "osm_id": 1453306982,
+        "osm_version": 1,
+        "osm_timestamp": "2025-11-24T11:22:29Z",
+        "source_url": "https://www.openstreetmap.org/way/1453306982",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6245073,
+            30.6784896
+          ],
+          [
+            120.6245157,
+            30.6788919
+          ],
+          [
+            120.6245163,
+            30.6790285
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1453306983",
+      "properties": {
+        "highway": "tertiary",
+        "name": "凯旋路",
+        "osm_type": "way",
+        "osm_id": 1453306983,
+        "osm_version": 2,
+        "osm_timestamp": "2026-01-25T11:45:04Z",
+        "source_url": "https://www.openstreetmap.org/way/1453306983",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6245073,
+            30.6784896
+          ],
+          [
+            120.6262184,
+            30.6786481
+          ],
+          [
+            120.6268323,
+            30.6787036
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1470221086",
+      "properties": {
+        "highway": "tertiary",
+        "name": "凯旋路",
+        "osm_type": "way",
+        "osm_id": 1470221086,
+        "osm_version": 1,
+        "osm_timestamp": "2026-01-25T11:45:04Z",
+        "source_url": "https://www.openstreetmap.org/way/1470221086",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6268323,
+            30.6787036
+          ],
+          [
+            120.6272912,
+            30.6787451
+          ],
+          [
+            120.6296132,
+            30.678955
+          ]
+        ]
+      }
+    }
+  ]
+}

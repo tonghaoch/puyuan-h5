@@ -1,0 +1,203 @@
+{
+  "version": "reference-aligned-2026-11-18",
+  "source": "references/puyuan-reference.jpg",
+  "sourceSize": {
+    "width": 2363,
+    "height": 1672
+  },
+  "scene": {
+    "width": 1520,
+    "height": 1240
+  },
+  "sourceOffset": {
+    "x": -30,
+    "y": -180
+  },
+  "scope": [
+    [620, 310],
+    [895, 280],
+    [970, 277],
+    [1060, 272],
+    [1147, 284],
+    [1172, 352],
+    [1273, 364],
+    [1314, 408],
+    [1400, 422],
+    [1425, 500],
+    [1460, 645],
+    [1410, 725],
+    [1320, 838],
+    [1285, 946],
+    [1300, 1062],
+    [1309, 1194],
+    [1270, 1233],
+    [1140, 1263],
+    [1000, 1285],
+    [810, 1300],
+    [600, 1326],
+    [403, 1334],
+    [275, 1328],
+    [144, 1328],
+    [155, 1215],
+    [181, 1100],
+    [296, 1038],
+    [414, 1005],
+    [445, 919],
+    [461, 776],
+    [453, 565],
+    [511, 489],
+    [615, 450]
+  ],
+  "landmarks": [
+    {
+      "id": "water-stage",
+      "name": "水上舞台",
+      "category": "performance",
+      "anchor": [1058, 370],
+      "art": "stage",
+      "subtitle": "一方戏台，一曲江南"
+    },
+    {
+      "id": "temple",
+      "name": "福善寺",
+      "category": "scenic",
+      "anchor": [928, 680],
+      "art": "temple",
+      "subtitle": "循着原图，寻访古刹院落"
+    },
+    {
+      "id": "guildhall",
+      "name": "濮商会馆",
+      "category": "craft",
+      "anchor": [620, 960],
+      "art": "market",
+      "subtitle": "在旧时光里，与手艺相逢"
+    },
+    {
+      "id": "theater",
+      "name": "梅泾剧场",
+      "category": "performance",
+      "anchor": [795, 930],
+      "art": "stage",
+      "subtitle": "入梦一场，戏韵千年"
+    },
+    {
+      "id": "teahouse",
+      "name": "深夜食堂",
+      "category": "food",
+      "anchor": [850, 990],
+      "art": "tea",
+      "subtitle": "巷陌深处，留一席烟火"
+    },
+    {
+      "id": "market",
+      "name": "濮家大院",
+      "category": "craft",
+      "anchor": [1025, 1085],
+      "art": "market",
+      "subtitle": "走进院落，寻找水乡风物"
+    },
+    {
+      "id": "dining",
+      "name": "龙湾街美食广场",
+      "category": "food",
+      "anchor": [435, 1134],
+      "art": "food",
+      "subtitle": "一箸之间，尝遍江南"
+    },
+    {
+      "id": "north-gate",
+      "name": "北更楼",
+      "category": "scenic",
+      "anchor": [545, 550],
+      "art": "temple",
+      "subtitle": "循着古镇的来路"
+    },
+    {
+      "id": "visitor",
+      "name": "游客中心",
+      "category": "service",
+      "anchor": [748, 414],
+      "art": "tea",
+      "subtitle": "游园途中，安心停靠"
+    },
+    {
+      "id": "fuma",
+      "name": "濮驸马第",
+      "category": "scenic",
+      "anchor": [716, 649],
+      "art": "temple",
+      "subtitle": "青砖黛瓦间，读一段往事"
+    },
+    {
+      "id": "art-gallery",
+      "name": "禅美术馆",
+      "category": "scenic",
+      "anchor": [1080, 528],
+      "art": "temple",
+      "subtitle": "在水岸，遇见艺术"
+    },
+    {
+      "id": "zen-hotel",
+      "name": "禅意酒店",
+      "category": "service",
+      "anchor": [1200, 575],
+      "art": "tea",
+      "subtitle": "临水院落，闲坐片刻"
+    },
+    {
+      "id": "designer-house",
+      "name": "设计师之家",
+      "category": "scenic",
+      "anchor": [1350, 665],
+      "art": "market",
+      "subtitle": "水巷中的创意空间"
+    },
+    {
+      "id": "xiangyun",
+      "name": "翔云观",
+      "category": "scenic",
+      "anchor": [1157, 812],
+      "art": "temple",
+      "subtitle": "一方清静，半日闲情"
+    },
+    {
+      "id": "dayou",
+      "name": "大有桥建筑群",
+      "category": "scenic",
+      "anchor": [650, 1055],
+      "art": "temple",
+      "subtitle": "过一座桥，看一片老屋"
+    },
+    {
+      "id": "shuchang",
+      "name": "书场",
+      "category": "performance",
+      "anchor": [973, 974],
+      "art": "stage",
+      "subtitle": "听书品茗，坐享好时光"
+    },
+    {
+      "id": "zhuanglou",
+      "name": "妆楼",
+      "category": "scenic",
+      "anchor": [708, 1175],
+      "art": "temple",
+      "subtitle": "在南街，留一帧古镇光景"
+    },
+    {
+      "id": "food-center",
+      "name": "美食中心",
+      "category": "food",
+      "anchor": [1345, 443],
+      "art": "food",
+      "subtitle": "沿着水岸，寻一餐好滋味"
+    }
+  ],
+  "waterAnimations": [
+    "M895 486 Q925 455 971 436 Q1005 413 1024 382 Q1057 336 1113 361 Q1163 396 1238 385 Q1287 389 1295 420",
+    "M1404 520 Q1427 580 1427 638 Q1415 698 1376 740 Q1325 797 1274 860 Q1236 921 1205 993 Q1169 1078 1172 1202",
+    "M795 724 Q812 783 816 827 Q819 846 873 846 Q980 835 1074 836 Q1148 832 1228 867",
+    "M344 1106 Q322 1167 290 1203 Q252 1248 170 1281"
+  ]
+}

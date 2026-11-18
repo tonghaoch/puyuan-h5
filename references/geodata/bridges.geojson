@@ -1,0 +1,862 @@
+{
+  "type": "FeatureCollection",
+  "name": "Puyuan OSM bridge ways: review only",
+  "attribution": "© OpenStreetMap contributors",
+  "license": "https://opendatacommons.org/licenses/odbl/1-0/",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "way/965359486",
+      "properties": {
+        "bridge": "yes",
+        "highway": "tertiary",
+        "layer": "1",
+        "oneway": "yes",
+        "osm_type": "way",
+        "osm_id": 965359486,
+        "osm_version": 3,
+        "osm_timestamp": "2024-08-12T02:13:53Z",
+        "source_url": "https://www.openstreetmap.org/way/965359486",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6271182,
+            30.6855868
+          ],
+          [
+            120.6269145,
+            30.6854524
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/965496963",
+      "properties": {
+        "bridge": "yes",
+        "highway": "unclassified",
+        "layer": "1",
+        "osm_type": "way",
+        "osm_id": 965496963,
+        "osm_version": 2,
+        "osm_timestamp": "2025-06-04T04:25:07Z",
+        "source_url": "https://www.openstreetmap.org/way/965496963",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6326265,
+            30.6814808
+          ],
+          [
+            120.6315954,
+            30.6815726
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/965496971",
+      "properties": {
+        "bridge": "yes",
+        "highway": "unclassified",
+        "layer": "1",
+        "osm_type": "way",
+        "osm_id": 965496971,
+        "osm_version": 1,
+        "osm_timestamp": "2021-07-19T03:49:09Z",
+        "source_url": "https://www.openstreetmap.org/way/965496971",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6319213,
+            30.6791377
+          ],
+          [
+            120.6316261,
+            30.6791034
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1283295031",
+      "properties": {
+        "bridge": "yes",
+        "highway": "service",
+        "layer": "1",
+        "osm_type": "way",
+        "osm_id": 1283295031,
+        "osm_version": 1,
+        "osm_timestamp": "2024-05-15T14:42:57Z",
+        "source_url": "https://www.openstreetmap.org/way/1283295031",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6313923,
+            30.6821064
+          ],
+          [
+            120.6313625,
+            30.6822448
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1283295033",
+      "properties": {
+        "bridge": "yes",
+        "highway": "secondary",
+        "layer": "1",
+        "oneway": "yes",
+        "osm_type": "way",
+        "osm_id": 1283295033,
+        "osm_version": 2,
+        "osm_timestamp": "2025-05-27T18:15:23Z",
+        "source_url": "https://www.openstreetmap.org/way/1283295033",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6243973,
+            30.6793239
+          ],
+          [
+            120.6243961,
+            30.6790611
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1283295039",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "name": "祈福桥",
+        "source": "maxar",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1283295039,
+        "osm_version": 3,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1283295039",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6291776,
+            30.6825205
+          ],
+          [
+            120.6289118,
+            30.6824748
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1283295040",
+      "properties": {
+        "bridge": "yes",
+        "highway": "residential",
+        "layer": "1",
+        "source": "maxar",
+        "osm_type": "way",
+        "osm_id": 1283295040,
+        "osm_version": 1,
+        "osm_timestamp": "2024-05-15T14:42:57Z",
+        "source_url": "https://www.openstreetmap.org/way/1283295040",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.627112,
+            30.6813454
+          ],
+          [
+            120.6272094,
+            30.6813568
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1283295042",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "name": "永乐桥",
+        "source": "maxar",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1283295042,
+        "osm_version": 3,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1283295042",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6294161,
+            30.6817922
+          ],
+          [
+            120.6294688,
+            30.6816384
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1283295044",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1283295044,
+        "osm_version": 2,
+        "osm_timestamp": "2025-06-04T04:25:07Z",
+        "source_url": "https://www.openstreetmap.org/way/1283295044",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6296792,
+            30.6818501
+          ],
+          [
+            120.6297131,
+            30.6817203
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1283295046",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "name": "御桥",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1283295046,
+        "osm_version": 3,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1283295046",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6302985,
+            30.681927
+          ],
+          [
+            120.6302476,
+            30.6820592
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1283295048",
+      "properties": {
+        "bridge": "yes",
+        "highway": "residential",
+        "layer": "1",
+        "name": "朝阳桥",
+        "source": "maxar",
+        "osm_type": "way",
+        "osm_id": 1283295048,
+        "osm_version": 2,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1283295048",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6276798,
+            30.6814169
+          ],
+          [
+            120.6280726,
+            30.681471
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1283295052",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "source": "maxar",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1283295052,
+        "osm_version": 2,
+        "osm_timestamp": "2025-06-04T04:25:07Z",
+        "source_url": "https://www.openstreetmap.org/way/1283295052",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6294287,
+            30.6818448
+          ],
+          [
+            120.6295771,
+            30.6818955
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1283295056",
+      "properties": {
+        "bridge": "yes",
+        "highway": "residential",
+        "layer": "1",
+        "source": "maxar",
+        "osm_type": "way",
+        "osm_id": 1283295056,
+        "osm_version": 1,
+        "osm_timestamp": "2024-05-15T14:42:57Z",
+        "source_url": "https://www.openstreetmap.org/way/1283295056",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6319409,
+            30.6824732
+          ],
+          [
+            120.6320761,
+            30.6824633
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1307152479",
+      "properties": {
+        "bridge": "yes",
+        "highway": "tertiary",
+        "layer": "1",
+        "oneway": "yes",
+        "osm_type": "way",
+        "osm_id": 1307152479,
+        "osm_version": 1,
+        "osm_timestamp": "2024-08-12T02:13:53Z",
+        "source_url": "https://www.openstreetmap.org/way/1307152479",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6269652,
+            30.6853908
+          ],
+          [
+            120.6271736,
+            30.6855433
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391987360",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1391987360,
+        "osm_version": 1,
+        "osm_timestamp": "2025-06-04T04:25:07Z",
+        "source_url": "https://www.openstreetmap.org/way/1391987360",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6293188,
+            30.6856725
+          ],
+          [
+            120.6293925,
+            30.6852338
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1391989196",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "name": "侍郎桥",
+        "osm_type": "way",
+        "osm_id": 1391989196,
+        "osm_version": 2,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1391989196",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.628946,
+            30.6836712
+          ],
+          [
+            120.6291513,
+            30.6835162
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020783",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "name": "寺湾街",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1416020783,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020783",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6274242,
+            30.6836357
+          ],
+          [
+            120.6271438,
+            30.6835969
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020786",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "name": "北廊桥",
+        "osm_type": "way",
+        "osm_id": 1416020786,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020786",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6286856,
+            30.6855486
+          ],
+          [
+            120.6287386,
+            30.685201
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020788",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "name": "鸣凤桥",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1416020788,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020788",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6294973,
+            30.6848045
+          ],
+          [
+            120.6296699,
+            30.6846875
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020792",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1416020792,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020792",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6285423,
+            30.6835307
+          ],
+          [
+            120.6286558,
+            30.6833664
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020795",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1416020795,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020795",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6288198,
+            30.6831864
+          ],
+          [
+            120.629099,
+            30.68322
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020798",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "name": "香烛桥",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1416020798,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020798",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.629645,
+            30.6821391
+          ],
+          [
+            120.6296871,
+            30.6819907
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020800",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1416020800,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020800",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6301814,
+            30.6823273
+          ],
+          [
+            120.6302143,
+            30.6821763
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020802",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "name": "大有桥",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1416020802,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020802",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.628441,
+            30.6813478
+          ],
+          [
+            120.6283929,
+            30.6815145
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020804",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "name": "碧水桥",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1416020804,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020804",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6271711,
+            30.6828778
+          ],
+          [
+            120.6272202,
+            30.6827554
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020805",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "name": "功德桥",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1416020805,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020805",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6276835,
+            30.6819276
+          ],
+          [
+            120.6279606,
+            30.681965
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020806",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "name": "西庙桥",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1416020806,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020806",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6275427,
+            30.6822215
+          ],
+          [
+            120.6275837,
+            30.6820648
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020809",
+      "properties": {
+        "bridge": "yes",
+        "highway": "pedestrian",
+        "layer": "1",
+        "name": "秀桐桥",
+        "surface": "cobblestone",
+        "osm_type": "way",
+        "osm_id": 1416020809,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020809",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6273952,
+            30.6831346
+          ],
+          [
+            120.6274943,
+            30.6831555
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1416020813",
+      "properties": {
+        "bridge": "yes",
+        "highway": "secondary",
+        "layer": "1",
+        "name": "中兴路",
+        "oneway": "yes",
+        "osm_type": "way",
+        "osm_id": 1416020813,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/way/1416020813",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.6245163,
+            30.6790285
+          ],
+          [
+            120.6245175,
+            30.67929
+          ]
+        ]
+      }
+    }
+  ]
+}

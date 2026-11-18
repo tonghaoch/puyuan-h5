@@ -1,0 +1,48 @@
+{
+  "type": "FeatureCollection",
+  "name": "Puyuan OSM reference: buildings",
+  "attribution": "© OpenStreetMap contributors",
+  "license": "https://opendatacommons.org/licenses/odbl/1-0/",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "way/1098135603",
+      "properties": {
+        "building": "yes",
+        "osm_type": "way",
+        "osm_id": 1098135603,
+        "osm_version": 1,
+        "osm_timestamp": "2022-09-27T01:09:14Z",
+        "source_url": "https://www.openstreetmap.org/way/1098135603",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              120.6317595,
+              30.6852453
+            ],
+            [
+              120.6328304,
+              30.6852245
+            ],
+            [
+              120.632764,
+              30.6842898
+            ],
+            [
+              120.6316961,
+              30.6843287
+            ],
+            [
+              120.6317595,
+              30.6852453
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

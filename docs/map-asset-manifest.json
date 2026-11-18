@@ -1,0 +1,16 @@
+{
+  "source": "references/puyuan-reference.jpg",
+  "source_sha256": "10e9e3b067ce85d910fc225268eb76066194a3bc37f40a787e7da259417f767e",
+  "version": "reference-aligned-2026-11-18",
+  "scene": {
+    "width": 1520,
+    "height": 1240
+  },
+  "translation": {
+    "x": -30,
+    "y": -180
+  },
+  "geometry_operation": "translation only; no warp, rotation, or invented building placement",
+  "landmark_count": 18,
+  "georeferenced": false
+}

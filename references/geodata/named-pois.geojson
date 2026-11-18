@@ -1,0 +1,188 @@
+{
+  "type": "FeatureCollection",
+  "name": "Puyuan OSM reference: named-pois",
+  "attribution": "© OpenStreetMap contributors",
+  "license": "https://opendatacommons.org/licenses/odbl/1-0/",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "node/12885564503",
+      "properties": {
+        "man_made": "tower",
+        "name": "福山塔",
+        "name:en": "Fushan Pagoda",
+        "tower:type": "pagoda",
+        "osm_type": "node",
+        "osm_id": 12885564503,
+        "osm_version": 1,
+        "osm_timestamp": "2025-06-04T04:25:07Z",
+        "source_url": "https://www.openstreetmap.org/node/12885564503",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.6298608,
+          30.6845258
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "node/12885564504",
+      "properties": {
+        "amenity": "place_of_worship",
+        "name": "福山寺",
+        "name:en": "Fushan Temple",
+        "religion": "buddhist",
+        "osm_type": "node",
+        "osm_id": 12885564504,
+        "osm_version": 1,
+        "osm_timestamp": "2025-06-04T04:25:07Z",
+        "source_url": "https://www.openstreetmap.org/node/12885564504",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.6299,
+          30.6838701
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "node/12885564540",
+      "properties": {
+        "amenity": "place_of_worship",
+        "name": "濮院教堂",
+        "name:en": "Puyuan Church",
+        "religion": "christian",
+        "osm_type": "node",
+        "osm_id": 12885564540,
+        "osm_version": 2,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/node/12885564540",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.6297229,
+          30.680656
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "node/12885566950",
+      "properties": {
+        "information": "office",
+        "name": "香海禅寺濮院古镇游客中心",
+        "name:en": "Xianghai Temple Puyuan ancient Town tourist center",
+        "tourism": "information",
+        "osm_type": "node",
+        "osm_id": 12885566950,
+        "osm_version": 2,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/node/12885566950",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.628797,
+          30.6861573
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "node/12885566951",
+      "properties": {
+        "name": "濮院时尚古镇",
+        "name:en": "Puyuan Fashion Ancient Town",
+        "shop": "ticket",
+        "osm_type": "node",
+        "osm_id": 12885566951,
+        "osm_version": 1,
+        "osm_timestamp": "2025-06-04T04:37:42Z",
+        "source_url": "https://www.openstreetmap.org/node/12885566951",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.6288374,
+          30.685898
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "node/12885566952",
+      "properties": {
+        "name": "濮院时尚古镇",
+        "name:en": "Puyuan Fashion Ancient Town",
+        "tourism": "attraction",
+        "osm_type": "node",
+        "osm_id": 12885566952,
+        "osm_version": 1,
+        "osm_timestamp": "2025-06-04T04:37:42Z",
+        "source_url": "https://www.openstreetmap.org/node/12885566952",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.628463,
+          30.6827383
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "node/13012953852",
+      "properties": {
+        "amenity": "place_of_worship",
+        "name": "水上禅堂",
+        "religion": "buddhist",
+        "osm_type": "node",
+        "osm_id": 13012953852,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/node/13012953852",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.6298211,
+          30.6850111
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "node/13012953880",
+      "properties": {
+        "amenity": "place_of_worship",
+        "name": "濮院关王庙",
+        "religion": "chinese_folk",
+        "osm_type": "node",
+        "osm_id": 13012953880,
+        "osm_version": 1,
+        "osm_timestamp": "2025-07-20T03:18:47Z",
+        "source_url": "https://www.openstreetmap.org/node/13012953880",
+        "verification": "osm-source-only; not field-surveyed"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.6274286,
+          30.6821856
+        ]
+      }
+    }
+  ]
+}
