@@ -4,8 +4,7 @@ import { shanghaiDate, shiftDay, sessionStatus } from '../src/lib/time.ts'
 import {
   zoomAt,
   clampCamera,
-  MIN_SCALE,
-  MAX_SCALE,
+  zoomRange,
   cameraBounds,
   visibleScene,
 } from '../src/lib/map-camera.ts'
@@ -36,8 +35,9 @@ test('zoom preserves the world point beneath the pointer until scene limits inte
 test('expanded camera retains a bounded meadow and gives geography its own limits', () => {
   const zoomIn = zoomAt({ x: 0, y: 0, scale: 0.7 }, 1000, 200, 300, 390, 700)
   const zoomOut = zoomAt(zoomIn, 0.0001, 200, 300, 390, 700)
-  assert.equal(zoomIn.scale, MAX_SCALE)
-  assert.equal(zoomOut.scale, MIN_SCALE)
+  const { initial } = zoomRange(390, 700)
+  assert.equal(zoomIn.scale, initial * 1.25 ** 8)
+  assert.equal(zoomOut.scale, initial / 1.25)
   const clamped = clampCamera({ x: 1e9, y: -1e9, scale: 1 }, 390, 700)
   const world = cameraBounds('illustration')
   assert.ok(clamped.x + world.left <= 0)
@@ -46,7 +46,7 @@ test('expanded camera retains a bounded meadow and gives geography its own limit
   assert.ok(clamped.y + world.bottom >= 700)
   assert.ok(clamped.x > 390, 'the town may leave the viewport so the meadow can be explored')
   const real = clampCamera({ x: 1e9, y: -1e9, scale: 8 }, 390, 700, 'geographic')
-  assert.equal(real.scale, 1.8)
+  assert.equal(real.scale, zoomIn.scale)
   assert.ok(real.x < 390, 'decorative margins do not alter the geographic map')
   const view = visibleScene({ x: -300, y: -200, scale: 2 }, 400, 600, 0)
   assert.deepEqual(view, { left: 150, top: 100, right: 350, bottom: 400 })
@@ -126,7 +126,10 @@ test('satellite image uses service-returned projected extent in the same frame a
   ).geometry.coordinates[0]
   const frame = createGeoFrame(boundary, 1520, 1240, 100)
   const metadata = JSON.parse(
-    await readFile(new URL('../public/geodata/imagery-extent.json', import.meta.url), 'utf8'),
+    await readFile(
+      new URL('../references/geodata/esri-world-imagery-export.json', import.meta.url),
+      'utf8',
+    ),
   )
   const extent = metadata.extent
   const topLeft = frame.projectMeters([extent.xmin, extent.ymax])
@@ -1348,15 +1351,25 @@ test('south garden lanes stay dry and the east timber crossing joins the two ban
       const [beforeX, beforeY] = lane.profile[index]
       assert.ok(width > 0 && (side === 'east' ? x > center[0] : x < center[0]))
       for (let step = 0; step <= 8; step++) {
-        const point: Point = [beforeX + ((x - beforeX) * step) / 8, beforeY + ((y - beforeY) * step) / 8]
+        const point: Point = [
+          beforeX + ((x - beforeX) * step) / 8,
+          beforeY + ((y - beforeY) * step) / 8,
+        ]
         assert.equal(wet(point).length, 0)
       }
     }
   }
   const crossing = bridges.find(({ id }: { id: string }) => id === 'bridge-9')
-  const [rear, front] = crossing.sections[Math.floor(crossing.sections.length / 2)] as [Point, Point]
+  const [rear, front] = crossing.sections[Math.floor(crossing.sections.length / 2)] as [
+    Point,
+    Point,
+  ]
   assert.equal(wet([(rear[0] + front[0]) / 2, (rear[1] + front[1]) / 2]).length, 1)
-  for (const bank of [[1183, 956.5], [1236.7, 962]] as Point[]) assert.equal(wet(bank).length, 0)
+  for (const bank of [
+    [1183, 956.5],
+    [1236.7, 962],
+  ] as Point[])
+    assert.equal(wet(bank).length, 0)
 })
 
 test('stage glass bays stay on the promenade, with separate dry eaves and one lake below the platform', async () => {
@@ -1461,16 +1474,23 @@ test('temple garden paths meet opposite dry ends without paving across the canal
   const { pointInRing } = await import('../src/lib/geography.ts')
   type Point = [number, number]
   type Walk = { id: string; profile: [number, number, number][] }
-  const town = JSON.parse(await readFile(new URL('../src/data/town-landscape.json', import.meta.url), 'utf8'))
-  const wet = (point: Point) => town.water.some((region: { points: Point[]; holes: Point[][] }) =>
-    pointInRing(point, region.points) && !region.holes.some((ring) => pointInRing(point, ring)),
+  const town = JSON.parse(
+    await readFile(new URL('../src/data/town-landscape.json', import.meta.url), 'utf8'),
   )
+  const wet = (point: Point) =>
+    town.water.some(
+      (region: { points: Point[]; holes: Point[][] }) =>
+        pointInRing(point, region.points) && !region.holes.some((ring) => pointInRing(point, ring)),
+    )
   const profile = (id: string) => (town.walks as Walk[]).find((walk) => walk.id === id)!.profile
   const west = profile('temple-garden-west-approach')
   const east = profile('temple-garden-east-approach')
   const bridge = town.bridges.find(({ id }: { id: string }) => id === 'bridge-5')
   for (const [x, y] of [...west, ...east]) assert.ok(!wet([x, y]))
-  for (const [tip, section] of [[west.at(-1), bridge.sections[0]], [east[0], bridge.sections.at(-1)]]) {
+  for (const [tip, section] of [
+    [west.at(-1), bridge.sections[0]],
+    [east[0], bridge.sections.at(-1)],
+  ]) {
     const [left, right] = section
     assert.ok(Math.hypot(tip[0] - (left[0] + right[0]) / 2, tip[1] - (left[1] + right[1]) / 2) < 1)
   }
@@ -1482,7 +1502,9 @@ test('the designer quay lane meets the dry north end of the west slab bridge', a
   const { readFile } = await import('node:fs/promises')
   const { pointInRing } = await import('../src/lib/geography.ts')
   type Point = [number, number]
-  const town = JSON.parse(await readFile(new URL('../src/data/town-landscape.json', import.meta.url), 'utf8'))
+  const town = JSON.parse(
+    await readFile(new URL('../src/data/town-landscape.json', import.meta.url), 'utf8'),
+  )
   const lane = town.walks.find(({ id }: { id: string }) => id === 'street-designer-quay-lane-26')
   const bridge = town.bridges.find(({ id }: { id: string }) => id === 'designer-west-slab')
   assert.ok(lane && bridge)
@@ -1491,13 +1513,18 @@ test('the designer quay lane meets the dry north end of the west slab bridge', a
     bridge.x + (fraction - 0.5) * bridge.length * Math.cos(radians),
     bridge.y + (fraction - 0.5) * bridge.length * Math.sin(radians),
   ]
-  const wet = (point: Point) => town.water.some((region: { points: Point[]; holes: Point[][] }) =>
-    pointInRing(point, region.points) && !region.holes.some((ring) => pointInRing(point, ring)),
-  )
+  const wet = (point: Point) =>
+    town.water.some(
+      (region: { points: Point[]; holes: Point[][] }) =>
+        pointInRing(point, region.points) && !region.holes.some((ring) => pointInRing(point, ring)),
+    )
   const north = station(0)
   const south = station(1)
   const [endX, endY] = lane.profile.at(-1)
-  assert.ok(Math.hypot(endX - north[0], endY - north[1]) < 1, 'lane must reach the northern abutment')
+  assert.ok(
+    Math.hypot(endX - north[0], endY - north[1]) < 1,
+    'lane must reach the northern abutment',
+  )
   assert.ok(south[0] < north[0] && south[1] > north[1])
   assert.ok(!wet([endX, endY]) && !wet(north) && !wet(south))
   const crossing = Array.from({ length: 41 }, (_, index) => wet(station(index / 40)))

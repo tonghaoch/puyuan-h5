@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import type { Place } from '../data/catalog'
-import { clampCamera, zoomAt, SCENE, type Camera } from '../lib/map-camera'
+import { clampCamera, zoomAt, zoomRange, ZOOM_STEP, SCENE, type Camera } from '../lib/map-camera'
 import MeadowLayer from './MeadowLayer.vue'
 import LandmarkLayer from './LandmarkLayer.vue'
 import ArchitectureLayer from './ArchitectureLayer.vue'
@@ -73,6 +73,9 @@ const savedCameras = new Map<string, Camera>()
 const viewport = ref<HTMLElement>()
 const camera = reactive<Camera>({ x: 0, y: 0, scale: 0.6 })
 const dimensions = reactive({ width: 0, height: 0 })
+const limits = computed(() => zoomRange(dimensions.width, dimensions.height))
+const atMaxZoom = computed(() => camera.scale >= limits.value.max - 1e-9)
+const atMinZoom = computed(() => camera.scale <= limits.value.min + 1e-9)
 const dragging = ref(false)
 const ready = ref(false)
 const pointers = new Map<number, { x: number; y: number }>()
@@ -110,7 +113,7 @@ function reset() {
   showBuildingPicker.value = false
   inspectionIndex.value = -1
   const { width, height } = dimensions
-  const scale = Math.min(width / 1120, (height - 160) / 1040)
+  const scale = limits.value.initial
   setCamera({ scale, x: width / 2 - 850 * scale, y: (height + 5) / 2 - 605 * scale })
 }
 watch(
@@ -331,7 +334,12 @@ onBeforeUnmount(() => observer?.disconnect())
     <div v-if="!geographic" class="meadow-backdrop" :style="meadowStyle" aria-hidden="true"></div>
     <div class="map-scene" :style="style">
       <template v-if="!geographic">
-        <MeadowLayer :camera="camera" :width="dimensions.width" :height="dimensions.height" />
+        <MeadowLayer
+          v-if="view === 'illustration'"
+          :camera="camera"
+          :width="dimensions.width"
+          :height="dimensions.height"
+        />
         <img
           class="map-art"
           :src="view === 'reference' ? '/art/puyuan-original-scope.webp' : nativeLandscape.ground"
@@ -343,6 +351,7 @@ onBeforeUnmount(() => observer?.disconnect())
         />
         <ReferenceTiles
           v-if="view === 'reference'"
+          :at-max-zoom="atMaxZoom"
           :camera="camera"
           :width="dimensions.width"
           :height="dimensions.height"
@@ -576,10 +585,20 @@ onBeforeUnmount(() => observer?.disconnect())
       <AppIcon name="locate" :size="22" />
     </button>
     <div class="zoom-tools">
-      <button class="map-tool" aria-label="放大地图" @click="changeZoom(1.25)">
+      <button
+        class="map-tool"
+        aria-label="放大地图"
+        :disabled="atMaxZoom"
+        @click="changeZoom(ZOOM_STEP)"
+      >
         <AppIcon name="plus" /></button
       ><span></span
-      ><button class="map-tool" aria-label="缩小地图" @click="changeZoom(0.8)">
+      ><button
+        class="map-tool"
+        aria-label="缩小地图"
+        :disabled="atMinZoom"
+        @click="changeZoom(1 / ZOOM_STEP)"
+      >
         <AppIcon name="minus" />
       </button>
     </div>

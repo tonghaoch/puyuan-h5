@@ -2,7 +2,7 @@
 from pathlib import Path
 import argparse
 import json
-from PIL import Image, ImageChops, ImageDraw, ImageFilter
+from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageOps
 
 ROOT=Path(__file__).resolve().parents[1]
 layout=json.loads((ROOT/'src/data/reference-map.json').read_text())
@@ -12,8 +12,30 @@ dx,dy=layout['sourceOffset']['x'],layout['sourceOffset']['y']
 scope=Image.new('L',(w,h))
 ImageDraw.Draw(scope).polygon([(x+dx,y+dy) for x,y in layout['scope']],fill=255)
 raw=Image.new('RGB',(w,h),'#efeede');raw.paste(source,(dx,dy))
-original=Image.new('RGB',(w,h),'#efeede')
-original.paste(raw,(0,0),scope.filter(ImageFilter.GaussianBlur(6)))
+paint=Image.open(ROOT/'references/reference-outpaint.webp').convert('RGB')
+if paint.size != (w,h):
+    raise ValueError('AI outpaint must be registered to the reference scene')
+# Sample open ground in the northwest of the painting, not a second illustration.
+patch=paint.crop((round(w*.04),round(h*.05),round(w*.1663),round(h*.2048))).resize((192,192),Image.Resampling.LANCZOS)
+strip=Image.new('RGB',(384,192))
+strip.paste(patch);strip.paste(ImageOps.mirror(patch),(192,0))
+grass=Image.new('RGB',(384,384))
+grass.paste(strip);grass.paste(ImageOps.flip(strip),(0,192))
+grass.save(ROOT/'public/art/reference-meadow.webp',lossless=True,method=4)
+# Match the repeating backdrop's origin and period at all four scene edges.
+field=Image.new('RGB',(w,h))
+for y in range(0,h,grass.height):
+    for x in range(0,w,grass.width):
+        field.paste(grass,(x,y))
+rim=Image.new('L',(w,h))
+draw=ImageDraw.Draw(rim)
+for inset in range(min(65,w//2,h//2)):
+    t=inset/64
+    draw.rectangle((inset,inset,w-1-inset,h-1-inset),fill=round(255*t*t*(3-2*t)))
+paint=Image.composite(paint,field,rim)
+# Keep source pixels inside the town. Only the outer lip transitions to the AI edit.
+keep=ImageChops.lighter(scope,scope.filter(ImageFilter.GaussianBlur(4)).point(lambda p:min(255,p*2)))
+original=Image.composite(raw,paint,keep)
 parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--ai-master',type=Path,help='Approved 4x AI image in cropped scene coordinates')
 parser.add_argument('--lapsrn-x8',type=Path,help='LapSRN_x8.pb for the high-density close-up layer')
@@ -45,7 +67,12 @@ def clarify_lines(image, radius):
 original.save(ROOT/'public/art/puyuan-original-scope.webp',quality=90,method=6)
 save_tiles(clarify_lines(original.resize((w*2,h*2),Image.Resampling.LANCZOS),1.35),2)
 if args.ai_master:
-    save_tiles(clarify_lines(ai,2.4),4)
+    # The approved master has a cream matte at its edge. Keep its enhanced
+    # interior, but derive the rim and exterior from the newly painted scene.
+    interior=scope.filter(ImageFilter.GaussianBlur(6)).point(lambda p:max(0,(p-246)*255//9))
+    detailed=Image.composite(ai,original.resize(ai.size,Image.Resampling.LANCZOS),
+                             interior.resize(ai.size,Image.Resampling.BILINEAR))
+    save_tiles(clarify_lines(detailed,2.4),4)
 if args.lapsrn_x8:
     import cv2
     import numpy as np

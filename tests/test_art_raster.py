@@ -30,6 +30,7 @@ class PublishedRaster(unittest.TestCase):
             drawing = Image.new('RGB',(200,140),(70,100,130))
             drawing.paste((180,140,100),(80,50,120,90))
             drawing.save(source)
+            Image.new('RGB',(160,120),(91,135,75)).save(root/'references/reference-outpaint.webp',lossless=True)
             before = source.read_bytes()
             subprocess.run([sys.executable,str(script)],check=True)
             self.assertEqual(source.read_bytes(),before)
@@ -38,7 +39,7 @@ class PublishedRaster(unittest.TestCase):
                 # Source (100,70) maps to scene (80,60), now at twice the density.
                 self.assertEqual(result.getpixel((160,120)),(180,140,100))
                 self.assertEqual(result.getpixel((80,120)),(70,100,130))
-                self.assertEqual(result.getpixel((0,0)),(239,238,222))
+                self.assertEqual(result.getpixel((0,0)),(91,135,75))
 
     def test_blank_landmark_cannot_replace_the_last_good_asset(self):
         with TemporaryDirectory() as directory:
