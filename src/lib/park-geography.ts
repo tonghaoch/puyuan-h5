@@ -2,7 +2,7 @@ import { computed, onMounted, ref } from 'vue'
 import { createGeoFrame, type GeoCollection, type GeoFeature, type LngLat } from './geography'
 import { SCENE } from './map-camera'
 
-export type MapView = 'illustration' | 'reference' | 'geographic'
+export type MapView = 'reference' | 'geographic'
 let geometryRequest: Promise<GeoCollection> | undefined
 async function getGeometry(): Promise<GeoCollection> {
   const response = await fetch('/geodata/puyuan.geojson')
