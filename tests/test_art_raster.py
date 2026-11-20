@@ -12,6 +12,24 @@ ENCODER = Path(__file__).resolve().parents[1]/'scripts/encode-art-asset.py'
 
 
 class PublishedRaster(unittest.TestCase):
+    def test_boundary_roads_survive_meadow_at_every_zoom(self):
+        root = ENCODER.parents[1]
+        art = root/'public/art'
+        with Image.open(root/'references/puyuan-reference.jpg') as source:
+            for sx,sy in ((255,544),(500,487),(553,464),(611,398),(591,273),
+                          (1154,265),(1155,247),(169,1120),(240,1354)):
+                expected = source.getpixel((sx,sy))
+                for level in (1,2,4,8):
+                    x,y = (sx-30)*level,(sy-180)*level
+                    size = 1024 if level == 8 else 512
+                    path = art/'puyuan-original-scope.webp'
+                    if level != 1:
+                        path = art/f'reference-tiles/{level}/{x//size}-{y//size}.webp'
+                        x,y = x%size,y%size
+                    with Image.open(path) as image, self.subTest(point=(sx,sy),level=level):
+                        actual = image.getpixel((x,y))
+                        self.assertLess(max(abs(a-b) for a,b in zip(actual,expected)),16)
+
     def test_reference_enhancement_preserves_scene_alignment_and_source(self):
         with TemporaryDirectory() as directory:
             root = Path(directory)

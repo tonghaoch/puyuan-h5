@@ -8,6 +8,10 @@ puyuan-reference.jpg 是用户于 2026-11-17 提供的原始参考图，尺寸 2
 
 原图保留完整，不覆盖、不裁改；正式地图资产另行制作。本目录不会被 Vite 自动打包到产品中。
 
+北更楼外的弯路位于古镇遮罩之外。`reference-map.json` 中的 `northGateRoadOutline` 沿原图像素坐标保留路面，不扩大镇界，也不恢复路旁的印刷文字；该轮廓修改后需同步重建概览及全部高清层。
+
+右上水上舞台旁的路、左下中兴路与凯旋路的交叉口用同一坐标系的 `restoredRoadOutlines` 描边，仅在镇外用原画路面取色补齐，避免把印刷路名和云朵带回草坪。
+
 2026-11-18：scripts/prepare-reference-map.py 按 src/data/reference-map.json 选取古镇范围，生成 public/art 下的配色版、原色对照和水面动画遮罩。仅做平移、遮罩与配色，原图不覆盖。
 
 `npm run art:reference` 重建 1520 × 1240 的原色概览图和 2 倍保真图块（Lanczos 插值、轻度锐化）。加上 `-- --ai-master /path/to/puyuan-AI-4x.webp --fsrcnn-x4 /path/to/FSRCNN_x4.pb` 可同时生成 4 倍图块：原标牌附近使用去字底图重新超分，其余沿用高清母图。省略这两个参数时保留已发布的 4 倍图块。两层均为 512 像素无损 WebP，边界图块按实际尺寸裁切。原始 JPG 与手绘导览素材不变。
