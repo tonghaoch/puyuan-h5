@@ -1,6 +1,7 @@
 """Fine material treatment within source contours. Coordinates and source voids remain unchanged."""
 import math
 from .native_roofs import facade, planes, slate
+from .nw_court_roofs import COURTS, court_roof
 
 PROFILES = {
  'north-watchtower': ('石台与门楼', '#d2d1bd', '#76816f', 'stone'),
@@ -22,12 +23,27 @@ PROFILES = {
 def poly_path(points): return 'M'+'L'.join(f'{x:.3f},{y:.3f}' for x,y in points)+'Z'
 def path_shape(f):return poly_path(f['points'])+''.join(poly_path(hole) for hole in f['holes'])
 
+
+def sampled_shape(feature,paint):
+    return (f'<path d="{path_shape(feature)}" transform="translate(.5 .5)" fill="{paint}" fill-rule="evenodd" '
+            f'stroke="{paint}" stroke-width="1" stroke-linejoin="round"/>')
+
+
+def sample_footprint(feature):
+    """The tracer records indices of perimeter samples, not their outer cell edges."""
+    horizontal,vertical,width,height=feature['bounds']
+    area=f'x="{horizontal}" y="{vertical}" width="{width}" height="{height}"'
+    mask=(f'<mask id="finish-{feature["id"]}" maskUnits="userSpaceOnUse" {area}>'
+          +sampled_shape(feature,'white')+'</mask>')
+    return mask,area
+
+
 def timber_facings(feature,prefix):
     panels=feature.get('streetObservation',{}).get('timber',[])
     if not panels:return ''
     key=prefix+'-timber-'+feature['id']
     material=f'<defs><pattern id="{key}" width="5.1" height="3.6" patternUnits="userSpaceOnUse"><rect width="5.1" height="3.6" fill="#745145"/><path d="M.4 0v3.6M1.9 .25h2.5v2.05H1.9Z" fill="#5a4039" stroke="#493c37" stroke-width=".28"/><path d="M3.12 .35V2.1M1.9 1.24h2.5M.82 0v3.6" stroke="#b0987f" stroke-width=".2"/></pattern></defs>'
-    return material+''.join(f'<path d="{path_shape(panel)}" fill="url(#{key})" fill-rule="evenodd"/>' for panel in panels)
+    return material+''.join(sampled_shape(panel,f'url(#{key})') for panel in panels)
 def stroke(points,color,width=.25,opacity=1):
     return '<polyline points="'+' '.join(f'{x:.3f},{y:.3f}' for x,y in points)+f'" fill="none" stroke="{color}" stroke-width="{width}" opacity="{opacity}" stroke-linejoin="round" stroke-linecap="round"/>'
 def color(rgb):return '#'+''.join(f'{int(max(0,min(255,c))):02x}' for c in rgb)
@@ -35,10 +51,10 @@ def color(rgb):return '#'+''.join(f'{int(max(0,min(255,c))):02x}' for c in rgb)
 def roof_folds(f):
     # These two long ridges are visible in the source; retain the distinct paired slopes.
     folds={
-        (1327,506,30,86): ([(1327,513),(1341,505),(1341,578),(1327,592)],[(1341,505),(1357,512),(1357,592),(1341,578)],[(1341,509),(1341,577)]),
-        (1299,532,26,58): ([(1299,534),(1311,528),(1311,582),(1299,590)],[(1311,528),(1325,535),(1325,590),(1311,582)],[(1311,534),(1311,580)]),
+        'roof-987': ([(1327,513),(1341,505),(1341,578),(1327,592)],[(1341,505),(1357,512),(1357,592),(1341,578)],[(1341,509),(1341,577)]),
+        'roof-975': ([(1299,534),(1311,528),(1311,582),(1299,590)],[(1311,528),(1325,535),(1325,590),(1311,582)],[(1311,534),(1311,580)]),
     }
-    item=folds.get(tuple(f['bounds'])) if f['owner']=='designer-quarter' and f['kind']=='roof' else None
+    item=folds.get(f['id']) if f['owner']=='designer-quarter' and f['kind']=='roof' else None
     if item is None:return ''
     left,right,ridge=item
     return (f'<path d="{poly_path(left)}" fill="#bac4ac" opacity=".14"/>'
@@ -47,7 +63,11 @@ def roof_folds(f):
             +stroke([(x-.5,y) for x,y in ridge],'#b4bda3',.28,.6))
 
 def render_surface(f):
-    key=f['id'];kind=f['kind'];x,y,w,h=f['bounds'];angle=f['angle'];source=f['color'];d=path_shape(f)
+    if f['id'] in ('roof-973','wood-634','wood-630','wood-629','wood-619') and not f.get('nwRawFront'):
+        from .nw_frontage_owner import owned_surface
+        from .nw_pool_fronts import FRAMES
+        return owned_surface(f, render_surface, FRAMES)
+    key=f['id'];kind=f['kind'];x,y,w,h=f['bounds'];angle=f['angle'];source=f['color']
     profile=PROFILES.get(f['owner'],('街巷瓦木细节','#775b43','#c2ad80','lattice'))
     lum=sum(source)/3
     if kind=='roof':base=color(slate(f));edge='#3b383a';light='#b0a9a0'
@@ -55,7 +75,8 @@ def render_surface(f):
     elif kind=='wood':base=color([source[0]*.75+20,source[1]*.70+17,source[2]*.65+14]);edge='#514539';light=profile[2]
     elif kind=='glass':base='#b8d1c8';edge='#6a9088';light='#ebf0e2'
     else:base=color([lum*.44+127,lum*.44+123,lum*.42+111]);edge='#a4aa95';light='#f8f3e3'
-    defs=[f'<clipPath id="finish-{key}"><path d="{d}" clip-rule="evenodd"/></clipPath>',f'<linearGradient id="finish-shade-{key}" x1="0" y1="0" x2=".25" y2="1"><stop stop-color="#fff5d5" stop-opacity=".16"/><stop offset=".55" stop-color="#e1e4ce" stop-opacity="0"/><stop offset="1" stop-color="#19352a" stop-opacity=".18"/></linearGradient>']
+    footprint,area=sample_footprint(f)
+    defs=[footprint,f'<linearGradient id="finish-shade-{key}" x1="0" y1="0" x2=".25" y2="1"><stop stop-color="#fff5d5" stop-opacity=".16"/><stop offset=".55" stop-color="#e1e4ce" stop-opacity="0"/><stop offset="1" stop-color="#19352a" stop-opacity=".18"/></linearGradient>']
     if kind in ['roof','gold']:
         texture=f'<path d="M.24 0V3.4" stroke="{light}" stroke-width=".22" opacity=".55"/><path d="M1.5 0V3.4M0 1.7H1.9" stroke="{edge}" stroke-width=".24" opacity=".66"/><path d="M.7 1.7q.32 .42 .65 0" fill="none" stroke="{light}" stroke-width=".12" opacity=".5"/>'
         tw,th=1.9,3.4
@@ -75,10 +96,9 @@ def render_surface(f):
     p=['<defs>'+''.join(defs)+'</defs>']
     p.append(facade(f))
     if kind in ['roof','gold']:
-        p.append(f'<path d="{d}" transform="translate(.35 .65)" fill="#253e32" fill-rule="evenodd" opacity=".18"/>')
-    p.append(f'<path d="{d}" fill="{base}" fill-rule="evenodd" stroke="{edge}" stroke-width=".16" stroke-linejoin="round"/>')
+        p.append(f'<g transform="translate(.35 .65)"><rect {area} mask="url(#finish-{key})" fill="#253e32" opacity=".18"/></g>')
+    p.append(f'<g mask="url(#finish-{key})"><rect {area} fill="{base}"/>')
     observed=f.get('finishing',{})
-    p.append(f'<g clip-path="url(#finish-{key})">')
     for patch in observed.get('sourceRelief',{}).get('tones',[]):
         level=patch['level'];tone='#14251e' if level<0 else '#e6dfc3'
         opacity=(.065 if abs(level)==1 else .13) if kind in ['roof','gold'] else (.10 if abs(level)==1 else .22)
@@ -86,9 +106,9 @@ def render_surface(f):
         outline=poly_path(patch['points'])+''.join(poly_path(hole) for hole in patch['holes'])
         p.append(f'<path d="{outline}" fill="{tone}" opacity="{opacity}" fill-rule="evenodd"/>')
     texture_opacity=.36 if kind in ['roof','gold'] else .32
-    p.append(f'<path d="{d}" fill="url(#finish-tile-{key})" fill-rule="evenodd" opacity="{texture_opacity}"/>')
-    p.append(f'<path d="{d}" fill="url(#finish-shade-{key})" fill-rule="evenodd"/>')
-    p.append(planes(f))
+    p.append(f'<rect {area} fill="url(#finish-tile-{key})" opacity="{texture_opacity}"/>')
+    p.append(f'<rect {area} fill="url(#finish-shade-{key})"/>')
+    p.append(court_roof(f) if key in COURTS else planes(f))
     study=f.get('streetObservation',{})
     for points in study.get('ink',observed.get('sourceRelief',{}).get('seams',[])):
         p.append(stroke(points,edge,.43,.78))

@@ -25,6 +25,8 @@ def volume_planes(f):
     return ''.join(result)
 
 def facade(f):
+    if f['id'] == 'roof-978':
+        return ''
     if f['kind'] not in ['roof','gold'] or f['area']<28 or f.get('streetObservation',{}).get('plaster'):return ''
     x,y,w,h=f['bounds'];height=min(5.8,2.2+math.sqrt(f['area'])*.13)
     timber=f.get('facade')=='timber'

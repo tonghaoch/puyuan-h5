@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--rebuild', required=True, type=Path)
 parser.add_argument('--out', required=True, type=Path)
+parser.add_argument('--strict',action='store_true',help='Require all native runtime WebPs to be byte-identical as well')
 args = parser.parse_args()
 rebuild = args.rebuild.resolve()
 if rebuild == ROOT or not rebuild.is_dir() or (rebuild / 'references').exists():
@@ -49,6 +50,13 @@ for path in images:
 
 report = {'rebuild': str(rebuild), 'referencePresent': False, 'identicalArtSVGs': len(svgs),
           'identicalJSON': names, 'heroImages': heroes}
+if args.strict:
+    runtime = sorted({file for layer in ('native','landmarks','architecture','meadow') for file in ROOT.glob(f'public/art/{layer}/*.webp')})
+    rebuilt = {file.relative_to(rebuild) for layer in ('native','landmarks','architecture','meadow') for file in rebuild.glob(f'public/art/{layer}/*.webp')}
+    expected = {file.relative_to(ROOT) for file in runtime}
+    mismatches = sorted(str(file) for file in expected&rebuilt if not identical(file))
+    report['runtimeWebPs'] = {'count':len(expected),'different':mismatches,'missingOrAdditional':sorted(str(file) for file in expected^rebuilt)}
 args.out.parent.mkdir(parents=True, exist_ok=True)
 args.out.write_text(json.dumps(report, indent=2) + '\n')
+if args.strict and (mismatches or expected!=rebuilt):raise SystemExit('Native runtime WebPs differ; see '+str(args.out))
 print(f'{len(svgs)} SVGs, {len(names)} manifests and {len(heroes)} detail images compared')

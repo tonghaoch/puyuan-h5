@@ -92,9 +92,16 @@ def wall_segment(x,y,w):
 
 def ground(site):
     p=[]
+    landscape=None
     for index,c in enumerate(site.get('courts',[])):
         x,y,w,h=c['bounds'];key=f'court-{x}-{y}-{index}'
         if c.get('surface','paving')=='none':continue
+        priority=c.get('yieldFloorToPlaza')
+        if priority:
+            landscape=json.loads((Path(__file__).resolve().parents[2]/'src/data/town-landscape.json').read_text())
+            plaza,=[entry for entry in landscape['plazas'] if entry['id']==priority]
+            bounds=f'x="{x-1}" y="{y-1}" width="{w+2}" height="{h+2}"'
+            p.append(f'<defs><mask id="{key}-public" maskUnits="userSpaceOnUse" {bounds}><rect {bounds} fill="white"/>'+path(shape(plaza),'black',extra='fill-rule="evenodd"')+f'</mask></defs><g mask="url(#{key}-public)">')
         warm=c.get('surface')=='brick';base='#cec5a5' if warm else '#d6d5bd';line='#a7ab8e'
         p.append(f'<defs><pattern id="{key}" width="8" height="5" patternUnits="userSpaceOnUse"><rect width="8" height="5" fill="{base}"/><path d="M0 0h8M0 2.5h8M4 0v2.5M2 2.5V5" stroke="{line}" stroke-width=".22"/><path d="M.5 .5h3m1 2.5h3" stroke="#ece5c8" stroke-width=".25"/></pattern></defs>')
         p.append(poly([(x,y),(x+w,y),(x+w,y+h),(x,y+h)],f'url(#{key})','#b6bc9d',.5))
@@ -102,8 +109,9 @@ def ground(site):
         cx=x+w/2
         p.append(path(f'M{cx} {y+h}V{y+h-10}',stroke='#aaa98a',width=4))
         p.append(path(f'M{cx} {y+h}V{y+h-10}',stroke='#e4dcc0',width=3))
+        if priority:p.append('</g>')
     if not p:return ''
-    landscape=json.loads((Path(__file__).resolve().parents[2]/'src/data/town-landscape.json').read_text())
+    if landscape is None:landscape=json.loads((Path(__file__).resolve().parents[2]/'src/data/town-landscape.json').read_text())
     blockers=''.join(path(shape(water),'black',extra='fill-rule="evenodd"') for water in landscape['water'])
     architecture=json.loads((Path(__file__).resolve().parents[2]/'src/data/town-architecture.json').read_text())['features']
     for f in architecture:

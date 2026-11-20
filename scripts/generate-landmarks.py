@@ -6,10 +6,11 @@ from art.atlas_layout import ZONES
 from art.site_details import DETAILS
 from art.stage import stage
 from art.pagoda import pagoda
-from art.surface_finishes import path_shape, render_surface, PROFILES
-from art.completions import completion
+from art.surface_finishes import render_surface, sampled_shape, PROFILES
+from art.completions import completion, pale_block
 from art.courtyard_details import ground as courtyard_ground
-from art.street_houses import detail_body, overlaps_box, replace_traces, street_areas
+from art.street_houses import colonnade, court_shadows, detail_body, eave_end, overlaps_box, replace_traces, street_areas
+from art.sw_quay_tables import retired_traces
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'public/art/landmarks';OUT.mkdir(parents=True,exist_ok=True)
 CONTEXT=ROOT/'public/art/architecture';CONTEXT.mkdir(parents=True,exist_ok=True)
@@ -24,13 +25,14 @@ for feature in features:
     feature['roofVolume']=volumes.get(feature['id'],{})
     feature['streetObservation']=observations.get(feature['id'],{})
 reference=json.loads((ROOT/'src/data/reference-map.json').read_text())
-completions=json.loads((ROOT/'src/data/town-completions.json').read_text())['sites']
+completion_data=json.loads((ROOT/'src/data/town-completions.json').read_text())
+completions=completion_data['sites']
 streets=json.loads((ROOT/'src/data/street-houses.json').read_text())
 structures=json.loads((ROOT/'src/data/landmark-structures.json').read_text())['sites']
 street_sites=streets['sites']
 background_groups=[group for groups in streets['background'].values() for group in groups]
 street_groups=[group for groups in street_areas(streets).values() for group in groups]
-superseded={surface for group in street_groups for surface in group.get('replacedSurfaces',[])}
+superseded={surface for group in street_groups for surface in group.get('replacedSurfaces',[])} | retired_traces()
 dx,dy=reference['sourceOffset']['x'],reference['sourceOffset']['y']
 
 def poly(points,fill,stroke='none',sw=.3):
@@ -40,6 +42,9 @@ def hexcolor(rgb): return '#'+''.join(f'{int(max(0,min(255,c))):02x}' for c in r
 
 def surfaces_body(surfaces):
     surfaces=[surface for surface in surfaces if surface['id'] not in superseded and surface['owner']!='waterside-stage' and not (surface['owner']=='visitor-court' and surface['kind']=='glass')]
+    from art.nw_market_ranges import market_layer
+    old_timber,market=market_layer(surfaces)
+    if old_timber:surfaces=[surface for surface in surfaces if surface['id'] not in old_timber]
     # Narrow timber elevations sit in front of their roof edge, so connected roof
     # footprints cannot erase upper-storey windows and gallery fronts.
     def elevation(f):
@@ -54,8 +59,17 @@ def surfaces_body(surfaces):
     def clipped(surface,body):
         key=surface['id']
         return f'<g mask="url(#clear-{key})">{body}</g>' if key in cutouts and body else body
-    plaster=''.join(clipped(surface,''.join(f'<path d="{path_shape(panel)}" fill-rule="evenodd" fill="#eeebe2" stroke="#8e8980" stroke-width=".26"/>' for panel in surface['streetObservation'].get('plaster',[]))) for surface in surfaces)
-    return ('<defs>'+''.join(defs)+'</defs>' if defs else '')+plaster+''.join(clipped(f,render_surface(f)) for f in sorted(surfaces,key=elevation))
+    plaster=''.join(clipped(surface,''.join(sampled_shape(panel,'#eeebe2') for panel in surface['streetObservation'].get('plaster',[]))) for surface in surfaces)
+    backings=[];joinery=[]
+    for surface in surfaces:
+        detail=streets.get('joinery',{}).get(surface['id'])
+        if not detail:continue
+        if detail.get('plasterReturns'):
+            walls=''.join(poly(ring,'#eee8df') for ring in detail['plasterReturns'])
+            backings.append(clipped(surface,f'<g id="{detail["id"]}-plaster">{walls}</g>'))
+        pieces=''.join(colonnade(piece,piece['height']) if 'beam' in piece else eave_end(piece) for piece in detail['pieces'])
+        joinery.append(clipped(surface,f'<g id="{detail["id"]}">{pieces}</g>'))
+    return ('<defs>'+''.join(defs)+'</defs>' if defs else '')+plaster+''.join(backings)+''.join(clipped(f,render_surface(f)) for f in sorted(surfaces,key=elevation))+''.join(joinery)+market
 
 def painted_bottom(feature):
     bottom=feature['bounds'][1]+feature['bounds'][3]+7
@@ -80,7 +94,7 @@ for key,place,name,box in ZONES:
     for group in own_groups:
         for ring in group['replace']:
             box=(min(box[0],min(x for x,y in ring)-1),min(box[1],min(y for x,y in ring)-1),max(box[2],max(x for x,y in ring)+1),max(box[3],max(y for x,y in ring)+1))
-    body=replace_traces(body,box,street_groups)+(DETAILS[key]() if key=='visitor-court' else '')+detail_body(own_groups,features)
+    body=court_shadows(own_groups)+replace_traces(body,box,street_groups)+(DETAILS[key]() if key=='visitor-court' else '')+detail_body(own_groups,features)
     if key=='waterside-stage':body+=stage(structures[key])
     (OUT/f'{key}.svg').write_text(wrap(box,body,name+' · 原生手绘建筑'))
     x,y,r,b=box
@@ -96,8 +110,11 @@ for row in range(5):
         key=f'block-{col}-{row}'
         box=(sx,sy,sx+256,sy+256)
         streets_here=[group for group in background_groups if any(overlaps_box(ring,box) for ring in group['replace'])]
-        if not visible and not streets_here:continue
-        body=replace_traces(surfaces_body(visible),box,street_groups)+detail_body(streets_here,features)
+        terraces=[block for block in completion_data['paleBlocks'] if any(overlaps_box(unit['top']+[(px,py+unit['rise']) for px,py in unit['lip']],box) for unit in block['units'])]
+        if not visible and not streets_here and not terraces:continue
+        court_underlays=[group for group in streets_here if group.get('swCourtUnderlay')]
+        foreground_streets=[group for group in streets_here if not group.get('swCourtUnderlay')]
+        body=''.join(pale_block(block) for block in terraces)+detail_body(court_underlays,features)+replace_traces(surfaces_body(visible),box,street_groups)+detail_body(foreground_streets,features)
         (CONTEXT/f'{key}.svg').write_text(wrap(box,body,'古镇街巷建筑 · 原生轮廓'))
         tiles.append({'id':key,'x':col*256,'y':row*256,'width':256,'height':256,'asset':f'/art/architecture/{key}.webp','overviewAsset':f'/art/architecture/{key}.preview.webp','sourceAsset':f'/art/architecture/{key}.svg','surfaceCount':len(visible)})
 (ROOT/'src/data/landmark-models.json').write_text(json.dumps({'version':'native-architecture-2026-11-18','coordinateSpace':'reference-image-pixels','models':models},ensure_ascii=False,indent=2)+'\n')

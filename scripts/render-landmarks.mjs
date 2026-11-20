@@ -3,6 +3,7 @@ import { existsSync } from 'node:fs'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { createHash } from 'node:crypto'
 import { spawnSync } from 'node:child_process'
+import { rasterizeArt } from './art-raster.mjs'
 const root = new URL('../', import.meta.url)
 const temporary = new URL('../artifacts/architecture-renders/', import.meta.url)
 await mkdir(temporary, { recursive: true })
@@ -60,34 +61,42 @@ try {
     const preview = new URL(`public${job.overviewAsset}`, root).pathname
     const hash = createHash('sha256')
       .update(source)
-      .update(`raster-v2:${job.factor}:${job.preview}:92:85:4`)
+      .update(`decoded-srgb-canvas-v1:${job.factor}:${job.preview}:92:85:4`)
+      .update(job.heroAsset ? ':painted-landmark-v1' : '')
       .digest('hex')
     if (cache[job.id] === hash && existsSync(target) && existsSync(preview)) {
       process.stdout.write(`Unchanged ${job.id}\n`)
       continue
     }
-    const page = await browser.newPage({
-      viewport: { width: Number(w), height: Number(h) },
-      deviceScaleFactor: job.factor,
-    })
-    await page.setContent(
-      `<style>html,body{margin:0;background:transparent}svg{display:block}</style>${source}`,
-    )
+    const page = await browser.newPage()
     const input = new URL(`${job.id}.png`, temporary).pathname
-    await page.screenshot({ path: input, omitBackground: true })
+    let encoded = false
+    for (let attempt = 0; attempt < 3; attempt++) {
+      await writeFile(
+        input,
+        await rasterizeArt(page, source, Number(w) * job.factor, Number(h) * job.factor),
+      )
+      const convert = spawnSync(
+        process.env.PUYUAN_ART_PYTHON || 'python3',
+        [
+          new URL('scripts/encode-art-asset.py', root).pathname,
+          input,
+          target,
+          preview,
+          String(Number(w) * job.preview),
+          String(Number(h) * job.preview),
+          ...(job.heroAsset ? ['--landmark'] : []),
+        ],
+        { stdio: 'inherit' },
+      )
+      if (convert.status === 0) {
+        encoded = true
+        break
+      }
+      if (convert.status !== 3) throw new Error(`Could not encode ${job.id}`)
+    }
     await page.close()
-    const convert = spawnSync(
-      process.env.PUYUAN_ART_PYTHON || 'python3',
-      [
-        '-c',
-        `from PIL import Image
-image=Image.open(${JSON.stringify(input)})
-image.save(${JSON.stringify(target)},quality=92,method=4)
-image.resize((${Number(w) * job.preview},${Number(h) * job.preview}),Image.Resampling.LANCZOS).save(${JSON.stringify(preview)},quality=85,method=4)`,
-      ],
-      { stdio: 'inherit' },
-    )
-    if (convert.status !== 0) throw new Error(`Could not render ${job.id}`)
+    if (!encoded) throw new Error(`Landmark ${job.id} is still transparent after three captures`)
     cache[job.id] = hash
     await writeFile(cachePath, JSON.stringify(cache, null, 2))
     process.stdout.write(`Rendered ${job.id}\n`)

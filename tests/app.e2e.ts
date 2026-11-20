@@ -523,12 +523,15 @@ const landmarkMaterials = {
   'dressing-house': [
     [656, 1159, 'slate'],
     [672, 1168, 'timber'],
-    [683, 1171, 'clear'],
+    [683, 1171, 'opaque'],
+    [683, 1175.5, 'clear'],
     [695, 1163, 'timber'],
     [727, 1136, 'slate'],
     [712, 1150, 'timber'],
     [717, 1156, 'timber'],
-    [715, 1170, 'clear'],
+    [715, 1170, 'opaque'],
+    [712, 1175, 'clear'],
+    [719.7, 1173.2, 'clear'],
     [760, 1141, 'timber'],
     [774, 1144, 'clear'],
   ],
@@ -621,12 +624,19 @@ for (const [site, samples] of Object.entries(landmarkMaterials)) {
                         : 'other'
             votes.set(material, (votes.get(material) ?? 0) + 1)
           }
-          return [...votes].sort((first, second) => second[1] - first[1])[0]![0]
+          return {
+            material: [...votes].sort((first, second) => second[1] - first[1])[0]![0],
+            opaque: colors.every((value, index) => index % 4 !== 3 || value >= 240),
+          }
         })
       },
       { bounds: model.sourceBounds, points: samples.map(([x, y]) => [x, y]) },
     )
-    expect(materials).toEqual(samples.map(([, , material]) => material))
+    for (const [index, [x, y, expected]] of samples.entries()) {
+      const sample = materials[index]!
+      if (expected === 'opaque') expect(sample.opaque, `${site}: ${x},${y}`).toBe(true)
+      else expect(sample.material, `${site}: ${x},${y}`).toBe(expected)
+    }
     await page.getByRole('button', { name: `查看${model.name}建筑详情` }).click()
     await expect(page.getByRole('dialog').locator('.detail-hero img')).toHaveAttribute(
       'src',

@@ -2,7 +2,7 @@
 import math
 import random
 from .landscape import number, path, poly
-from .surface_finishes import path_shape, render_surface, timber_facings
+from .surface_finishes import sampled_shape, render_surface, timber_facings
 from .native_roofs import slate
 
 
@@ -72,7 +72,7 @@ def curled_hip(rear,crest,front,sag,color):
     return ''.join(parts)
 
 
-def panel(top_left, top_right, bottom_left, bottom_right, color, face, lift=0,glazed=False,sag=0,weathered=False,inked=False,aged=False):
+def panel(top_left, top_right, bottom_left, bottom_right, color, face, lift=0,glazed=False,sag=0,weathered=False,inked=False,aged=False,pan_pitch=None):
     def tile(across,down):
         point=roof_slope(along(top_left,top_right,across),along(bottom_left,bottom_right,across),down,sag)
         return shifted(point,0,-lift*abs(2*across-1)**5*down**2)
@@ -80,6 +80,44 @@ def panel(top_left, top_right, bottom_left, bottom_right, color, face, lift=0,gl
     outline=[top_left,top_right]+(course(1)[::-1] if lift else [bottom_right,bottom_left])
     if sag:outline=[top_left,top_right]+[tile(1,index/8) for index in range(1,8)]+course(1)[::-1]+[tile(0,index/8) for index in range(7,0,-1)]
     parts=[poly(outline,color,'#363435',.34)]
+    if pan_pitch:
+        rng=random.Random(f'{bottom_right}:{top_left}');rows=max(2,round(math.dist(bottom_left,bottom_right)/pan_pitch))
+        runs=max(2,round(math.dist(top_left,bottom_left)/(3.6 if face else 2.4)))
+        for index in range(rows):
+            across=(index+.42)/rows
+            intervals=[0]+[(segment+rng.uniform(-.28,.28))/runs for segment in range(1,runs)]+[1]
+            for start,finish in zip(intervals,intervals[1:]):
+                level=(start+finish)*.5
+                sleeve=[tile(across+.18/rows,start),tile(across+.18/rows,level),tile(across+.18/rows,finish)]
+                parts.append(stroke(sleeve,rng.choice(('#827e80','#736d70','#69656b','#605e61')),pan_pitch*.46))
+                parts.append(stroke([tile(across,at) for at in (start,level,finish)],rng.choice(('#211f22','#302d32','#19191c','#464247')),pan_pitch*rng.uniform(.39,.66)))
+                parts.append(stroke([tile(across-.10/rows,finish),tile(across+.23/rows,finish)],'#85807d' if rng.random()<.30 else '#3f3c3e',.40))
+        return f'<g data-pan-rows="{rows}">'+''.join(parts)+'</g>'
+    if glazed and face:
+        rng=random.Random(f'{top_left[0]}:{top_left[1]}');pitch=2.84
+        def trough(horizontal,level):
+            near,far=tile(0,level),tile(1,level);across=(horizontal-.46*level-near[0])/(far[0]-near[0]);return tile(across,level) if 0<across<1 else None
+        for index in range(1,math.ceil((bottom_right[0]-bottom_left[0])/pitch)):
+            horizontal=bottom_left[0]+index*pitch+rng.uniform(-.44,.44)
+            def channel(low,high):return [tip for step in range(13) if (tip:=trough(horizontal,low+(high-low)*step/12)) is not None]
+            full=channel(.04,.97)
+            if len(full)<2:continue
+            parts.append(stroke(full,'#bc7c49',.69))
+            bands=[(rng.uniform(.16,.33),rng.uniform(.62,.85))] if abs(top_left[1]-bottom_left[1])<16 else [(rng.uniform(.18,.31),rng.uniform(.40,.56)),(rng.uniform(.61,.75),rng.uniform(.81,.94))]
+            for low,high in bands:
+                sleeve=channel(low,high)
+                if len(sleeve)<2:continue
+                parts.append(stroke(sleeve,rng.choice(('#824821','#975625','#ad662e','#9f5929')),rng.uniform(.88,1.26)))
+                parts.append(stroke([shifted(point,.60,-.12) for point in sleeve],'#eeb681',.38))
+        return ''.join(parts)
+    if glazed and top_left==top_right:
+        for index in range(2,9):
+            level=index/9;count=max(2,round(math.dist(tile(0,level),tile(1,level))/3.3))
+            for segment in range(count):
+                start=(segment+.12*(index%2))/count;end=(segment+.72)/count
+                parts.append(stroke([tile(start,level),tile(end,level+.022)],'#73462f' if index%3 else '#875033',.96))
+                parts.append(stroke([tile(start,level-.052),tile(end,level-.04)],'#daad76',.42))
+        return ''.join(parts)
     if aged:
         rng=random.Random(f'{top_left[0]:.2f}/{top_left[1]:.2f}')
         columns=max(2,round(math.dist(bottom_left,bottom_right)/1.65));bands=max(2,round(math.dist(top_left,bottom_left)/2.1))
@@ -159,8 +197,56 @@ def tree_blockers(model,form=None):
     return faces
 
 
+def court_shadows(groups):
+    parts=[]
+    for group in groups:
+        if 'castOnCourt' not in group:continue
+        across,down=group['castOnCourt']
+        for index,model in enumerate(group['houses']):
+            form=group.get('roofForms',{}).get(str(index));left,right,rear_left,rear_right,crest,end=roof_frame(model,form)
+            height=model[7];rise=model[6];foot=[shifted(point,0,height) for point in (left,right,rear_right,rear_left)]
+            shade=[shifted(point,across*height,(1+down)*height) for point in (left,right,rear_right,rear_left)]
+            ridge=[shifted(point,across*(height+rise),(1+down)*(height+rise)) for point in (crest,end)]
+            for face in [shade,[shade[0],shade[1],ridge[1],ridge[0]],[shade[2],shade[3],ridge[0],ridge[1]]]:parts.append(poly(face,'#424b59'))
+            for side in range(4):
+                following=(side+1)%4;parts.append(poly([foot[side],foot[following],shade[following],shade[side]],'#424b59'))
+    return '<g opacity=".37">'+''.join(parts)+'</g>' if parts else ''
+
+
 def colonnade(frame,height):
+    if frame.get('infill')=='courtyard-front' or (frame.get('infill')=='lime-casements' and 'apronJoints' in frame):
+        from .courtyard_frontage import courtyard_front
+        return courtyard_front(frame,height,colonnade)
+    if frame.get('infill')=='stained-shutters' and 'soffit' in frame:
+        from .north_gallery import eaved_shutters
+        return eaved_shutters(frame,height,colonnade)
     left,right=frame['beam'];parts=[]
+    if frame.get('infill')=='lime-casements':
+        parts.append(poly([left,right,shifted(right,0,height),shifted(left,0,height)],'#eee8e2','#79736b',.42))
+        for start,end,head,sill in frame['openings']:
+            low,high=along(left,right,start),along(left,right,end)
+            top_left,top_right=shifted(low,0,head*height),shifted(high,0,head*height)
+            foot_left,foot_right=shifted(low,0,sill*height),shifted(high,0,sill*height)
+            parts.append(poly([top_left,top_right,foot_right,foot_left],'#5d4944','#927a6c',.48))
+            divider=along(low,high,.45)
+            parts.append(stroke([shifted(divider,0,head*height),shifted(divider,0,sill*height)],'#735e53',.42))
+            parts.append(stroke([shifted(foot_left,-.25,.25),shifted(foot_right,.25,.25)],'#ac9987',.47))
+        parts.append(stroke([left,shifted(left,0,height)],'#675e5a',.82))
+        parts.append(stroke([shifted(left,0,height),shifted(right,0,height)],'#837e6e',.86))
+        return f'<g data-infill="lime-casements" data-windows="{len(frame["openings"])}">'+''.join(parts)+'</g>'
+    if frame.get('infill')=='open-post-gallery':
+        for index,(start,end) in enumerate(zip(frame['columns'],frame['columns'][1:])):
+            low,high=along(left,right,start),along(left,right,end)
+            if index in frame['plasteredBays']:
+                parts.append(poly([low,high,shifted(high,0,height-.6),shifted(low,0,height-.6)],'#cab7a4'))
+            if index in frame['railBays']:
+                parts.append(stroke([shifted(low,0,height*.76),shifted(high,0,height*.76)],'#735343',1.45))
+        for position in frame['columns']:
+            post=along(left,right,position);foot=shifted(post,0,height)
+            parts.append(stroke([post,foot],'#6b4034',frame['postWidth']))
+            parts.append(stroke([shifted(post,-.55,.9),shifted(foot,-.55,-.34)],'#9e634a',.51))
+        parts.append(stroke([left,right],'#48372f',1.35))
+        return f'<g data-bays="{len(frame["columns"])-1}" data-infill="open-post-gallery">'+''.join(parts)+'</g>'
     if frame.get('infill')=='lime-timber':
         parts.append(poly([left,right,shifted(right,0,height),shifted(left,0,height)],'#e4e0dc','#595250',.4))
         if 'transom' in frame:
@@ -178,6 +264,19 @@ def colonnade(frame,height):
         post=along(left,right,fraction);base=shifted(post,0,height-.6)
         parts.append(poly([shifted(base,-width/2,0),shifted(base,width/2,0),shifted(base,width*.3,depth),shifted(base,-width*.30,depth+.2)],'#7e7267','#534d48',.36))
         parts.append(stroke([shifted(base,-width*.21,.65),shifted(base,-width*.20,depth-.3)],'#b6ada2',.36))
+    if frame.get('infill')=='waterside-panels':
+        parts.append(poly([left,right,shifted(right,0,height),shifted(left,0,height)],'#78504a','#423333',.6))
+        def at(position,level):return shifted(along(left,right,position),0,height*level)
+        for floor,(top,bottom) in enumerate(zip(frame['floors'],frame['floors'][1:])):
+            columns=frame['columns'] if floor==0 else frame['lowerColumns']
+            for index,(start,end) in enumerate(zip(columns,columns[1:])):
+                parts.append(poly([at(start,top),at(end,top),at(end,bottom),at(start,bottom)],('#82534b','#704943','#795049')[index%3]))
+            for column in columns:
+                parts.append(stroke([at(column,top),at(column,bottom)],'#493431',.94))
+        for start,end,level in frame['rails']:
+            parts.append(stroke([at(start,level),at(end,level)],'#382a29',1.22))
+        parts.append(stroke([at(0,1.02),at(1,1.02)],'#685d52',1.32))
+        return f'<g data-bays="{len(frame["columns"])-1}" data-storeys="2" data-infill="waterside-panels">'+''.join(parts)+'</g>'
     if frame.get('infill')=='storeyed-shutters':
         parts.append(poly([left,right,shifted(right,0,height),shifted(left,0,height)],'#785046','#4b3734',.55))
         for top,bottom in zip(frame['floors'],frame['floors'][1:]):
@@ -204,7 +303,28 @@ def colonnade(frame,height):
                 post=along(low,high,.55);parts.append(stroke([shifted(post,0,top),shifted(post,0,bottom)],'#a59181',.43))
         parts.append(stroke([shifted(left,0,height-.4),shifted(right,0,height-.4)],'#6a6662',.84))
         return f'<g data-bays="{len(frame["columns"])-1}" data-infill="pier-gallery">'+''.join(parts)+'</g>'
+    if frame.get('infill')=='lime-shop-door':
+        parts.append(poly([left,right,shifted(right,0,height),shifted(left,0,height)],'#e4e1dc','#817d77',.37))
+        low=along(left,right,frame['columns'][1]);high=along(left,right,frame['columns'][2]);sill=height+.55
+        parts.append(poly([low,high,shifted(high,0,sill),shifted(low,0,sill)],'#674e48','#55413d',.5))
+        parts.append(stroke([shifted(low,0,height*.4),shifted(high,0,height*.4)],'#3c3031',.81))
+        return f'<g data-bays="{len(frame["columns"])-1}" data-infill="lime-shop-door">'+''.join(parts)+'</g>'
+    if frame.get('infill')=='stained-shutters':
+        parts.append(poly([left,right,shifted(right,0,height),shifted(left,0,height)],'#76504a','#423432',.48))
+        for bay,(start,end) in enumerate(zip(frame['columns'],frame['columns'][1:])):
+            low,high=along(left,right,start+.022),along(left,right,end-.024)
+            parts.append(poly([shifted(low,0,.7),shifted(high,0,.7),shifted(high,0,height*.46),shifted(low,0,height*.46)],'#4a3635' if bay%2 else '#573d3a'))
+            for fraction in (.12,.39,.69):
+                bar=along(low,high,fraction);parts.append(stroke([shifted(bar,0,1.0),shifted(bar,0,height*.78)],'#513b37',.46))
+            post=along(left,right,start);parts.append(stroke([post,shifted(post,0,height)],'#302729',.86))
+        for at in frame.get('limePiers',[]):
+            post=along(left,right,at);parts.append(stroke([shifted(post,0,.4),shifted(post,0,height-.15)],'#dbd0c7',.96))
+        for level,pigment,width in [(.02,'#3c3133',1),(.12,'#b99987',.65),(.93,'#493733',.65)]:
+            parts.append(stroke([shifted(left,0,level*height),shifted(right,0,level*height)],pigment,width))
+        return f'<g data-bays="{len(frame["columns"])-1}" data-infill="stained-shutters">'+''.join(parts)+'</g>'
     if frame.get('infill')=='lattice-panels':
+        if 'gableHead' in frame:
+            parts.append(poly([left,frame['gableHead'],right],'#694438','#453932',.45))
         parts.append(poly([left,right,shifted(right,0,height),shifted(left,0,height)],'#694438','#453932',.45))
         for index,(start,end) in enumerate(zip(frame['columns'],frame['columns'][1:])):
             low=along(left,right,start);high=along(left,right,end);bay=math.dist(low,high)
@@ -237,7 +357,51 @@ def colonnade(frame,height):
     return f'<g data-bays="{len(frame["columns"])-1}">'+''.join(parts)+'</g>'
 
 
-def house(model,tone=None,form=None,front_frame=None):
+def wall_foot(top,course):
+    ends=sorted(course['ends'],reverse=top[0][0]>top[-1][0]);stone=course['stone']=='granite'
+    toe_width=1.28 if stone else .83;parts=[poly(list(top)+ends[::-1],'#ebe9e6' if stone else '#ebe8df','#8a847a',.28)]
+    for corner,foot in zip((top[0],top[-1]),ends):
+        parts.append(stroke([along(corner,foot,.21),along(corner,foot,.87)],'#827c72',.57))
+    length=math.dist(*ends);blocks=max(1,round(length/(5.2 if stone else 6.7)))
+    for index in range(blocks):
+        start=along(*ends,index/blocks);finish=along(*ends,(index+1)/blocks)
+        top_start=shifted(start,0,-toe_width);top_finish=shifted(finish,0,-toe_width)
+        parts.append(poly([top_start,top_finish,finish,start],(('#807d72','#56574f','#6c6d62') if stone else ('#9a9687','#827e6f','#a59f91'))[index%3]))
+        parts.append(stroke([along(start,finish,.06),along(start,finish,.89)],'#41453c' if stone else '#6c695c',.68 if stone else .42))
+        if index:parts.append(stroke([start,top_start],'#c3bfb0',.38))
+    return '<g data-wall-foot="'+course['stone']+'">'+''.join(parts)+'</g>'
+
+
+def plaster_loft(front,crest,rear,height,detail):
+    left,right=sorted((front,rear),key=lambda corner:corner[0]);span=right[0]-left[0];peak=(crest[0]-left[0])/span
+    sill=detail.get('tie',[left,right])
+    def base(at):return along(*sill,at)
+    def head(at):return along(left,crest,at/peak) if at<peak else along(crest,right,(at-peak)/(1-peak))
+    reveal=detail.get('lintelDrop',0);beam=[shifted(base(at),0,reveal) for at in (detail['doors'][0],detail['doors'][-1])]
+    parts=[colonnade({'beam':beam,'columns':[(at-detail['doors'][0])/(detail['doors'][-1]-detail['doors'][0]) for at in detail['doors']],'infill':'stained-shutters'},height-reveal)]
+    for at in detail['posts']:
+        post=base(at);upper=head(at);parts.append(stroke([shifted(upper,0,.72),post],'#443f3d',.87))
+    for lo,hi in detail['lights']:
+        near,far=base(lo),base(hi);rise=min(near[1]-head(lo)[1],far[1]-head(hi)[1])
+        parts.append(poly([shifted(near,0,-rise*.65),shifted(far,0,-rise*.65),shifted(far,0,-rise*.21),shifted(near,0,-rise*.21)],'#514b49'))
+    parts.append(stroke([base(detail['doors'][0]),base(detail['doors'][-1])],'#574a45',.92));return '<g data-loft="lime-and-timber">'+''.join(parts)+'</g>'
+
+
+def quay_apron(model):
+    rear,edge,toe=model['rear'],model['edge'],model['toe'];parts=[poly(rear+edge[::-1],'#c4c0a9'),poly(edge+toe[::-1],'#9c9b89')]
+    for index,(near,far) in enumerate(zip(edge,edge[1:])):
+        low,high=toe[index:index+2];count=max(1,round(math.dist(near,far)/4.2))
+        for col in range(count):
+            at,end=col/count,(col+1)/count;top_left,top_right=along(near,far,at),along(near,far,end);bot_left,bot_right=along(low,high,at),along(low,high,end)
+            parts.append(poly([top_left,top_right,bot_right,bot_left],('#a7a58d','#9c9f8c','#adac99')[(col+index)%3]))
+            parts.append(stroke([top_left,bot_left],'#6b7366',.37));parts.append(stroke([along(bot_left,bot_right,.14),along(bot_left,bot_right,.77)],'#656f60',.57))
+    for cross,top,width,height,lean in model.get('supports',[]):
+        left=(cross-width*.5,top);right=(cross+width*.5,top);foot=shifted(left,lean,height)
+        parts.append(poly([left,right,shifted(right,lean,height-.14),foot],'#4f5043','#414938',.29));parts.append(stroke([shifted(right,-.1,.2),shifted(right,lean-.10,height*.62)],'#898775',.36))
+    return f'<g data-quay-apron="{model["id"]}">'+''.join(parts)+'</g>'
+
+
+def house(model,tone=None,form=None,front_frame=None,wall_feet=None):
     left_x,left_y,right_x,right_y,depth_x,depth_y,rise,height,kind=model
     frame=roof_frame(model,form);left,right,rear_left,rear_right,ridge_left,ridge_right=frame
     shrine=kind in ('temple','temple-portico');open_frame=kind in ('canopy','temple-portico');hipped=kind in ('canopy','hall');glazed=tone=='ochre-glaze'
@@ -246,12 +410,20 @@ def house(model,tone=None,form=None,front_frame=None):
     is_timber=kind in ('shop','temple','gallery','arcade','hall','pier-shop')
     arcade=kind=='arcade'
     facing={'arcade':'#49423c','hall':'#795044','pier-shop':'#dfd8c8'}.get(kind,'#795548' if is_timber else '#eeeae1')
-    parts=[poly([wall_left,wall_right,sill_right,sill_left],facing,'#6b655c',.3)]
+    feet=wall_feet or {};front_foot=feet.get('front');gable_foot=feet.get('gable')
+    parts=[wall_foot([wall_left,wall_right],front_foot) if front_foot else poly([wall_left,wall_right,sill_right,sill_left],facing,'#6b655c',.3)]
     near_gable=end_wall(model,frame,form);end,peak,far_end=near_gable
     sag=(form or {}).get('sag',0)
     verge=slope_points(end,peak,sag)+slope_points(peak,far_end,sag)[1:] if sag else [end,peak,far_end]
-    parts.append(poly(verge+[shifted(far_end,0,height),shifted(end,0,height)],'#776154' if shrine else '#e1dfe0' if tone=='aged-pan' else '#e4e0d6','#726e66',.3))
-    if abs(depth_x)>3 and not (form and form.get('endFace')):
+    end_paint={'shadow-timber':'#5f4b46','weathered-board':'#856e66'}.get((form or {}).get('sideFacing'),'#776154' if shrine else '#e1dfe0' if tone=='aged-pan' else '#e4e0d6')
+    end_body=wall_foot(verge,gable_foot) if gable_foot else poly(verge+[shifted(far_end,0,height),shifted(end,0,height)],end_paint,'#726e66',.3)
+    parts.append(end_body)
+    if form and 'plasterLoft' in form:
+        loft=form['plasterLoft']
+        if 'foot' in loft:
+            ordered=sorted(loft['foot'],key=lambda point:point[0],reverse=end[0]<far_end[0]);parts[-1]=poly(verge+ordered,end_paint,'#827971',.32)
+        parts.append(plaster_loft(end,peak,far_end,height,loft))
+    if abs(depth_x)>3 and not gable_foot and not (form and form.get('endFace')):
         parts.append(stroke([shifted(end,0,height*.84),shifted(far_end,0,height*.84)],'#aaa69c',.44))
         center=along(end,far_end,.52)
         parts.append(stroke([shifted(center,0,-rise*.4),shifted(center,0,-rise*.4+.8)],'#655f59',.72))
@@ -266,7 +438,7 @@ def house(model,tone=None,form=None,front_frame=None):
             parts.append(stroke([shifted(start,0,height*.35),shifted(finish,0,height*.35)],'#53423b',.32))
             bracket=along(start,finish,.06);parts.append(stroke([shifted(bracket,0,.35),shifted(bracket,0,1.05)],'#c4af91',.58))
     elif kind=='blind-wall':
-        parts.append(stroke([shifted(sill_left,0,-.55),shifted(sill_right,0,-.55)],'#c4bbac',.7))
+        if not front_foot:parts.append(stroke([shifted(sill_left,0,-.55),shifted(sill_right,0,-.55)],'#c4bbac',.7))
         for post in (wall_left,wall_right):parts.append(stroke([post,shifted(post,0,height)],'#706a5f',.58))
     elif abs(right_x-left_x)>2:
         for index in range(bays):
@@ -290,13 +462,17 @@ def house(model,tone=None,form=None,front_frame=None):
                 post=along(wall_left,wall_right,index/bays)
                 parts.append(stroke([post,shifted(post,0,height)],'#4f3932',.62))
                 parts.append(stroke([shifted(post,-.55,.8),shifted(post,.62,.8)],'#c5aa86',.45))
-    parts.append(stroke([sill_left,sill_right],'#9b9486',.65))
+    if not front_foot:parts.append(stroke([sill_left,sill_right],'#9b9486',.65))
+    if form and 'foundation' in form:
+        footing=form['foundation'];parts.append(stroke(footing,'#716953',1.18))
+        for start,end in zip(footing,footing[1:]):parts.append(stroke([along(start,end,.07),along(start,end,.89)],'#484538',.75))
     walls=canopy_frame(wall_left,wall_right,rear_left,rear_right,height,shrine) if open_frame else ''.join(parts);parts=[]
     if form and form.get('support')=='water-piers':
         walls=poly(verge+[far_end,end],'#dedbd6','#716f6b',.4)+water_piers(end,far_end,height)
     if front_frame:
         walls=colonnade(front_frame,height)
-        if front_frame.get('exposedReturn'):
+        if gable_foot:walls=end_body+walls
+        elif front_frame.get('exposedReturn'):
             front,crest,rear=near_gable
             side=poly([front,crest,rear,shifted(rear,0,height-.3),shifted(front,0,height)],'#dad6cd','#756e67',.42)
             side+=stroke([shifted(rear,0,height-.65),shifted(front,0,height-.35)],'#827c76',.59)
@@ -305,7 +481,11 @@ def house(model,tone=None,form=None,front_frame=None):
     rear_tone,front_tone={'river-grey':('#777873','#575b58'),'warm-tile':('#736a65','#59514f'),'smoke-tile':('#615b56','#494440'),'ink-slate':('#5c595a','#49484b'),'ochre-glaze':('#c58e5b','#e2a76e')}.get(tone,('#666363','#565355' if kind=='gallery' else '#504e51'))
     aged=tone=='aged-pan'
     if aged:rear_tone,front_tone='#605d60','#555257'
-    parts.append(panel(rear_left,rear_right,ridge_left,ridge_right,rear_tone,False,glazed=glazed,sag=sag,weathered=tone=='smoke-tile',inked=inked,aged=aged))
+    pitches=(form or {}).get('panPitch')
+    if pitches:
+        parts.append(panel(ridge_left,ridge_right,rear_left,rear_right,'#484448',False,sag=sag,pan_pitch=pitches[0]))
+        front_tone='#474447'
+    else:parts.append(panel(rear_left,rear_right,ridge_left,ridge_right,rear_tone,False,glazed=glazed,sag=sag,weathered=tone=='smoke-tile',inked=inked,aged=aged))
     if glazed:
         for ridge,rear,front,color in [(ridge_left,rear_left,left,'#ad7546'),(ridge_right,rear_right,right,'#d9a367')]:
             tip=shifted(front,0,-2.5)
@@ -320,7 +500,21 @@ def house(model,tone=None,form=None,front_frame=None):
     if hipped:
         parts.append(panel(ridge_left,ridge_left,rear_left,left,'#5e5a59',False))
         parts.append(panel(ridge_right,ridge_right,right,rear_right,'#484448',True))
-    parts.append(panel(ridge_left,ridge_right,left,right,front_tone,True,2.5 if shrine else 0,glazed,sag,tone=='smoke-tile',inked,aged))
+    parts.append(panel(ridge_left,ridge_right,left,right,front_tone,True,2.5 if shrine else 0,glazed,sag,tone=='smoke-tile',inked,aged,pitches[1] if pitches else None))
+    if form and form.get('tileRuns'):
+        parts.append(poly([ridge_left,ridge_right,right,left],'#555c56','#4a4948',.42))
+        for fraction,wide,low,high in form['tileRuns']:
+            head=along(ridge_left,ridge_right,fraction);foot=along(left,right,fraction)
+            parts.append(stroke([roof_slope(head,foot,low,sag),roof_slope(head,foot,high,sag)],'#302f30',wide))
+            parts.append(stroke([shifted(roof_slope(head,foot,low,sag),wide*.7,0),shifted(roof_slope(head,foot,high,sag),wide*.7,0)],'#81807b',.42))
+    if glazed:
+        for peak,tip in [(ridge_left,left),(ridge_right,right)]:
+            hip=[shifted(roof_slope(peak,tip,step/12,sag),0,-2.5*(step/12)**2) for step in range(13)]
+            parts.append(stroke([shifted(point,0,.60) for point in hip],'#624325',1.28))
+            parts.append(stroke(hip,'#f1cb85',.75))
+        lip=[shifted(along(left,right,index/20),0,-2.5*abs(index/10-1)**5) for index in range(21)]
+        parts.append(poly(lip+[shifted(point,0,1.36) for point in reversed(lip)],'#523421','#38251c',.55))
+        parts.append(stroke([shifted(point,0,-.27) for point in lip],'#dba364',.47))
     parts.append(stroke([ridge_left,ridge_right],'#e9c38b' if glazed else '#a7a199',.68 if glazed else .52))
     if aged:
         parts.append(stroke([ridge_left,ridge_right],'#494347',.86))
@@ -348,10 +542,17 @@ def house(model,tone=None,form=None,front_frame=None):
         parts.append(stroke(verge,'#514f50',.46))
         if form and form.get('endFace')=='limewash' and form.get('support')!='water-piers':
             base=[shifted(front,0,height-.17),shifted(rear,0,height-.17)]
-            if form.get('baseTrim')!='lime-wash':
+            if not gable_foot and form.get('baseTrim')!='lime-wash':
                 parts.append(stroke([shifted(point,0,-.52) for point in base],'#b1aaa0',.85))
                 parts.append(stroke(base,'#5f5a53',.88))
-            for corner in [front,rear]:parts.append(stroke([shifted(corner,0,1.0),shifted(corner,0,height-.72)],'#77746f',.55))
+            if not gable_foot:
+                for corner in [front,rear]:parts.append(stroke([shifted(corner,0,1.0),shifted(corner,0,height-.72)],'#77746f',.55))
+            if form.get('cornerStones'):
+                for corner in (front,rear):
+                    for fraction in (.21,.68):
+                        joint=shifted(corner,0,height*fraction);parts.append(stroke([joint,shifted(joint,.10,height*.23)],'#423e3e',.86))
+                for start,end in ((.04,.18),(.77,.94)):
+                    parts.append(stroke([shifted(along(front,rear,across),0,height-.2) for across in (start,end)],'#5d5552',.63))
             parts.append(stroke([shifted(point,0,.68) for point in verge],'#e8e7df',.94))
             if aged:
                 for start,end in ((front,crest),(crest,rear)):
@@ -360,7 +561,7 @@ def house(model,tone=None,form=None,front_frame=None):
                         tip=roof_slope(start,end,(index+.17)/count,sag);foot=roof_slope(start,end,(index+.73)/count,sag)
                         parts.append(stroke([shifted(tip,0,-.17),shifted(foot,0,.06)],'#3e393b' if index%4 else '#918c88',.78))
             for corner in [front,rear]:parts.append(stroke([shifted(corner,0,.4),shifted(corner,0,1.35)],'#605c59',.5))
-        elif not (form and form.get('support')=='water-piers'):
+        elif not gable_foot and not (form and form.get('support')=='water-piers'):
             mid=along(front,rear,.5);half=min(1.05,abs(depth_x)*.12);level=mid[1]+height*.46
             parts.append(poly([(mid[0]-half,level),(mid[0],level-.78),(mid[0]+half,level),(mid[0],level+.78)],'#746e64','#a59d8f',.18))
     return walls,''.join(parts)
@@ -390,6 +591,24 @@ def screen_wall(model):
     return ''.join(parts)
 
 
+def lane_gate(model):
+    left,right=model['beam'];height=model['height'];jamb=model['jamb'];rise=model['rise']
+    parts=[]
+    for start,end in ((0,jamb),(1-jamb,1)):
+        edge=along(left,right,start);tip=along(left,right,end)
+        parts.append(poly([edge,tip,shifted(tip,0,height),shifted(edge,0,height)],'#f0eee7','#605c58',.34))
+        parts.append(stroke([shifted(edge,0,height-.32),shifted(tip,0,height-.32)],'#7c7770',.71))
+    threshold=shifted(along(left,right,jamb),0,height);stop=shifted(along(left,right,1-jamb),0,height)
+    parts.append(poly([threshold,stop,shifted(stop,-.35,.91),shifted(threshold,-.35,.91)],'#aca8a0','#827c73',.25))
+    near,far=shifted(left,-.8,0),shifted(right,.82,0)
+    crest=shifted(along(near,far,.45),.35,-rise)
+    parts.append(poly([near,crest,far,shifted(far,0,.68),shifted(near,0,.68)],'#4c494a','#403b3b',.36))
+    parts.append(stroke([shifted(near,-.2,-.34),crest,shifted(far,.15,-.3)],'#787373',.45))
+    for index in range(1,7):
+        tile=along(near,far,index/7);parts.append(stroke([shifted(tile,.35,-rise*.4),tile],'#716b69',.3))
+    return f'<g id="{model["id"]}">'+''.join(parts)+'</g>'
+
+
 def eave_end(detail):
     parts=[]
     for coping in detail.get('coping',[]):
@@ -416,10 +635,12 @@ def eave_end(detail):
 
 def visible_eaves(group,features):
     prefix=group['id'];rings=group['replace'];houses=group['houses']
+    lining=group.get('roofUnderlay')
     points=[point for ring in rings for point in ring]
     left=min(x for x,y in points);right=max(x for x,y in points);top=min(y for x,y in points);bottom=max(y for x,y in points)
     roofs=[];timber=[];ink=[];defs=[];outlines=[]
     for feature in features:
+        if lining is not None and feature['id'] not in lining:continue
         sx,sy,width,height=feature['bounds']
         if sx>=right or sy>=bottom or sx+width<=left or sy+height<=top:continue
         if feature['kind']=='wood':
@@ -431,28 +652,45 @@ def visible_eaves(group,features):
             fraction=max(0,min(1,((center[0]-start_x)*dx+(center[1]-start_y)*dy)/(dx*dx+dy*dy)))
             return math.hypot(center[0]-start_x-fraction*dx,center[1]-start_y-fraction*dy)
         model=min(houses,key=distance);angle=math.degrees(math.atan2(model[3]-model[1],model[2]-model[0]))
-        key=prefix+'-'+feature['id'];contour=path_shape(feature);color='#'+''.join(f'{channel:02x}' for channel in slate(feature))
+        key=prefix+'-'+feature['id'];color='#'+''.join(f'{channel:02x}' for channel in slate(feature))
         defs.append(f'<pattern id="{key}-tiles" width="1.3" height="2.3" patternUnits="userSpaceOnUse" patternTransform="rotate({angle:.2f})"><rect width="1.3" height="2.3" fill="{color}"/><path d="M.24 0v2.3M.3 1.15h1" stroke="#343237" stroke-width=".22"/><path d="M.67 0v2.3" stroke="#a8a39c" stroke-width=".16"/></pattern>')
-        roofs.append(path(contour,f'url(#{key}-tiles)','#49454a',.26,'fill-rule="evenodd"'))
-        outlines.append(f'<path d="{contour}" clip-rule="evenodd"/>')
+        roofs.append(sampled_shape(feature,f'url(#{key}-tiles)'))
+        outlines.append(sampled_shape(feature,'white'))
         observation=feature.get('streetObservation',{})
         for seam in observation.get('ink',[]):ink.append(stroke(seam,'#373238',.47))
         for ridge in feature['finishing'].get('observedRoofMarks',[]):ink.append(stroke(ridge,'#ada79d',.32))
         timber.append(timber_facings(feature,prefix))
     roof_clip=prefix+'-roof-outline';scope=prefix+'-extent'
     defs.append(f'<clipPath id="{scope}">'+''.join(poly(ring,'white') for ring in rings)+'</clipPath>')
-    defs.append(f'<clipPath id="{roof_clip}">'+''.join(outlines)+'</clipPath>')
-    return '<defs>'+''.join(defs)+'</defs>'+f'<g clip-path="url(#{scope})">'+''.join(roofs)+f'<g clip-path="url(#{roof_clip})">'+''.join(ink)+'</g>'+''.join(timber)+'</g>'
+    defs.append(f'<mask id="{roof_clip}" maskUnits="userSpaceOnUse" x="{left}" y="{top}" width="{right-left}" height="{bottom-top}">'+''.join(outlines)+'</mask>')
+    return '<defs>'+''.join(defs)+'</defs>'+f'<g clip-path="url(#{scope})">'+''.join(roofs)+f'<g mask="url(#{roof_clip})">'+''.join(ink)+'</g>'+''.join(timber)+'</g>'
 
 
 def stone_platform(model):
     rim=model['rim'];drop=model['rise'];parts=[poly([shifted(point,0,drop) for point in rim],'#b0aaa0','#8e8a82',.32),poly(rim,'#e5e2d9','#aaa69d',.32)]
+    course=model.get('frontCourse')
+    if course:
+        rng=random.Random(str(course[0]))
+        for start,end in zip(course,course[1:]):
+            blocks=max(1,round(math.dist(start,end)/6.7))
+            for index in range(blocks):
+                left,right=along(start,end,index/blocks),along(start,end,(index+1)/blocks)
+                parts.append(poly([left,right,shifted(right,0,drop),shifted(left,0,drop)],rng.choice(('#aaa8a1','#bfbcb6','#d1cec6'))))
+                parts.append(stroke([left,shifted(left,-.10,drop-.15)],'#85837d',.42))
+                parts.append(stroke([shifted(left,0,drop),shifted(right,0,drop)],'#585955',.73))
+        parts.append(stroke(course,'#f3f0e7',.76))
     back_left,back_right,front_right,front_left=model['flight'];steps=model['steps']
+    for cheek in model.get('cheeks',[]):
+        parts.append(poly(cheek,'#827e78','#5b5853',.48))
+        parts.append(stroke(cheek[:2],'#504d4b',.86))
     for level in range(steps):
         start=along(back_left,front_left,level/steps);end=along(back_right,front_right,level/steps)
         foot=along(back_left,front_left,(level+1)/steps);tip=along(back_right,front_right,(level+1)/steps)
         parts.append(poly([start,end,tip,foot],'#e4e0d6','#b0aaa0',.22))
-        parts.append(stroke([foot,tip],'#938e85',.42))
+        parts.append(stroke([foot,tip],'#6c6d67' if course else '#938e85',.81 if course else .42))
+        if course:
+            parts.append(stroke([start,foot],'#797971',.76))
+            parts.append(stroke([end,tip],'#72736d',.68))
     return f'<g data-stair-treads="{steps}">'+''.join(parts)+'</g>'
 
 
@@ -478,16 +716,51 @@ def gate_terrace(model):
     return '<g data-masonry="gate-parapet">'+''.join(parts)+'</g>'
 
 
+def standalone_elevation(group,by_id):
+    model=group['standaloneElevation'];key=group['id']+'-behind-registered-surfaces'
+    points=[point for ring in group['replace'] for point in ring]
+    left=min(x for x,y in points);top=min(y for x,y in points)
+    area=f'x="{left}" y="{top}" width="{max(x for x,y in points)-left}" height="{max(y for x,y in points)-top}"'
+    protected=''.join(sampled_shape(by_id[surface],'black') for surface in model['behind'])
+    mask=f'<defs><mask id="{key}" maskUnits="userSpaceOnUse" {area}><rect {area} fill="white"/>{protected}</mask></defs>'
+    faces=[]
+    for face in model['faces']:
+        head=face['head'];start,end=face['foot'];paint='#dcdad3' if face.get('return') else '#ebe8e3'
+        parts=[poly(head+[end,start],paint)]
+        if 'sillHeight' in face:
+            height=face['sillHeight'];parts.append(poly([shifted(start,0,-height),shifted(end,0,-height),end,start],'#b4b1a3'))
+        if 'course' in face:
+            count,height=face['course'];parts.append(poly([shifted(start,0,-height),shifted(end,0,-height),end,start],'#c4bfb1'))
+            for index in range(count):
+                near=along(start,end,(index+.18)/count);far=along(start,end,(index+.77)/count)
+                parts.append(poly([shifted(near,0,-height*.85),shifted(far,0,-height),far,near],'#655f53'))
+        faces.append(f'<g data-elevation-face="{face["id"]}">'+''.join(parts)+'</g>')
+    for head,foot,width in model.get('jambs',[]):
+        faces.append(stroke([head,foot],'#4c443c',width))
+        faces.append(stroke([shifted(head,width*.26,.4),shifted(foot,width*.26,-.4)],'#807562',width*.23))
+    return mask+f'<g mask="url(#{key})">'+''.join(faces)+'</g>'
+
+
 def detail_body(groups,features):
     parts=[]
     by_id={feature['id']:feature for feature in features}
+    if any('courtLayers' in group or 'courtBeforeHouse' in group for group in groups):
+        from .courtyard_occlusion import court_bindings
+        court_bindings(groups)
     for group in groups:
         parts.append(f'<g id="{group["id"]}">')
+        if 'standaloneElevation' in group:
+            parts.append(standalone_elevation(group,by_id)+'</g>');continue
         measured=''
         if 'slateOutlines' in group:
             key=group['id']+'-measured-slate'
-            outlines=''.join(poly(by_id[surface]['points'],'white') for surface in group['slateOutlines'])
-            parts.append(f'<defs><clipPath id="{key}">{outlines}</clipPath></defs>');measured=f' clip-path="url(#{key})"'
+            surfaces=[by_id[surface] for surface in group['slateOutlines']];bounds=[feature['bounds'] for feature in surfaces]
+            left=min(box[0] for box in bounds);top=min(box[1] for box in bounds);right=max(box[0]+box[2] for box in bounds);bottom=max(box[1]+box[3] for box in bounds)
+            outlines=''.join(sampled_shape(feature,'white') for feature in surfaces)
+            parts.append(f'<defs><mask id="{key}" maskUnits="userSpaceOnUse" x="{left}" y="{top}" width="{right-left}" height="{bottom-top}">{outlines}</mask></defs>');measured=f' mask="url(#{key})"'
+            if group.get('sharedSlate') or group.get('wallsBehindSlate'):
+                wall_mask=key+'-plaster';area=f'x="{left-12}" y="{top-12}" width="{right-left+24}" height="{bottom-top+24}"'
+                parts.append(f'<defs><mask id="{wall_mask}" maskUnits="userSpaceOnUse" {area}><rect {area} fill="white"/>'+''.join(sampled_shape(surface,'black') for surface in surfaces)+'</mask></defs>')
         marks_id=group['id']+'-tile-accents'
         if 'surfaceFinish' in group:
             accents=[]
@@ -506,27 +779,63 @@ def detail_body(groups,features):
         if 'courtFinish' in group:
             lawn=group['courtFinish']=='garden-lawn';key=group['id']+'-court-finish';paving=f'url(#{key})'
             tiles='<rect width="19" height="12" fill="#b9cb9e"/><path d="M2 9l1.5-.65m2.8-4.1 1.3.2m6.3 2.8 1.1-.55m1.1 5 .9-.3" stroke="#aebf91" stroke-width=".28"/>' if lawn else '<rect width="19" height="12" fill="#e6e3dd"/><path d="M0 0h19M0 6h19M7 0v6M15 6v6" stroke="#d7d2ca" stroke-width=".3"/>'
+            if group['courtFinish']=='court-grass':
+                tiles='<rect width="19" height="12" fill="#d9d8b7"/><path d="M0 4q3.5-2 7.8-.9l-3.1 1.3zM10 10q4.4-1.6 7.4-.7l-4.1 1.1z" fill="#cfceac"/><path d="M3 9l1.5-.55m4.2-6.1 1.1-.3m4.3 2.8 1.6-.7" stroke="#bdbf9d" stroke-width=".34"/>'
+            if group['courtFinish']=='silver-setts':
+                tiles='<rect width="19" height="12" fill="#edefe8"/><path d="M0 1.1l6.3-.35 1.7 2.7 5.2-.5m3.3 3.2 2.5-.4M0 9.3l5.8-.7 1.4 2.1 6.9-.3" fill="none" stroke="#cfd0c8" stroke-width=".38"/><path d="M8.2 3.9l4.7-.5 1.4 2.4-5.3.7z" fill="#e6e7de"/>'
             parts.append(f'<defs><pattern id="{key}" patternUnits="userSpaceOnUse" width="19" height="12">{tiles}</pattern></defs>')
         if 'pavingAngle' in group:
             key=group['id']+'-setts';paving=f'url(#{key})'
             parts.append(f'<defs><pattern id="{key}" width="8.5" height="4.8" patternUnits="userSpaceOnUse" patternTransform="rotate({group["pavingAngle"]})"><rect width="8.5" height="4.8" fill="#e2dccc"/><path d="M0 .2h8.5M0 2.5h8.5M2.6 .2v2.3m4.7 0v2.3" fill="none" stroke="#b6b09c" stroke-width=".22"/><path d="M.7 2.1h1.2m3.3 2.2h1.6" stroke="#eee9da" stroke-width=".28"/></pattern></defs>')
-        for court in group.get('courts',[]):
-            parts.append(poly(court,paving,'#b8b2a7',.38))
+        for index,court in enumerate(group.get('courts',[])):
+            surface=poly(court,paving,'#b8b2a7',.38);layer=group.get('courtLayers',{}).get(str(index))
+            if index in group.get('earthCourtSurfaces',[]):
+                from .east_quarter_materials import earth_court
+                surface+=earth_court(f'{group["id"]}-earth-{index}',court)
+            parts.append(f'<defs><g id="court-layer-{layer}">{surface}</g></defs>' if layer else surface)
         for segment in group.get('walls',[]):parts.append(wall(*segment))
+        if gate:=group.get('cappedGateReturn'):
+            from .shrine_street_ensemble import gate_return
+            parts.append(gate_return(gate))
+        for apron in group.get('quayAprons',[]):parts.append(quay_apron(apron))
         for screen in group.get('screens',[]):parts.append(screen_wall(screen))
         for platform in group.get('platforms',[]):parts.append(stone_platform(platform))
         if 'gateTerrace' in group:parts.append(gate_terrace(group['gateTerrace']))
         if group.get('retainObservedSurfaces',True):parts.append(visible_eaves(group,features))
+        measured_houses=group.get('measuredHouses')
         for index,model in enumerate(group['houses']):
-            form=group.get('roofForms',{}).get(str(index));walls,roof=house(model,group.get('roofTones',{}).get(str(index)),form,group.get('frontFrames',{}).get(str(index)));key=f'{group["id"]}-roof-{index}'
+            layer=group.get('courtBeforeHouse',{}).get(str(index))
+            if layer:parts.append(f'<use href="#court-layer-{layer}"/>')
+            form=group.get('roofForms',{}).get(str(index));feet=group.get('wallFeet',{}).get(str(index))
+            if wing:=group.get('courtWingVolumes',{}).get(str(index)):
+                model,form,feet=wing['model'],wing['roof'],wing['feet']
+            walls,roof=house(model,group.get('roofTones',{}).get(str(index)),form,group.get('frontFrames',{}).get(str(index)),feet);key=f'{group["id"]}-roof-{index}'
+            if timber_id:=group.get('frontTimberSources',{}).get(str(index)):
+                timber=by_id[timber_id]
+                assert timber['kind']=='wood' and group.get('retainObservedSurfaces',True) and not feet
+                left,right,*_=roof_frame(model,form)
+                start,end=along(left,right,.035),along(left,right,.965)
+                front=[start,end,shifted(end,0,model[7]),shifted(start,0,model[7])]
+                clip=key+'-front-opening';mask=key+'-timber-reserve'
+                area='x="0" y="0" width="2363" height="1672"'
+                parts.append(f'<defs><clipPath id="{clip}">{poly(front,"white")}</clipPath><mask id="{mask}" maskUnits="userSpaceOnUse" {area}><rect {area} fill="white"/><g clip-path="url(#{group["id"]}-extent)"><g clip-path="url(#{clip})">{sampled_shape(timber,"black")}</g></g></mask></defs>')
+                walls=f'<g mask="url(#{mask})">{walls}</g>'
+            if link:=group.get('isletCourtLinks',{}).get(str(index)):
+                from .islet_court_links import court_link
+                walls,roof=court_link(model,link,key)
+            if detail:=group.get('terracedTimberFrames',{}).get(str(index)):
+                from .east_shrine_frames import terraced_wall
+                walls=terraced_wall(walls,model,detail,f'{group["id"]}-frame-{index}')
+            observed=measured_houses is None or index in measured_houses
             finish=eave_end(group.get('eaveEnds',{}).get(str(index),{}))
             roof_layer=f'<g id="{key}">{roof}</g>'
-            if 'surfaceFinish' in group:
+            if observed and 'surfaceFinish' in group:
                 face_id=key+'-planes'
                 faces=roof_faces(model,roof_frame(model,form),form)
                 parts.append(f'<defs><clipPath id="{face_id}">'+''.join(poly(face,'white') for face in faces)+'</clipPath></defs>')
                 roof_layer+=f'<g clip-path="url(#{face_id})"><use href="#{marks_id}"/></g>'
-            if measured:roof_layer=f'<g{measured}>{roof_layer}</g>'
+            if observed and measured:roof_layer=f'<g{measured}>{roof_layer}</g>'
+            if observed and measured and (group.get('sharedSlate') or index in group.get('wallsBehindSlate',[])):walls=f'<g mask="url(#{wall_mask})">{walls}</g>'
             if form and 'clerestory' in form:
                 aperture=key+'-clerestory';points=roof_frame(model,form)
                 left=min(x for x,y in points)-4;top=min(y for x,y in points)-4
@@ -534,6 +843,16 @@ def detail_body(groups,features):
                 parts.append(f'<defs><mask id="{aperture}" maskUnits="userSpaceOnUse" {area}><rect {area} fill="white"/>'+poly(form['clerestory'],'black')+'</mask></defs>')
                 roof_layer=f'<g mask="url(#{aperture})">{roof_layer}</g>'
             parts.append(f'<g data-front="{model[-1]}">{walls}{roof_layer}{finish}</g>')
+        for index in group.get('limeCopings',[]):
+            form=group['roofForms'][str(index)];_,front,_,rear,_,crest=roof_frame(group['houses'][index],form)
+            coping=slope_points(front,crest,form['sag'])+slope_points(crest,rear,form['sag'])[1:]
+            parts.append(stroke([shifted(point,0,.7) for point in coping],'#554e50',.76))
+            parts.append(stroke(coping,'#dfdadb',1.18))
+        for pier in group.get('porchPiers',[]):
+            parts.append(poly(pier,'#514c49','#403b39',.35))
+            parts.append(stroke([pier[-1],pier[0]],'#a59c91',.49))
+        for segment in group.get('frontWalls',[]):parts.append(wall(*segment))
+        for gate in group.get('laneGates',[]):parts.append(lane_gate(gate))
         if group.get('visibleOnly'):parts.append('</g>')
         parts.append('</g>')
     return ''.join(parts)
@@ -541,7 +860,7 @@ def detail_body(groups,features):
 
 def replace_traces(body,box,groups):
     left,top,right,bottom=box
-    overlaps=[ring for group in groups for ring in group['replace'] if overlaps_box(ring,box)]
+    overlaps=[ring for group in groups if 'standaloneElevation' not in group for ring in group['replace'] if overlaps_box(ring,box)]
     if not overlaps:return body
     masks=''.join(poly(ring,'black') for ring in overlaps)
     area=f'x="{left}" y="{top}" width="{right-left}" height="{bottom-top}"'

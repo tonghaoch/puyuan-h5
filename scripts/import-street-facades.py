@@ -1,10 +1,11 @@
 """One-time authoring aid: observe plaster panels below native eaves. Not used by art:generate."""
-import json
+import argparse, json
 from pathlib import Path
 import cv2
 import numpy as np
 from PIL import Image
 from art.atlas_layout import PRINT_EXCLUSIONS
+from art.contour_registration import matches_archived_contour
 
 ROOT=Path(__file__).resolve().parents[1]
 rgb=np.array(Image.open(ROOT/'references/puyuan-reference.jpg').convert('RGB'))
@@ -13,7 +14,11 @@ saturation=cv2.cvtColor(rgb,cv2.COLOR_RGB2HSV)[:,:,1]
 allowed=np.full(gray.shape,255,np.uint8)
 for ring in PRINT_EXCLUSIONS:cv2.fillPoly(allowed,[np.array(ring,np.int32)],0)
 atlas=json.loads((ROOT/'src/data/town-architecture.json').read_text())['features']
-study={record['id']:record for record in json.loads((ROOT/'references/architecture/visible-surfaces.json').read_text())['features']}
+archive=json.loads((ROOT/'references/architecture/visible-surfaces.json').read_text())
+study={record['id']:record for record in archive['features']}
+parser=argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--out',type=Path,default=ROOT/'src/data/street-observations.json')
+args=parser.parse_args()
 
 
 def plaster_panels(feature):
@@ -81,7 +86,8 @@ observations={}
 for feature in atlas:
     if feature['kind'] not in ('roof','wood'):continue
     original=study[feature['id']]
-    assert original['bounds']==feature['bounds'] and original['kind']==feature['kind']
+    if not matches_archived_contour(feature,original,'roofClosing' not in archive):
+        raise ValueError(f'Archived geometry does not match {feature["id"]}')
     finish=original['finishing'];entry={}
     if feature['kind']=='roof':
         brightness=np.mean(original['sourceColor'])
@@ -96,5 +102,5 @@ for feature in atlas:
     if seams:entry['ink']=seams
     if entry:observations[feature['id']]=entry
 output={'coordinateSpace':'illustration-plane','surfaces':observations}
-(ROOT/'src/data/street-observations.json').write_text(json.dumps(output,separators=(',',':'))+'\n')
+args.out.write_text(json.dumps(output,separators=(',',':'))+'\n')
 print('Observed',len(observations),'surfaces;',sum(len(entry.get('plaster',[])) for entry in observations.values()),'plaster panels with an independently visible lower edge.')

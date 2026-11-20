@@ -25,12 +25,20 @@ def rounded_ring(points):
     return ''.join(p)+'Z'
 def shape(item):return rounded_ring(item['points'])+''.join(rounded_ring(h) for h in item.get('holes',[]))
 
-def quay_edge(ring,quay):
+def quay_edge(region,quay):
+    ring=region['holes'][quay['hole']] if 'hole' in quay else region['points']
     start=ring.index(quay['from']);end=ring.index(quay['to'])
     return (ring+ring)[start:(end if end>=start else end+len(ring))+1]
 
 
 def quay_face(edge,height,stone):
+    if isinstance(stone,dict):
+        from .masonry_bank import inset_face
+        start,end=stone['span']
+        if stone['finish']!='dressed-quay' or not 0<=start<end<len(edge):raise ValueError('Invalid dressed quay span')
+        prefix=quay_face(edge[:start+1],height,stone['base']) if start else ''
+        suffix=quay_face(edge[end:],height,stone['base']) if end<len(edge)-1 else ''
+        return prefix+inset_face(edge[start:end+1],stone['rise'],stone['copingWidth'])+suffix
     top=[(x,y-height) for x,y in edge];parts=[poly(edge+top[::-1],stone)]
     for (x,y),(xx,yy) in zip(edge,edge[1:]):
         count=max(1,round(math.hypot(xx-x,yy-y)/4.3))
@@ -42,21 +50,126 @@ def quay_face(edge,height,stone):
 
 def island_quay(region,quay):
     ring=region['holes'][quay['hole']];key=quay['id'];outline=rounded_ring(ring)
-    return f'<defs><clipPath id="{key}">'+path(outline,'white')+'</clipPath></defs>'+f'<g clip-path="url(#{key})">'+path(outline,'url(#island-stone)')+quay_face(quay_edge(ring,quay),quay['height'],'#766f5f')+'</g>'
+    return f'<defs><clipPath id="{key}">'+path(outline,'white')+'</clipPath></defs>'+f'<g clip-path="url(#{key})">'+path(outline,'url(#island-stone)')+quay_face(quay_edge(region,quay),quay['height'],quay.get('stone','#766f5f'))+'</g>'
+
+
+def bank_course(course):
+    toe, cap = course['toe'], course['cap']
+    def trace(points):
+        return 'M'+'L'.join(f'{number(horizontal)},{number(vertical)}' for horizontal,vertical in points)
+    def measured(points):
+        distances=[0]
+        for first,last in zip(points,points[1:]):distances.append(distances[-1]+math.dist(first,last))
+        def at(fraction):
+            target=distances[-1]*fraction
+            for index,(start,end) in enumerate(zip(distances,distances[1:])):
+                if target<=end:
+                    across=(target-start)/max(.001,end-start)
+                    return [first+(last-first)*across for first,last in zip(points[index],points[index+1])]
+            return points[-1]
+        return distances[-1],at
+    colors={'umber':('#70604c','#4f4b40','#b5a58b'),'granite':('#777772','#535650','#b9b9ad'),'moss':('#626c50','#475641','#a0a786')}
+    body,foot,lip=colors[course.get('tone','umber')]; length,base=measured(toe); _,coping=measured(cap)
+    parts=[poly(toe+cap[::-1],body),path(trace(toe),stroke=foot,width=.50)]
+    joints=max(1,round(length/6.2))
+    for index in range(joints):
+        start=base((index+.38)/joints);end=coping((index+.45)/joints)
+        if math.dist(start,end)>1.45:parts.append(path(trace([start,end]),stroke=foot,width=.32,extra='opacity=".62"'))
+    parts.append(path(trace(cap),stroke=lip,width=.44))
+    return ''.join(parts)
+
+
+def street_bed(walk):
+    profile=walk['profile']; left=[]; right=[]
+    for index,(horizontal,vertical,width) in enumerate(profile):
+        before=profile[max(0,index-1)]; after=profile[min(len(profile)-1,index+1)]
+        along,down=after[0]-before[0],after[1]-before[1]; norm=max(.01,math.hypot(along,down))
+        side_x,side_y=-down*width/(2*norm),along*width/(2*norm)
+        left.append((horizontal+side_x,vertical+side_y)); right.append((horizontal-side_x,vertical-side_y))
+    if walk.get('material')=='garden-sand':
+        parts=[]
+        for fraction,color in [(1,'#d7cdb5'),(.83,'#d3c4ad'),(.54,'#cebea7')]:
+            def verge(side):return [(station[0]+(point[0]-station[0])*fraction,station[1]+(point[1]-station[1])*fraction) for station,point in zip(profile,side)]
+            parts.append(path(rounded_ring(verge(left)+verge(right)[::-1]),color))
+        return f'<g id="{walk["id"]}">'+''.join(parts)+'</g>'
+    return f'<g id="{walk["id"]}">'+path(rounded_ring(left+right[::-1]),'#c5b29d','#c8b7a2',.4)+'</g>'
+
+
+def flag_cut(points, tone):
+    parts=[]
+    for start,end in zip(points,points[1:]):
+        across,down=end[0]-start[0],end[1]-start[1]
+        length=math.hypot(across,down)
+        normal=(-down/length,across/length)
+        breadth=min(.37,.16+length*.013)
+        def place(travel,edge):
+            return (start[0]+across*travel+normal[0]*edge,start[1]+down*travel+normal[1]*edge)
+        parts.append(poly([start,place(.18,-breadth*.63),place(.70,-breadth),end,place(.81,breadth*.48),place(.24,breadth*.71)],tone))
+    return ''.join(parts)
+
+
+def stone_lip(course):
+    rim=course['rim'];drop=course['drop'];rng=random.Random(str(rim[0]))
+    toe=[(across,down+drop) for across,down in rim]
+    parts=[poly(rim+toe[::-1],'#c4c0bf')]
+    for near,far in zip(rim,rim[1:]):
+        blocks=max(1,round(math.dist(near,far)/4.3))
+        def place(fraction,sink):
+            return (near[0]+(far[0]-near[0])*fraction,near[1]+(far[1]-near[1])*fraction+sink)
+        for index in range(blocks):
+            left,right=index/blocks,(index+1)/blocks
+            stone=rng.choice(('#c5c6c5','#acacac','#d4d3d2','#ddd9d2','#b9bec2'))
+            parts.append(poly([place(left,.22),place(right,.20),place(right,drop-.12),place(left,drop)],stone))
+            if rng.random()<.54:
+                parts.append(poly([place(left,drop*.72),place(left+.37/blocks,drop*.73),place(left+.40/blocks,drop),place(left,drop+.18)],'#737876'))
+    return ''.join(parts)
+
+
+def ground_bed(bed):
+    outline=rounded_ring(bed['points']) if bed.get('softVerge') else shape(bed)
+    parts=[f'<g id="{bed["id"]}">',path(outline,f'url(#{bed["material"]})')]
+    rng=random.Random(bed['id'])
+    for horizontal,vertical,wide,tall in bed.get('tufts',[]):
+        parts.append(ellipse(horizontal,vertical,wide*.48,tall*.38,'#adca86'))
+        for tuft in range(max(4,round(wide*tall*.38))):
+            angle=rng.random()*math.tau;radius=rng.random()**.5
+            base_x=horizontal+math.cos(angle)*radius*wide*.5;base_y=vertical+math.sin(angle)*radius*tall*.5
+            reach=rng.uniform(-1.35,1.35);rise=rng.uniform(.52,2.1)
+            parts.append(path(f'M{number(base_x)},{number(base_y)}q{number(reach*.17)},{number(-rise*.68)} {number(reach)},{number(-rise)}',stroke=rng.choice(('#586e3d','#85a85e','#73924e','#ccdc9c')),width=rng.uniform(.38,.85)))
+    return ''.join(parts)+'</g>'
 
 MATERIALS='''<defs>
+<linearGradient id="spring-sward" x1=".2" y1=".8" x2=".8" y2=".1"><stop stop-color="#dce7cf"/><stop offset=".42" stop-color="#e4edcf"/><stop offset=".8" stop-color="#dbe7c4"/><stop offset="1" stop-color="#e5e9d7"/></linearGradient>
+<pattern id="cool-flagstone" width="37" height="23" patternUnits="userSpaceOnUse"><rect width="37" height="23" fill="#dce4e5"/><path d="M0 4q6-2 14-.7t12-.4v3q-10 1.8-16-.2T0 6Z" fill="#d8e1e3"/><path d="M8 16q5-1.6 10-1l6 .3-2 1.5-9 1.2zM30 7q3-.8 5-.4l-2 1z" fill="#e2e8e7"/><path d="M5 10l.9-.3m2.8 1.7 1.5-.2m9 7.8 2-.4m7-16 1.6-.4m-5.8 1.9 1.3-.1" fill="none" stroke="#c6d2d3" stroke-width=".45"/></pattern>
+<linearGradient id="cinder-clay" x1="0" y1=".2" x2=".95" y2=".65"><stop stop-color="#9b8e86"/><stop offset=".4" stop-color="#a08c89"/><stop offset="1" stop-color="#9f8e89"/></linearGradient>
+<pattern id="track-grit" width="13" height="9" patternUnits="userSpaceOnUse"><path d="M1 2.4l1.5-.3m5.1 3.2 1.4.3m1.8-4.1.8.4M3.3 7l.9-.3" fill="none" stroke="#827970" stroke-width=".46" opacity=".55"/><path d="M4.6 3.5l.8-.3m5.2 4.1.9.4" fill="none" stroke="#bcaaa0" stroke-width=".58" opacity=".52"/></pattern>
+<linearGradient id="willow-turf" x1=".2" y1="0" x2=".8" y2="1"><stop stop-color="#c6dcb1"/><stop offset=".48" stop-color="#abd39c"/><stop offset="1" stop-color="#bfdca8"/></linearGradient>
+<linearGradient id="spring-turf" x1="0" y1="1" x2=".85" y2=".1"><stop stop-color="#d6ddbf"/><stop offset=".55" stop-color="#c6dbaf"/><stop offset="1" stop-color="#a9ca95"/></linearGradient>
+<linearGradient id="avenue-turf" x1=".45" y1="0" x2=".55" y2="1"><stop stop-color="#c0d8ac"/><stop offset=".55" stop-color="#d8dec0"/><stop offset="1" stop-color="#e4ddc6"/></linearGradient>
 <pattern id="silver-setts" width="19" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(-3)"><rect width="19" height="12" fill="#e2e1dd"/><path d="M0 0h8v5H0Z M12 6h7v6h-7Z" fill="#e6e5e0"/><path d="M0 5.7h7.2m1.3 0H19M8 .2v4.4m4 2.6v4.3M2 11.6h8" fill="none" stroke="#cfcfca" stroke-width=".33"/></pattern>
 <pattern id="blue-grey-flags" width="27" height="18" patternUnits="userSpaceOnUse" patternTransform="rotate(-4)"><rect width="27" height="18" fill="#9ea2ae"/><path d="M0 0h14v8H0ZM17 10h10v8H17Z" fill="#a4a6b0"/><path d="M5 10h8v6H5ZM20 2h5v4h-5Z" fill="#9ba0ab"/><path d="M0 8.5h11.3m.6 0h7M14 0v5.6M5 11v4.3m3.3 2.4h7" fill="none" stroke="#b2b3bb" stroke-width=".28"/></pattern>
 <pattern id="island-stone" width="13" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(-53)"><rect width="13" height="7" fill="#e6e1d2"/><path d="M0 .2h13M0 3.6h13M3 .2v3.4m6 0v3.4" fill="none" stroke="#c6c1af" stroke-width=".26"/></pattern>
-<linearGradient id="water" x1="0" y1="0" x2=".4" y2="1"><stop stop-color="#91bfb4"/><stop offset=".45" stop-color="#73a89e"/><stop offset="1" stop-color="#5e968d"/></linearGradient>
-<pattern id="ripples" width="65" height="32" patternUnits="userSpaceOnUse"><path d="M4 8q9-2 17 0m18 12q10-2 19 0M18 29q6-1.6 12 0" fill="none" stroke="#d5e5ce" stroke-width=".45" opacity=".55"/><path d="M0 16h8m23-12h13" stroke="#527f75" stroke-width=".35" opacity=".25"/></pattern>
+<linearGradient id="water" x1="0" y1="0" x2=".4" y2="1"><stop stop-color="#a2dfeb"/><stop offset=".45" stop-color="#95d7e4"/><stop offset="1" stop-color="#87cdda"/></linearGradient>
+<pattern id="ripples" width="83" height="47" patternUnits="userSpaceOnUse"><path d="M4 9q6-.3 12-1.7m28 16q9 0 15-2M22 40q4-.3 9-1.6" fill="none" stroke="#d9f3f5" stroke-width=".56" opacity=".7"/><path d="M8 16l6-1m27-9 10-.8" stroke="#67adbd" stroke-width=".35" opacity=".45"/></pattern>
 <pattern id="pavers" width="16" height="10" patternUnits="userSpaceOnUse"><rect width="16" height="10" fill="#d5d4bd"/><path d="M0 0h16M0 5h16M8 0v5M3 5v5M15 5v5" stroke="#aeb49d" stroke-width=".35"/><path d="M.5 1h7m1 5h6" stroke="#efead3" stroke-width=".5" opacity=".8"/><path d="M9 1h6v3H9ZM4 6h9v3H4Z" fill="#c9cdb5" opacity=".45"/></pattern>
 <pattern id="sand" width="23" height="19" patternUnits="userSpaceOnUse"><rect width="23" height="19" fill="#dad6b9"/><path d="M1 3h3m8 7h2M4 15h1m15-9h2" stroke="#a7b091" stroke-width=".35" opacity=".5"/><circle cx="17" cy="16" r=".45" fill="#f0e5c4"/></pattern>
+<pattern id="lane-setts" width="29" height="17" patternUnits="userSpaceOnUse" patternTransform="rotate(-3)"><rect width="29" height="17" fill="#dedfce"/><path d="M.1 3h9.3l.4 4.7H0zM17.3 13.1l11.7-.5v4.4H17.2z" fill="#d7d9ca"/><path d="M0 3h9.2l3.5-.4 16.3.2M0 8l17-.4 12 .2M0 13.3l11-.6 18 .2m-11.8.1.1 4M9.3 3l.5 4.7m12.8-4.9-.3 4.6M4 8.3l.2 4.4" fill="none" stroke="#bfc3b5" stroke-width=".31"/></pattern>
+<pattern id="silver-flags" width="24" height="15" patternUnits="userSpaceOnUse" patternTransform="rotate(-8)"><rect width="24" height="15" fill="#e6e6de"/><path d="M1 3h8v4H.8zM15 10h8v4h-8z" fill="#dfe1d9"/><path d="M0 2.7h7.6l.3 4.4 9.5-.2M20.2 3.2l3.8-.5M0 10.1h14.3l.4 4.9" fill="none" stroke="#c5c8bf" stroke-width=".36"/></pattern>
 <pattern id="quay" width="12" height="6" patternUnits="userSpaceOnUse"><rect width="12" height="6" fill="#b4b99e"/><path d="M0 0h12M0 3h12M5 0v3M10 3v3" stroke="#7f927a" stroke-width=".35"/><path d="M0 1h4m2 3h3" stroke="#dee0c1" stroke-width=".5"/></pattern>
 </defs>'''
 
 def tree(model):
+    if 'canalGrove' in model:
+        from .canal_groves import canal_grove
+        return canal_grove(model)
+    if model.get('stems'):
+        from .plantings import planting
+        return planting(model)
     rng=random.Random(model['id']);kind=model['kind'];s=model['scale']
+    if 'volume' in model.get('crown',{}):
+        from .crowns import crown
+        return crown(model,rng)
+    if 'crown' in model:return observed_crown(model,rng)
     if kind in ['pine','cypress','bamboo']:return evergreen(model)
     if kind=='blossom' and model.get('form')=='open-flowering':return flowering_tree(model,rng)
     palettes={'willow':['#456b4c','#5a8055','#729460','#8ca872','#b0be87'],
@@ -90,6 +203,81 @@ def tree(model):
             p.append(path(f'M{x} {y}q2 5 .4 12',stroke='#668657',width=.4))
             for j in range(4):p.append(path(f'M{x+1} {y+j*2.4}q2-.3 1 1.7',stroke='#99af74',width=.65))
     return ''.join(p)+'</g>'
+
+def crown_extent(model):
+    if model.get('stems'):
+        from .plantings import extent
+        return extent(model['stems'])
+    scale=model['scale']; room=22*scale
+    if 'crown' not in model:return [-room,-44*scale,room,5]
+    if 'volume' in model['crown']:
+        rows=model['crown']['volume']['stations']
+        return [min([-room]+[center-radius-3 for level,center,radius in rows]),rows[0][0]-3,
+                max([room]+[center+radius+3 for level,center,radius in rows]),max(5,rows[-1][0]+4)]
+    leaves=model['crown']['lobes']
+    return [min([-room]+[cx-rx*1.25-1 for cx,cy,rx,ry,*_ in leaves]),
+            min(cy-ry*1.25-1 for cx,cy,rx,ry,*_ in leaves),
+            max([room]+[cx+rx*1.25+1 for cx,cy,rx,ry,*_ in leaves]),
+            max([5]+[cy+ry*1.25+1 for cx,cy,rx,ry,*_ in leaves])]
+
+
+def observed_crown(model,rng):
+    descriptor=model['crown'];lobes=descriptor['lobes'];scale=model['scale']
+    palettes={'leaf':['#3e5e37','#659152','#89ad68','#a4c481','#c5dc9e'],
+              'spring':['#3c5a20','#669026','#91b641','#b1ce66','#d3e799'],
+              'pink':['#835749','#ad7569','#d39382','#eab5aa','#f9d5c7'],
+              'gold':['#795c40','#a28148','#c39b54','#d7ae67','#e8d789']}
+    colors=palettes[descriptor['tone']]
+    ink='#354431' if descriptor['tone'] in ('leaf','spring') else '#654739'
+    parts=[f'<g data-crown="{model["id"]}" transform="translate({model["x"]} {model["y"]})">',
+           ellipse(1.2*scale,.8*scale,5.8*scale,1.3*scale,'#667047','opacity=".35"')]
+    for cx,cy,rx,ry,band,shade,light in lobes:
+        parts.append(path(f'M0 0Q{number(-scale)},{number(cy*.40)} {number(cx)},{number(cy)}',stroke='#544f39',width=1.25*scale))
+    for order,(cx,cy,rx,ry,band,shade,light) in enumerate(lobes):
+        light_angle=light*math.pi/4; across=math.cos(light_angle); down=math.sin(light_angle)
+        if descriptor['tone']=='pink':
+            parts.append(ellipse(cx,cy,rx*.93,ry*.92,'#edc0b3','opacity=".62"'))
+            for spray in range(max(4,round(rx*ry*.19))):
+                angle=rng.random()*math.tau; span=rng.random()**.5
+                tip_x=cx+rx*math.cos(angle)*span; tip_y=cy+ry*math.sin(angle)*span
+                stem_x=tip_x+rng.uniform(-1.3,1.3); stem_y=tip_y+rng.uniform(1.0,2.1)
+                if spray%3==0:
+                    parts.append(path(f'M{number(stem_x)},{number(stem_y)}Q{number(tip_x-.7)},{number(tip_y+.7)} {number(tip_x)},{number(tip_y)}',stroke=ink,width=.55))
+                tone=colors[min(4,max(1,band+rng.choice([-1,0,0,1])))]
+                parts.append(ellipse(tip_x,tip_y,.86,.75,tone))
+                parts.append(ellipse(tip_x+.67,tip_y-.47,.65,.56,'#f8cdc0'))
+                if spray%4==0:parts.append(ellipse(tip_x-.38,tip_y+.3,.38,.32,'#99594b'))
+            continue
+        key=f'foliage-{model["id"]}-{order}'
+        parts.append(f'<defs><linearGradient id="{key}" x1="{number(.5-.5*across)}" y1="{number(.5-.5*down)}" x2="{number(.5+.5*across)}" y2="{number(.5+.5*down)}"><stop stop-color="{colors[max(0,band-1)]}"/><stop offset=".28" stop-color="{colors[band]}"/><stop offset=".8" stop-color="{colors[band]}"/><stop offset="1" stop-color="{colors[min(4,band+1)]}"/></linearGradient></defs>')
+        outline=[]
+        for index in range(13):
+            angle=index*math.tau/13;rad=rng.uniform(.85,1.04)
+            outline.append((cx+rx*math.cos(angle)*rad,cy+ry*math.sin(angle)*rad))
+        contour=f'M{number(outline[0][0])},{number(outline[0][1])}'
+        for index,tip in enumerate(outline[1:]+outline[:1]):
+            angle=(index+.5)*math.tau/13;rad=rng.uniform(1,1.18)
+            contour+=f'Q{number(cx+rx*math.cos(angle)*rad)},{number(cy+ry*math.sin(angle)*rad)} {number(tip[0])},{number(tip[1])}'
+        parts.append(path(contour+'Z',f'url(#{key})'))
+        count=max(7,round(rx*ry*.30))
+        for index in range(count):
+            angle=rng.random()*math.tau;rad=rng.random()**.48*.93
+            horizontal=cx+rx*math.cos(angle)*rad;vertical=cy+ry*math.sin(angle)*rad
+            dim=rng.random()<.30+shade*.07-.26*math.cos(angle-light_angle)*rad
+            tone=colors[max(0,band-2) if dim else min(4,band+1)]
+            if dim and index%3==0:tone=ink
+            length=min(1.85,max(.63,rx*.24))*rng.uniform(.70,1.24)
+            parts.append(ellipse(horizontal,vertical,length*.61,length*rng.uniform(.50,.95),tone))
+            if dim:parts.append(ellipse(horizontal-length*.53,vertical-length*.78,length*.34,length*.45,tone))
+            if index%5==0:
+                edge_x=cx+rx*math.cos(angle);edge_y=cy+ry*math.sin(angle)
+                parts.append(path(f'M{number(edge_x)},{number(edge_y)}q-.55 -.86 .36 -1.42',stroke=ink,width=.54))
+        if model['kind']=='willow' and ry>4:
+            for across in (-.61,.14,.53):
+                start=cx+across*rx;foot=cy+ry*math.sqrt(1-across**2)
+                parts.append(path(f'M{number(start)},{number(foot-1)}q.55 1.4 -.22 2.45',stroke=colors[max(0,band-1)],width=.42))
+    return ''.join(parts)+'</g>'
+
 
 def flowering_tree(model,rng):
     parts=[f'<g transform="translate({model["x"]} {model["y"]}) scale({model["scale"]})">',ellipse(1.3,.7,6.6,2.1,'#667453','opacity=".16"'),path('M0 0Q-1-8 .2-15L1-27',stroke='#735749',width=1.18)]
@@ -154,6 +342,36 @@ def evergreen(model):
 
 def bridge(model):
     length=model['length'];w=model['width'];half=length/2
+    if model.get('form')=='stone-steps':
+        sections=model['sections'];parts=[]
+        near=[right for left,right in sections];far=[left for left,right in sections]
+        def line(points,color,width):
+            return path('M'+'L'.join(f'{number(horizontal)},{number(vertical)}' for horizontal,vertical in points),stroke=color,width=width)
+        def between(first,last,fraction):return [start+(end-start)*fraction for start,end in zip(first,last)]
+        slate=model.get('stone')=='slate';rng=random.Random(model['id'])
+        face,rail,cap=('#95989b','#424348','#b3bab9') if slate else ('#c7c5c1','#5b5757','#e8e4de')
+        parts.append(poly(far+near[::-1],face,rail,.42))
+        for (start,end),(next_start,next_end) in zip(sections,sections[1:]):
+            steps=max(1,round(math.dist(start,next_start)/2.0))
+            for index in range(steps):
+                left=between(start,next_start,index/steps); right=between(end,next_end,index/steps)
+                if slate:
+                    lower_left=between(start,next_start,(index+1)/steps);lower_right=between(end,next_end,(index+1)/steps)
+                    split=rng.uniform(.31,.67)
+                    for low,high in ((.1,split-.013),(split+.013,.9)):
+                        flags=[between(left,right,low),between(left,right,high),between(lower_left,lower_right,high),between(lower_left,lower_right,low)]
+                        parts.append(poly(flags,rng.choice(['#a1a5a4','#979a9a','#83898b','#b3b3af','#8f8e93'])))
+                parts.append(line([between(left,right,.13),between(left,right,.87)],cap,.4))
+        for side in (far,near):
+            parapet=[(horizontal,vertical-1.6) for horizontal,vertical in side]
+            parts.append(line(side,rail,1.12));parts.append(poly(side+parapet[::-1],rail));parts.append(line(parapet,cap,.66))
+            for start,end in zip(side,side[1:]):
+                count=max(1,round(math.dist(start,end)/5.5))
+                for index in range(count):
+                    horizontal,vertical=between(start,end,index/count)
+                    parts.append(path(f'M{number(horizontal)},{number(vertical)}v-2.8',stroke=rail,width=.94))
+                    parts.append(ellipse(horizontal,vertical-2.9,.65,.38,cap))
+        return f'<g id="{model["id"]}">'+''.join(parts)+'</g>'
     if model.get('form')=='humpback-footbridge':
         def rail(side):return [(half*pos,w*side-3.1*(1-pos*pos)) for pos in [index/8 for index in range(-8,9)]]
         far=rail(-.44);near=rail(.48);parts=[poly(far+near[::-1],'#c6b8a4','#685952',.5),poly(near+[(x,y+1.3) for x,y in reversed(near)],'#7b6e61','#5b534d',.42)]
@@ -226,23 +444,6 @@ def bridge(model):
             p.append(path(f'M{number(x)} {number(y+arch)}v-3.4',stroke=deck,width=.85))
             p.append(ellipse(x,y+arch-3.5,.75,.45,'#ece5c6'))
     return ''.join(p)+'</g>'
-
-def boat(model):
-    bamboo=model.get('canopy','bamboo')=='bamboo'
-    roof,rib=('#b59b67','#dcc99b') if bamboo else ('#526769','#9aaea4')
-    parts=[f'<g transform="translate({model["x"]} {model["y"]}) rotate({model["angle"]}) scale({model["scale"]})">',
-           ellipse(1.5,3.8,14,3.4,'#315b51','opacity=".22"'),
-           path('M-14 0Q-8-4 9-3L16-1Q13 4 9 5Q-4 7-11 4Z','#805a41','#544a39',.48),
-           path('M-14 0Q-8-5 9-4L16-1Q5 3-10 2Z','#b88e61','#64563e',.38),
-           path('M-10 2Q3 4 13 .4M-8 4Q2 6 9 4.5',stroke='#d4b68a',width=.32)]
-    for seat in (8,10.5,13):parts.append(path(f'M{seat} -2.6l.6 2.8',stroke='#81603f',width=.65))
-    for post in (-9,-4,1,6):
-        parts.append(path(f'M{post} .9v-5.3',stroke='#5e503c',width=.68))
-        parts.append(path(f'M{post+.3} .7v-4.9',stroke='#e1c59a',width=.21))
-    parts.append(path('M-11-3.1Q-11-9-6-9.2L3-9.6Q7-9.8 8-4.3L6.5-2.8Z',roof,'#526152',.4))
-    for beam in (-9,-5,-1,3):parts.append(path(f'M{beam} -3.2q.3-3.9 2.7-5.6',stroke=rib,width=.44))
-    parts.append(path('M-10-3.1 7-3.1M-10 1.1 7 1.1',stroke='#c8ad82',width=.47))
-    return ''.join(parts)+'</g>'
 
 def landing(model):
     w=model['width'];d=model['reach'];stone=model['material']=='stone'

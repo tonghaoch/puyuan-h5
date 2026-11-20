@@ -194,6 +194,7 @@ test('street-house eaves are drawn in their own landmark and every roof referenc
         columns: number[]
         recess?: Point
         infill?: string
+        openings?: [number, number, number, number][]
         floors?: number[]
         pierFeet?: [number, number, number][]
       }
@@ -269,19 +270,28 @@ test('street-house eaves are drawn in their own landmark and every roof referenc
       for (const [index, frame] of Object.entries(group.frontFrames ?? {})) {
         assert.ok(Object.hasOwn(group.houses, index))
         assert.ok(
-          frame.columns.length >= 2 &&
-            frame.columns.every(
-              (at, i) => at >= 0 && at <= 1 && (!i || frame.columns[i - 1]! < at),
-            ),
-        )
-        assert.ok(
           [...frame.beam, ...(frame.recess ? [frame.recess] : [])].every(
             (point) => point.length === 2 && point.every(Number.isFinite),
           ),
         )
         const roof = svg.indexOf(`id="${group.id}-roof-${index}"`)
         const facade = svg.slice(svg.lastIndexOf('<g data-front=', roof), roof)
-        assert.ok(facade.includes(`data-bays="${frame.columns.length - 1}"`))
+        if (frame.infill === 'lime-casements') {
+          assert.ok(Array.isArray(frame.openings))
+          assert.ok(facade.includes(`data-windows="${frame.openings.length}"`))
+          for (const [start, end, head, sill] of frame.openings) {
+            assert.ok(0 <= start && start < end && end <= 1)
+            assert.ok(0 <= head && head < sill && sill <= 1)
+          }
+        } else {
+          assert.ok(
+            frame.columns.length >= 2 &&
+              frame.columns.every(
+                (at, i) => at >= 0 && at <= 1 && (!i || frame.columns[i - 1]! < at),
+              ),
+          )
+          assert.ok(facade.includes(`data-bays="${frame.columns.length - 1}"`))
+        }
         if (frame.infill === 'storeyed-shutters') {
           const floors = frame.floors!
           assert.ok(floors.length >= 3 && floors[0] === 0 && floors.at(-1) === 1)
@@ -438,7 +448,7 @@ test('temple stone banks follow water edges without roofs, join the canal, and k
   const text = (path: string) => readFile(new URL(path, import.meta.url), 'utf8')
   const read = async (path: string) => JSON.parse(await text(path))
   type Point = [number, number]
-  type Bank = { id: string; from: Point; to: Point; height: number }
+  type Bank = { id: string; from: Point; to: Point; height: number; hole?: number }
   type Water = { points: Point[]; holes: Point[][]; bankFaces?: Bank[] }
   const { water, walks }: { water: Water[]; walks: { id: string }[] } = await read(
     '../src/data/town-landscape.json',
@@ -465,8 +475,9 @@ test('temple stone banks follow water edges without roofs, join the canal, and k
     assert.equal(matches.length, 1, id)
     const { bank, region } = matches[0]!
     assert.ok(bank.height > 0 && ground.includes(`<g id="${id}">`))
+    const ring = bank.hole === undefined ? region.points : region.holes[bank.hole]!
     for (const [x, y] of [bank.from, bank.to])
-      assert.ok(region.points.some(([xx, yy]) => x === xx && y === yy))
+      assert.ok(ring.some(([xx, yy]) => x === xx && y === yy))
   }
   const wet = (point: Point) =>
     water.some(
@@ -500,6 +511,290 @@ test('temple stone banks follow water edges without roofs, join the canal, and k
       !features.some((f: { id: string }) => f.id === id) && !(id in roofs) && !(id in surfaces),
       id,
     )
+})
+
+test('canal forks and projected bridge decks have one water mask and dry abutments', async () => {
+  const { readFile } = await import('node:fs/promises')
+  const { pointInRing } = await import('../src/lib/geography.ts')
+  const text = (path: string) => readFile(new URL(path, import.meta.url), 'utf8')
+  type Point = [number, number]
+  type Water = { points: Point[]; holes: Point[][]; bankFaces?: { id: string }[] }
+  type Deck = {
+    id: string
+    sections?: [Point, Point][]
+    x: number
+    y: number
+    length: number
+    angle: number
+  }
+  const town: { water: Water[]; bridges: Deck[] } = JSON.parse(
+    await text('../src/data/town-landscape.json'),
+  )
+  const at = (point: Point) =>
+    town.water.filter(
+      ({ points, holes }) =>
+        pointInRing(point, points) && !holes.some((hole) => pointInRing(point, hole)),
+    )
+  const channels: [string, Point[]][] = [
+    [
+      'watch-west-quay',
+      [
+        [498, 700],
+        [497.5, 706],
+        [497.5, 716],
+        [501, 735],
+        [502, 758],
+        [503, 789],
+        [503, 825],
+        [504.1, 847],
+        [505.5, 869],
+        [509, 889],
+        [514, 908],
+        [517, 929],
+      ],
+    ],
+    [
+      'merchant-bend-quay',
+      [
+        [609.2, 744],
+        [610, 752],
+        [610.5, 759],
+      ],
+    ],
+    [
+      'merchant-bend-quay',
+      [
+        [561, 805],
+        [569, 804],
+        [574, 802],
+        [582, 802],
+        [593, 799],
+        [602, 796],
+        [613, 794],
+      ],
+    ],
+    [
+      'fuma-grass-quay',
+      [
+        [648, 724],
+        [664, 721],
+        [683, 718],
+        [702, 713],
+        [723, 712],
+        [745, 713],
+        [753, 716],
+        [763, 720],
+        [778, 722],
+        [788, 724.1],
+        [797, 719.5],
+        [805.7, 710.9],
+      ],
+    ],
+    [
+      'merchant-bend-quay',
+      [
+        [631, 960],
+        [634, 980],
+        [635, 990],
+      ],
+    ],
+    [
+      'merchant-bend-quay',
+      [
+        [645, 990],
+        [651, 996.1],
+        [666, 996],
+        [685, 993],
+        [705, 990],
+        [714, 988],
+        [738, 984],
+      ],
+    ],
+    [
+      'stage-arc-quay',
+      [
+        [1218, 383],
+        [1241, 384],
+        [1263, 383],
+      ],
+    ],
+    [
+      'watch-point-south-course',
+      [
+        [616, 519],
+        [623, 522],
+        [633, 525],
+        [639, 527],
+        [650, 530],
+        [661, 528],
+        [670, 523],
+        [677, 516],
+        [681, 513.4],
+      ],
+    ],
+  ]
+  for (const [bank, spine] of channels) {
+    const region = town.water.find((entry) => entry.bankFaces?.some(({ id }) => id === bank))
+    assert.ok(region, bank)
+    for (const [index, [endX, endY]] of spine.slice(1).entries()) {
+      const [x, y] = spine[index]!
+      const steps = Math.ceil(Math.hypot(endX - x, endY - y))
+      for (let step = 0; step <= steps; step++) {
+        const point: Point = [x + ((endX - x) * step) / steps, y + ((endY - y) * step) / steps]
+        const layers = at(point)
+        assert.ok(layers.length === 1 && layers[0] === region, `${bank}: ${point}`)
+      }
+    }
+  }
+  for (const point of [
+    [645, 511],
+    [652, 541],
+    [625, 715],
+    [713, 700],
+    [667, 732],
+    [647, 965],
+    [680, 985],
+    [717, 980],
+    [955, 540],
+    [961, 537],
+    [966, 535],
+    [971, 533],
+    [975, 531],
+    [502, 705],
+    [510, 840],
+    [517, 934],
+    [578, 792],
+    [584, 814],
+    [605, 763],
+  ] as Point[])
+    assert.equal(at(point).length, 0, String(point))
+  const layer = await text('../public/art/native/waterfronts.svg')
+  for (const id of [
+    'bridge-0',
+    'fuma-west-garden-slab',
+    'fuma-east-garden-slab',
+    'merchant-canal-slab',
+    'merchant-east-slab',
+    'pagoda-west-slab',
+    'lake-east-stone-slab',
+    'teahouse-north-timber',
+    'east-residence-slab',
+    'west-boathouse-footbridge',
+    'west-island-bank-slab',
+    'west-ditch-plankstone',
+    'family-west-footbridge',
+    'family-quay-footbridge',
+    'south-east-quay-slab',
+  ])
+    assert.ok(town.bridges.find((deck) => deck.id === id)?.sections?.length, id)
+  for (const deck of town.bridges) {
+    const { id } = deck
+    assert.equal(at([deck.x, deck.y]).length, 1, `${id}: water below deck`)
+    if (deck.sections) {
+      assert.ok(layer.includes(`id="${id}"`), id)
+      for (const [left, right] of [deck.sections[0]!, deck.sections.at(-1)!])
+        assert.equal(at([(left[0] + right[0]) / 2, (left[1] + right[1]) / 2]).length, 0, id)
+    } else {
+      const radians = (deck.angle * Math.PI) / 180
+      for (const side of [-0.5, 0.5])
+        assert.equal(
+          at([
+            deck.x + side * deck.length * Math.cos(radians),
+            deck.y + side * deck.length * Math.sin(radians),
+          ]).length,
+          0,
+          id,
+        )
+    }
+  }
+})
+
+test('one continuous southern canal serves both Pu family footbridges without flooding the gables', async () => {
+  const { readFile } = await import('node:fs/promises')
+  const { pointInRing } = await import('../src/lib/geography.ts')
+  type Point = [number, number]
+  type Region = { points: Point[]; holes: Point[][] }
+  const { water }: { water: Region[] } = JSON.parse(
+    await readFile(new URL('../src/data/town-landscape.json', import.meta.url), 'utf8'),
+  )
+  const covering = (point: Point) =>
+    water.filter(
+      (region) =>
+        pointInRing(point, region.points) && !region.holes.some((hole) => pointInRing(point, hole)),
+    )
+  const channel: Point[] = [
+    [1046, 1145.7],
+    [1061.25, 1144.4],
+    [1076.4, 1141.2],
+    [1096.6, 1137.7],
+    [1110, 1135.6],
+    [1117.2, 1133.2],
+    [1122, 1131.0],
+  ]
+  const [river] = covering(channel[0]!)
+  assert.ok(river)
+  for (const [index, start] of channel.slice(0, -1).entries()) {
+    const end = channel[index + 1]!
+    for (let step = 0; step <= 16; step++) {
+      const location: Point = [
+        start[0] + ((end[0] - start[0]) * step) / 16,
+        start[1] + ((end[1] - start[1]) * step) / 16,
+      ]
+      const hit = covering(location)
+      assert.equal(hit.length, 1)
+      assert.equal(hit[0], river)
+    }
+  }
+  for (const point of [
+    [1068, 1123],
+    [1079.4, 1119],
+    [1090, 1131],
+    [1106, 1128],
+  ] as Point[])
+    assert.equal(covering(point).length, 0)
+})
+
+test('merchant bend masonry stays on the dry island after opening the western channel', async () => {
+  const { readFile } = await import('node:fs/promises')
+  const { pointInRing } = await import('../src/lib/geography.ts')
+  type Point = [number, number]
+  type Face = { id: string; from: Point; to: Point; hole?: number }
+  type Region = { points: Point[]; holes: Point[][]; bankFaces?: Face[]; islandQuays?: Face[] }
+  const { water }: { water: Region[] } = JSON.parse(
+    await readFile(new URL('../src/data/town-landscape.json', import.meta.url), 'utf8'),
+  )
+  const matches = water.flatMap((region) =>
+    (region.bankFaces ?? [])
+      .filter(({ id }) => id === 'merchant-bend-quay')
+      .map((face) => ({ region, face })),
+  )
+  assert.equal(matches.length, 1)
+  const { region, face } = matches[0]!
+  assert.notEqual(face.hole, undefined)
+  const island = region.holes[face.hole!]!
+  for (const point of [
+    [644, 763],
+    [655, 843],
+    [660, 902],
+  ] as Point[])
+    assert.ok(pointInRing(point, island))
+  for (const point of [
+    [610, 752],
+    [574, 802],
+  ] as Point[]) {
+    assert.ok(pointInRing(point, region.points))
+    assert.ok(!region.holes.some((ring) => pointInRing(point, ring)))
+  }
+  for (const body of water) {
+    for (const bank of [...(body.bankFaces ?? []), ...(body.islandQuays ?? [])]) {
+      const ring = bank.hole === undefined ? body.points : body.holes[bank.hole]!
+      for (const [x, y] of [bank.from, bank.to])
+        assert.ok(
+          ring.some(([east, south]) => x === east && y === south),
+          bank.id,
+        )
+    }
+  }
 })
 
 test('one visitor canal passes under both galleries and leaves their landings on dry ground', async () => {
@@ -578,6 +873,23 @@ test('street and watchtower canals flow below crossings without flooding either 
         pointInRing(point, region.points) && !region.holes.some((ring) => pointInRing(point, ring)),
     )
   const channels: [string, Point[], string[]][] = [
+    [
+      'teahouse-east-grass-quay',
+      [
+        [869.7, 931],
+        [875, 934],
+        [884, 937.2],
+        [893, 936.4],
+        [906, 934],
+        [917.5, 930],
+        [931, 925.5],
+        [945, 920.4],
+        [956, 915.4],
+        [969.7, 910],
+        [981.2, 905.8],
+      ],
+      ['bridge-11'],
+    ],
     [
       'watch-willow-quay',
       [
@@ -685,6 +997,12 @@ test('street and watchtower canals flow below crossings without flooding either 
   }
   for (const point of [
     [1377, 681],
+    [890, 929.9],
+    [931, 917.1],
+    [956, 910],
+    [630.1, 492],
+    [648.8, 499.6],
+    [656.3, 498.4],
     [525, 577],
     [568, 579],
     [545, 580],
@@ -706,6 +1024,46 @@ test('street and watchtower canals flow below crossings without flooding either 
       !features.some((entry: { id: string }) => entry.id === retired) && !(retired in roofs),
       retired,
     )
+})
+
+test('east quay timber eaves and post feet sit on the dry side of the two stone landings', async () => {
+  const { readFile } = await import('node:fs/promises')
+  const { pointInRing } = await import('../src/lib/geography.ts')
+  const read = async (path: string) =>
+    JSON.parse(await readFile(new URL(path, import.meta.url), 'utf8'))
+  type Point = [number, number]
+  type Water = { points: Point[]; holes: Point[][] }
+  const { water, plazas }: { water: Water[]; plazas: { id: string; points: Point[] }[] } =
+    await read('../src/data/town-landscape.json')
+  const { background } = await read('../src/data/street-houses.json')
+  const row = background['east-west-bank'].find(
+    (group: { id: string }) => group.id === 'east-quay-timber-row',
+  )
+  const wet = (point: Point) =>
+    water.some(
+      (region) =>
+        pointInRing(point, region.points) && !region.holes.some((hole) => pointInRing(point, hole)),
+    )
+  for (const [left, top, right, end, , , , height] of row.houses) {
+    for (const fraction of [0, 0.25, 0.5, 0.75, 1]) {
+      assert.equal(
+        wet([left + (right - left) * fraction, top + (end - top) * fraction + height]),
+        false,
+      )
+    }
+  }
+  for (const [id, point] of [
+    ['east-quay-upper-landing', [1167.5, 1024]],
+    ['east-quay-lower-landing', [1161, 1039]],
+  ] as [string, Point][]) {
+    assert.ok(pointInRing(point, plazas.find((plaza) => plaza.id === id)!.points) && !wet(point))
+  }
+  for (const point of [
+    [1173, 1041],
+    [1179, 1031],
+    [1195, 990],
+  ] as Point[])
+    assert.ok(wet(point))
 })
 
 test('both hotel gallery roofs meet at their mitres and the open western moat reaches the south canal', async () => {
@@ -784,7 +1142,7 @@ test('measured roof accents reference editable surfaces and resolve inside each 
       if (!svg.includes(`id="${group.id}"`)) continue
       published.add(group.id)
       if (group.slateOutlines)
-        assert.ok(svg.includes(`clip-path="url(#${group.id}-measured-slate)"`), group.id)
+        assert.ok(svg.includes(`mask="url(#${group.id}-measured-slate)"`), group.id)
       if (group.surfaceFinish)
         assert.ok(
           svg.includes(`id="${group.id}-tile-accents"`) &&
@@ -829,6 +1187,75 @@ test('street eaves mask the specified trees in their published canopy tiles', as
       )
     }
   }
+})
+
+test('street joinery belongs to active elevations and its plaster sits behind the original windows', async () => {
+  const { readFile } = await import('node:fs/promises')
+  const read = async (name: string) =>
+    JSON.parse(await readFile(new URL(`../src/data/${name}.json`, import.meta.url), 'utf8'))
+  type Point = [number, number]
+  type Detail = {
+    id: string
+    plasterReturns?: Point[][]
+    pieces: { beam?: Point[]; height?: number }[]
+  }
+  const streets = await read('street-houses')
+  const surfaces: { id: string; bounds: number[] }[] = (await read('town-architecture')).features
+  const tiles: { sourceAsset: string }[] = (await read('architecture-tiles')).tiles
+  const artwork = await Promise.all(
+    tiles.map((tile) => readFile(new URL(`../public${tile.sourceAsset}`, import.meta.url), 'utf8')),
+  )
+  for (const [key, detail] of Object.entries(streets.joinery as Record<string, Detail>)) {
+    const surface = surfaces.find((item) => item.id === key)
+    assert.ok(surface, key)
+    const [left, top, width, height] = surface.bounds as [number, number, number, number]
+    const group = `id="${detail.id}"`
+    const copies = artwork.filter((svg) => svg.includes(group))
+    assert.ok(copies.length, key)
+    for (const piece of detail.pieces) {
+      for (const [x, y] of piece.beam ?? []) {
+        assert.ok(x >= left - 1 && x <= left + width + 1, key)
+        assert.ok(y >= top - 1 && y + (piece.height ?? 0) <= top + height + 7, key)
+      }
+    }
+    for (const svg of copies) {
+      const body = svg.indexOf(`id="finish-${key}"`)
+      assert.ok(body >= 0 && body < svg.indexOf(group), key)
+      if (detail.plasterReturns) {
+        const plaster = svg.indexOf(`id="${detail.id}-plaster"`)
+        assert.ok(plaster >= 0 && plaster < body, key)
+      }
+    }
+  }
+})
+
+test('the southwest spring ends at the stone bank without wetting the west path', async () => {
+  const { readFile } = await import('node:fs/promises')
+  const { pointInRing } = await import('../src/lib/geography.ts')
+  type Point = [number, number]
+  type Water = { points: Point[]; holes: Point[][] }
+  const { water }: { water: Water[] } = JSON.parse(
+    await readFile(new URL('../src/data/town-landscape.json', import.meta.url), 'utf8'),
+  )
+  const wet = (point: Point) =>
+    water.filter(
+      (region) =>
+        pointInRing(point, region.points) && !region.holes.some((hole) => pointInRing(point, hole)),
+    )
+  const spring = wet([172, 1252])
+  assert.equal(spring.length, 1)
+  for (const point of [
+    [170, 1256],
+    [166, 1263],
+    [165, 1272],
+  ] as Point[])
+    assert.deepEqual(wet(point), spring)
+  for (const point of [
+    [171, 1244],
+    [164, 1256],
+    [175, 1252],
+  ] as Point[])
+    assert.equal(wet(point).length, 0)
 })
 
 test('native map assets contain editable drawing commands without embedded raster imagery', async () => {
@@ -894,6 +1321,44 @@ test('the pagoda stands on dry stone with a continuous narrow inlet along the we
   assert.ok(!wet([936, 526]))
 })
 
+test('south garden lanes stay dry and the east timber crossing joins the two banks', async () => {
+  const { readFile } = await import('node:fs/promises')
+  const { pointInRing } = await import('../src/lib/geography.ts')
+  const read = async (path: string) =>
+    JSON.parse(await readFile(new URL(path, import.meta.url), 'utf8'))
+  type Point = [number, number]
+  type Water = { points: Point[]; holes: Point[][] }
+  type Walk = { id: string; profile: [number, number, number][] }
+  const { water, walks, groundBeds, bridges } = await read('../src/data/town-landscape.json')
+  const wet = (point: Point) =>
+    (water as Water[]).filter(
+      (region) =>
+        pointInRing(point, region.points) && !region.holes.some((hole) => pointInRing(point, hole)),
+    )
+  const garden = groundBeds.find(({ id }: { id: string }) => id === 'south-lane-court-grass')
+  const groups = (await read('../src/data/street-houses.json')).background['south-garden-lane']
+  const court = groups.find(({ id }: { id: string }) => id === 'south-lane-grass-court')
+  const center: Point = [1093, 1180]
+  assert.ok(pointInRing(center, garden.points) && pointInRing(center, court.courts[0]))
+  assert.equal(wet(center).length, 0)
+  for (const side of ['east', 'west']) {
+    const lane = (walks as Walk[]).find(({ id }) => id === `south-lane-court-${side}`)
+    assert.ok(lane)
+    for (const [index, [x, y, width]] of lane.profile.slice(1).entries()) {
+      const [beforeX, beforeY] = lane.profile[index]
+      assert.ok(width > 0 && (side === 'east' ? x > center[0] : x < center[0]))
+      for (let step = 0; step <= 8; step++) {
+        const point: Point = [beforeX + ((x - beforeX) * step) / 8, beforeY + ((y - beforeY) * step) / 8]
+        assert.equal(wet(point).length, 0)
+      }
+    }
+  }
+  const crossing = bridges.find(({ id }: { id: string }) => id === 'bridge-9')
+  const [rear, front] = crossing.sections[Math.floor(crossing.sections.length / 2)] as [Point, Point]
+  assert.equal(wet([(rear[0] + front[0]) / 2, (rear[1] + front[1]) / 2]).length, 1)
+  for (const bank of [[1183, 956.5], [1236.7, 962]] as Point[]) assert.equal(wet(bank).length, 0)
+})
+
 test('stage glass bays stay on the promenade, with separate dry eaves and one lake below the platform', async () => {
   const { readFile } = await import('node:fs/promises')
   const { pointInRing } = await import('../src/lib/geography.ts')
@@ -909,6 +1374,20 @@ test('stage glass bays stay on the promenade, with separate dry eaves and one la
   ]
   const svg = await text('../public/art/landmarks/waterside-stage.svg')
   assert.equal((svg.match(/data-glazing-bay=/g) ?? []).length, canopy.ribs.length - 1)
+  assert.equal(canopy.muntins.length, canopy.ribs.length - 1)
+  for (const [index, bars] of (canopy.muntins as number[][][]).entries()) {
+    assert.ok(svg.includes(`clip-path="url(#stage-glass-panel-${index})"`))
+    for (const [startX, startY, endX, endY, gauge] of bars as [
+      number,
+      number,
+      number,
+      number,
+      number,
+    ][]) {
+      assert.ok(Math.hypot(endX - startX, endY - startY) > 3)
+      assert.ok([0, 1, 2].includes(gauge))
+    }
+  }
   assert.ok(svg.includes('id="stage-floating-platform"'))
   const lake = water.find((region) => region.bankFaces?.some(({ id }) => id === 'stage-arc-quay'))
   assert.ok(lake)
@@ -977,6 +1456,55 @@ test('stage glass bays stay on the promenade, with separate dry eaves and one la
   }
 })
 
+test('temple garden paths meet opposite dry ends without paving across the canal', async () => {
+  const { readFile } = await import('node:fs/promises')
+  const { pointInRing } = await import('../src/lib/geography.ts')
+  type Point = [number, number]
+  type Walk = { id: string; profile: [number, number, number][] }
+  const town = JSON.parse(await readFile(new URL('../src/data/town-landscape.json', import.meta.url), 'utf8'))
+  const wet = (point: Point) => town.water.some((region: { points: Point[]; holes: Point[][] }) =>
+    pointInRing(point, region.points) && !region.holes.some((ring) => pointInRing(point, ring)),
+  )
+  const profile = (id: string) => (town.walks as Walk[]).find((walk) => walk.id === id)!.profile
+  const west = profile('temple-garden-west-approach')
+  const east = profile('temple-garden-east-approach')
+  const bridge = town.bridges.find(({ id }: { id: string }) => id === 'bridge-5')
+  for (const [x, y] of [...west, ...east]) assert.ok(!wet([x, y]))
+  for (const [tip, section] of [[west.at(-1), bridge.sections[0]], [east[0], bridge.sections.at(-1)]]) {
+    const [left, right] = section
+    assert.ok(Math.hypot(tip[0] - (left[0] + right[0]) / 2, tip[1] - (left[1] + right[1]) / 2) < 1)
+  }
+  assert.ok(wet([bridge.x, bridge.y]))
+  assert.deepEqual(east.at(-1), profile('street-temple-west-lane-18')[0])
+})
+
+test('the designer quay lane meets the dry north end of the west slab bridge', async () => {
+  const { readFile } = await import('node:fs/promises')
+  const { pointInRing } = await import('../src/lib/geography.ts')
+  type Point = [number, number]
+  const town = JSON.parse(await readFile(new URL('../src/data/town-landscape.json', import.meta.url), 'utf8'))
+  const lane = town.walks.find(({ id }: { id: string }) => id === 'street-designer-quay-lane-26')
+  const bridge = town.bridges.find(({ id }: { id: string }) => id === 'designer-west-slab')
+  assert.ok(lane && bridge)
+  const radians = (bridge.angle * Math.PI) / 180
+  const station = (fraction: number): Point => [
+    bridge.x + (fraction - 0.5) * bridge.length * Math.cos(radians),
+    bridge.y + (fraction - 0.5) * bridge.length * Math.sin(radians),
+  ]
+  const wet = (point: Point) => town.water.some((region: { points: Point[]; holes: Point[][] }) =>
+    pointInRing(point, region.points) && !region.holes.some((ring) => pointInRing(point, ring)),
+  )
+  const north = station(0)
+  const south = station(1)
+  const [endX, endY] = lane.profile.at(-1)
+  assert.ok(Math.hypot(endX - north[0], endY - north[1]) < 1, 'lane must reach the northern abutment')
+  assert.ok(south[0] < north[0] && south[1] > north[1])
+  assert.ok(!wet([endX, endY]) && !wet(north) && !wet(south))
+  const crossing = Array.from({ length: 41 }, (_, index) => wet(station(index / 40)))
+  assert.ok(crossing[20])
+  assert.equal(crossing.filter((inWater, index) => inWater && !crossing[index - 1]).length, 1)
+})
+
 test('native water surrounds boat hulls and the stage deck but not the promenade', async () => {
   const { readFile } = await import('node:fs/promises')
   const { pointInRing } = await import('../src/lib/geography.ts')
@@ -1000,7 +1528,8 @@ test('native water surrounds boat hulls and the stage deck but not the promenade
       [9, -4],
       [0, 0],
     ]
-    for (const [across, down] of hull)
+    for (const [hullX, down] of hull) {
+      const across = boat.bow === 'west' ? -hullX : hullX
       assert.ok(
         wet([
           boat.x + boat.scale * (across * Math.cos(angle) - down * Math.sin(angle)),
@@ -1008,6 +1537,7 @@ test('native water surrounds boat hulls and the stage deck but not the promenade
         ]),
         boat.id,
       )
+    }
   }
   const bridge = town.bridges.find((item: { id: string }) => item.id === 'east-islet-arch')
   assert.ok(bridge && wet([bridge.x, bridge.y]))

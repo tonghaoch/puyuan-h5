@@ -8,6 +8,7 @@ import numpy as np
 from PIL import Image
 from art.atlas_layout import ZONES, PRINT_EXCLUSIONS
 from art.landscape import quay_edge
+from art.contour_registration import close_roof_gaps
 ROOT=Path(__file__).resolve().parents[1]
 source=ROOT/'references/puyuan-reference.jpg'
 rgb=np.array(Image.open(source).convert('RGB'))
@@ -20,18 +21,18 @@ for polygon in PRINT_EXCLUSIONS: cv2.fillPoly(labels,[np.array(polygon,np.int32)
 town=json.loads((ROOT/'src/data/town-landscape.json').read_text())
 for region in town['water']:
     for quay in region.get('bankFaces',[]):
-        edge=quay_edge(region['points'],quay);top=[(x,y-quay['height']-.6) for x,y in edge]
+        edge=quay_edge(region,quay);top=[(x,y-quay['height']-.6) for x,y in edge]
         cv2.fillPoly(labels,[np.int32(np.rint(edge+top[::-1]))],255)
 allowed=(scope>0)&(labels==0)
 r,g,b=rgb[:,:,0].astype(float),rgb[:,:,1].astype(float),rgb[:,:,2].astype(float)
 roof=((gray<121)&(hsv[:,:,1]<92)&(g<r*1.17+2)&allowed).astype(np.uint8)*255
-roof=cv2.morphologyEx(roof,cv2.MORPH_CLOSE,np.ones((2,2),np.uint8))
+roof=close_roof_gaps(roof)
 roof[~allowed]=0
 # Gold roof in the temple. The constrained region prevents paths and tree trunks being treated as gold tile.
 gold=np.zeros_like(roof)
 gold_region=np.zeros_like(roof);cv2.rectangle(gold_region,(868,633),(979,691),255,-1)
 gold[((r>g*1.12)&(g>b*1.15)&(r>125)&(gold_region>0)&allowed)]=255
-gold=cv2.morphologyEx(gold,cv2.MORPH_CLOSE,np.ones((2,2),np.uint8));roof[gold>0]=0
+gold=close_roof_gaps(gold);roof[gold>0]=0
 near=cv2.dilate(roof|gold,np.ones((11,9),np.uint8))>0
 wall=((gray>147)&(np.maximum.reduce([r,g,b])-np.minimum.reduce([r,g,b])<42)&near&allowed).astype(np.uint8)*255
 wood=((r>g*1.18)&(g>b*.94)&(gray>35)&(gray<160)&near&allowed).astype(np.uint8)*255
@@ -83,7 +84,7 @@ for kind,mask,minimum in [('wall',wall,9),('wood',wood,8),('roof',roof,8),('gold
         coverage[pixel_mask>0]=255
 # Save a geometry snapshot and a visual review overlay for auditability.
 out=ROOT/'references/architecture';out.mkdir(exist_ok=True)
-(out/'visible-surfaces.json').write_text(json.dumps({'source_sha256':hashlib.sha256(source.read_bytes()).hexdigest(),'coordinateSpace':'reference-image-pixels','features':features},ensure_ascii=False,separators=(',',':')))
+(out/'visible-surfaces.json').write_text(json.dumps({'source_sha256':hashlib.sha256(source.read_bytes()).hexdigest(),'coordinateSpace':'reference-image-pixels','roofClosing':'balanced','features':features},ensure_ascii=False,separators=(',',':')))
 overlay=rgb.copy();paint=overlay.astype(float)
 paint[coverage>0]=paint[coverage>0]*.4+np.array([100,190,155])*.6
 Image.fromarray(paint.astype(np.uint8)).crop((120,260,1460,1340)).save(out/'surface-coverage.jpg',quality=93)

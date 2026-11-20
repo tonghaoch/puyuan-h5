@@ -7,13 +7,15 @@ import { parseArgs } from 'node:util'
 const root = new URL('../', import.meta.url)
 const read = async (path) => JSON.parse(await readFile(new URL(path, root), 'utf8'))
 const { sites, background } = await read('src/data/street-houses.json')
-const { sourceOffset } = await read('src/data/reference-map.json')
-const { bridges } = await read('src/data/town-landscape.json')
+const { sourceOffset, scene: sceneSize } = await read('src/data/reference-map.json')
+const { bridges, groundBeds } = await read('src/data/town-landscape.json')
+const { paleBlocks } = await read('src/data/town-completions.json')
 const { values, positionals } = parseArgs({
   options: {
     out: { type: 'string', default: 'artifacts/island-review' },
     fit: { type: 'boolean', default: false },
     details: { type: 'boolean', default: false },
+    box: { type: 'string', multiple: true, default: [] },
   },
   allowPositionals: true,
 })
@@ -26,6 +28,10 @@ const areas = {
   ...Object.fromEntries(Object.entries(structures).map(([id, model]) => [id, model.review])),
 }
 const named = {
+  ...Object.fromEntries(groundBeds.map(({ id, points }) => [id, [{ replace: [points] }]])),
+  ...Object.fromEntries(
+    paleBlocks.map(({ id, units }) => [id, [{ replace: units.map(({ top }) => top) }]]),
+  ),
   ...Object.fromEntries(
     bridges.map(({ id, x, y, length, width, angle }) => {
       const radians = (angle * Math.PI) / 180
@@ -53,17 +59,63 @@ const named = {
   ),
   ...areas,
 }
-const selected = positionals.length
-  ? positionals.map((name) => {
-      assert.ok(Object.hasOwn(named, name), name)
-      return [name, named[name]]
-    })
-  : Object.entries(background)
-if (values.details) assert.ok(positionals.length && !values.fit, 'Specify landmarks for --details')
+const selected =
+  positionals.length || values.box.length
+    ? positionals.map((name) => {
+        assert.ok(Object.hasOwn(named, name), name)
+        return [name, named[name]]
+      })
+    : Object.entries(background)
+if (values.details)
+  assert.ok(
+    positionals.length && !values.fit && !values.box.length,
+    'Specify landmarks for --details',
+  )
+for (const value of values.box) {
+  assert.match(
+    value,
+    /^\d+,\d+,\d+,\d+$/,
+    'Use --box left,top,right,bottom in illustration coordinates',
+  )
+  const [left, top, right, bottom] = value.split(',').map(Number)
+  assert.ok(
+    left < right &&
+      top < bottom &&
+      left + sourceOffset.x >= 0 &&
+      top + sourceOffset.y >= 0 &&
+      right + sourceOffset.x <= sceneSize.width &&
+      bottom + sourceOffset.y <= sceneSize.height,
+    `Box outside the scene: ${value}`,
+  )
+  selected.push([
+    `cell-${[left, top, right, bottom].join('-')}`,
+    [
+      {
+        replace: [
+          [
+            [left, top],
+            [right, bottom],
+          ],
+        ],
+      },
+    ],
+  ])
+}
 const shots = []
+async function stableFrame(page, name) {
+  let previous = await page.screenshot()
+  for (let attempt = 0; attempt < 8; attempt++) {
+    await page.waitForTimeout(250)
+    const next = await page.screenshot()
+    if (previous.equals(next)) return next
+    previous = next
+  }
+  assert.fail(`View did not finish painting: ${name}`)
+}
 await mkdir(out, { recursive: true })
 const localChrome = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 const browser = await chromium.launch({
+  args: values.details ? ['--disable-gpu'] : [],
   executablePath:
     process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE ||
     (existsSync(localChrome) ? localChrome : undefined),
@@ -96,13 +148,39 @@ try {
           .getByRole('button', { name: new RegExp(model.name) })
           .click()
         await page.locator(`[data-model-id="${area}"] img`).evaluate((image) => image.decode())
+        await page.waitForFunction(() => {
+          const scene = document.querySelector('.map-scene')
+          const target = new DOMMatrix(scene.style.transform)
+          const actual = new DOMMatrix(getComputedStyle(scene).transform)
+          return Math.abs(target.e - actual.e) + Math.abs(target.f - actual.f) < 1
+        })
         await page.waitForLoadState('networkidle')
-        shots.push([new URL(`${area}-inspection-${device}.png`, out), await page.screenshot()])
+        shots.push([
+          new URL(`${area}-inspection-${device}.png`, out),
+          await stableFrame(page, `${device}/${area}/inspection`),
+        ])
         await page.getByRole('button', { name: `查看${model.name}建筑详情` }).click()
         const hero = page.getByRole('dialog').locator('.detail-hero img')
         await hero.evaluate((image) => image.decode())
         assert.equal(await hero.getAttribute('src'), model.heroAsset)
-        shots.push([new URL(`${area}-detail-${device}.png`, out), await page.screenshot()])
+        await page.waitForFunction(() => {
+          const hero = document.querySelector('[role="dialog"] .detail-hero img')
+          if (!hero) return false
+          const box = hero.getBoundingClientRect()
+          const foreground = document.elementFromPoint(
+            box.x + box.width / 2,
+            box.y + box.height / 2,
+          )
+          return (
+            box.height > 0 &&
+            foreground?.closest('.detail-hero') === hero.closest('.detail-hero') &&
+            Number(getComputedStyle(hero.closest('.dialog-backdrop')).opacity) >= 0.99
+          )
+        })
+        shots.push([
+          new URL(`${area}-detail-${device}.png`, out),
+          await stableFrame(page, `${device}/${area}/detail`),
+        ])
         await page.goto(process.env.PUYUAN_PREVIEW_URL || 'http://127.0.0.1:5174/', {
           waitUntil: 'networkidle',
         })
@@ -190,15 +268,7 @@ try {
         await Promise.all(images.map((image) => image.decode()))
         await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
       })
-      let frame = await page.screenshot()
-      let settled = false
-      for (let attempt = 0; attempt < 8 && !settled; attempt++) {
-        await page.waitForTimeout(250)
-        const next = await page.screenshot()
-        settled = frame.equals(next)
-        frame = next
-      }
-      assert.ok(settled, `Map did not finish painting: ${device}/${area}`)
+      const frame = await stableFrame(page, `${device}/${area}`)
       shots.push([new URL(`${area}${values.fit ? '-fit' : ''}-${device}.png`, out), frame])
     }
     assert.ok(!requests.some((url) => url.includes('puyuan-original-scope')))

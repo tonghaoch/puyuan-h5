@@ -1,0 +1,7 @@
+{
+  "stations":[
+    {"id":"lake-museum-north","feet":{"flowering-1040-444":[[1042.8,455.4]],"lake-north-pollards":[[1040.5,449],[1051.2,454.5]]},"contactAfter":[[["flowering-1040-444",0],[["lake-north-pollards",0],["lake-north-pollards",1]]]]},
+    {"id":"museum-west-landing","feet":{"tree-180":[[1014.5,575],[1019.6,575.8]],"tree-320":[[1005.8,580.7],[1023.7,569]],"tree-322":[[1026.6,584.6]]},"contactAfter":[[["tree-322",0],[["tree-180",1],["tree-320",1]]]],"overhangingLeaders":[["tree-322",0,2,[[-7.04,-36.4],[-0.16,-40.53],[8.96,-38.0],[20.32,-34.67]]]]},
+    {"id":"oval-north-garden","feet":{"tree-51":[[1198.4,656.5],[1211.1,658.1],[1209,645],[1216,643]],"flowering-1229-638":[[1228.1,657.7]]},"contactAfter":[[["flowering-1229-638",0],[["tree-51",3],["tree-51",2],["tree-51",0]]]]}
+  ]
+}

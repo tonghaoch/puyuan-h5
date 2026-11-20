@@ -3,6 +3,7 @@
 These are native art designs, not claims about measured or previously hidden architecture.
 """
 import math
+import random
 from .landscape import path, poly, ellipse
 from .courtyard_details import details
 
@@ -55,3 +56,51 @@ def completion(site):
     for house_data in site.get('houses',[]):p.append(house(*house_data))
     p.append(details(site))
     return ''.join(p)
+
+
+def stone_arris(edge, seed):
+    rng=random.Random(seed)
+    parts=[]
+    for start,end in zip(edge,edge[1:]):
+        length=math.dist(start,end)
+        if length==0:continue
+        def station(distance):
+            return tuple(first+(last-first)*distance/length for first,last in zip(start,end))
+        def mark(low,high,color,width):
+            first,last=station(low),station(high)
+            return path(f'M{first[0]:.2f},{first[1]:.2f}L{last[0]:.2f},{last[1]:.2f}',stroke=color,width=width)
+        parts.append(mark(0,length,'#d7d9ce',.40))
+        low=0
+        while low<length:
+            high=min(length,low+rng.uniform(3.4,4.8))
+            parts.append(mark(low,low+(high-low)*rng.uniform(.12,.27),rng.choice(('#34382f','#43483b','#515646')),rng.uniform(.79,1.04)))
+            low=high
+    return ''.join(parts)
+
+
+def pale_block(block):
+    def trace(points):
+        return 'M'+'L'.join(f'{horizontal:.2f},{vertical:.2f}' for horizontal,vertical in points)
+    parts=[f'<g id="{block["id"]}">']
+    for index,unit in enumerate(block['units']):
+        top,lip,rise=unit['top'],unit['lip'],unit['rise']
+        bottom=[(horizontal,vertical+rise) for horizontal,vertical in lip]
+        parts.append(poly(lip+bottom[::-1],['#cccbbc','#d5d4c9','#c5c6b8'][index%3]))
+        parts.append(path(trace(bottom),stroke='#8f9083',width=.43))
+        if 'shadedReturn' in unit:
+            side=unit['shadedReturn'];edge=side['edge'];foot=side['foot']
+            parts.append(poly(edge+foot[::-1],'#54534e','#64655c',.4))
+            parts.append(path(trace(foot),stroke='#a8a299',width=.63))
+        parts.append(poly(top,['#ebeee8','#ecefe9','#e9ede6'][index%3],'#b9bdb2',.38))
+        parts.append(path(trace([(horizontal-.12,vertical+.85) for horizontal,vertical in lip]),stroke='#f2f2e7',width=.46))
+    for opening in block.get('openings',[]):
+        back_left,back_right,front_right,front_left=opening['rim'];left_foot,right_foot=opening['wallFoot']
+        parts.append(poly(opening['rim'],'#c4c3a6'))
+        parts.append(poly([back_left,back_right,right_foot,left_foot],'#dddccf'))
+        parts.append(poly([back_left,left_foot,front_left],'#ceccbb'))
+        parts.append(poly([left_foot,right_foot,front_right,front_left],'#bfbea2'))
+        parts.append(stone_arris(opening['wallFoot'],'recess-foot'))
+        parts.append(stone_arris(opening['rim']+[back_left],'recess-rim'))
+    for index,edge in enumerate(block['copings']):
+        parts.append(stone_arris(edge,f'{block["id"]}-{index}'))
+    return ''.join(parts)+'</g>'
