@@ -63,7 +63,7 @@ test('zoom and camera survive tab changes and pan responds to pointer drag', asy
   await expect(scene).toHaveAttribute('style', initial!)
 })
 
-test('favorites persist after reload and can be removed in the collection', async ({ page }) => {
+test('favorites persist after reload and can be removed from the card', async ({ page }) => {
   await page.goto('/#food')
   await page.getByRole('button', { name: '收藏水巷茶事', exact: true }).click()
   await expect(page.getByRole('button', { name: '取消收藏水巷茶事', exact: true })).toHaveAttribute(
@@ -71,11 +71,9 @@ test('favorites persist after reload and can be removed in the collection', asyn
     'true',
   )
   await page.reload()
-  await page.getByRole('button', { name: '我的收藏', exact: true }).click()
-  const dialog = page.getByRole('dialog')
-  await expect(dialog.getByText('水巷茶事', { exact: true })).toBeVisible()
-  await dialog.getByRole('button', { name: '取消收藏水巷茶事', exact: true }).click()
-  await expect(dialog.getByText(/还没有收藏/)).toBeVisible()
+  await expect(page.getByRole('button', { name: '我的收藏', exact: true })).toHaveCount(0)
+  await page.getByRole('button', { name: '取消收藏水巷茶事', exact: true }).click()
+  await expect(page.getByRole('button', { name: '收藏水巷茶事', exact: true })).toBeVisible()
 })
 
 test('direct detail links close locally, browser Back closes an opened detail', async ({
@@ -247,7 +245,7 @@ test('zooming the reference map loads local AI tiles and panning replaces them',
   await expect(tiles).toHaveCount(0)
 })
 
-test('reference and illustration share geometry, real map and imagery share georeferenced geometry', async ({
+test('reference and illustration share geometry and real map keeps its landmarks', async ({
   page,
 }) => {
   await page.goto('/')
@@ -267,19 +265,11 @@ test('reference and illustration share geometry, real map and imagery share geor
   await page.getByRole('button', { name: '真实路网', exact: true }).click()
   await expect(page.locator('.real-road').first()).toBeVisible()
   await expect(page.locator('.geo-landmark')).toHaveCount(8)
-  await page.getByRole('textbox', { name: '搜索地图地点或活动' }).fill('福山塔')
-  await expect(page.locator('.geo-landmark')).toHaveCount(1)
+  await expect(page.getByRole('textbox', { name: '搜索地图地点或活动' })).toHaveCount(0)
   await page.getByRole('button', { name: '查看地图资料：福山塔', exact: true }).click()
   await expect(page.getByRole('dialog').getByRole('heading', { name: '福山塔' })).toBeVisible()
   await page.getByRole('button', { name: '继续看地图' }).click()
-  await page.getByRole('button', { name: '影像核对', exact: true }).click()
-  await expect(page.locator('.real-map-scene image')).toHaveAttribute(
-    'href',
-    '/geodata/imagery-reference.jpg',
-  )
-  expect(Number(await page.locator('.real-map-scene image').getAttribute('width'))).toBeGreaterThan(
-    500,
-  )
+  await expect(page.getByRole('button', { name: '影像核对', exact: true })).toHaveCount(0)
   await expect(page.locator('.geo-landmark')).toHaveCount(8)
   await page.getByRole('button', { name: '手绘导览', exact: true }).click()
   await expect(page.locator('.map-scene')).toHaveAttribute('style', initial!)
@@ -301,8 +291,6 @@ test('acquired GPS can be opened on the main real map without placing it on the 
     'aria-pressed',
     'true',
   )
-  await page.getByRole('button', { name: '影像核对', exact: true }).click()
-  await expect(page.locator('.main-user-position')).toBeVisible()
   await page.getByRole('button', { name: '手绘导览', exact: true }).click()
   await expect(page.locator('.main-user-position')).toHaveCount(0)
 })

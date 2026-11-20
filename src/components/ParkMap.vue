@@ -23,7 +23,6 @@ const props = defineProps<{
   fix: GeographicFix | null
   now: number
   focusLocation: number
-  query: string
 }>()
 const emit = defineEmits<{
   select: [place: Place, modelId?: string]
@@ -45,9 +44,7 @@ function closeBuildingPicker() {
   void nextTick(() => inspectionTitle.value?.focus())
 }
 const inspected = computed(() => landmarkModels.models[inspectionIndex.value])
-const positions = computed(() =>
-  geography.points.value.filter((p) => p.name.includes(props.query.trim())),
-)
+const positions = geography.points
 const userPosition = computed(() =>
   props.fix && geography.frame.value
     ? geography.frame.value.project([props.fix.longitude, props.fix.latitude])
@@ -443,13 +440,7 @@ onBeforeUnmount(() => observer?.disconnect())
           aria-label="公开地图道路、水道、桥梁和园区范围"
         >
           <rect :width="SCENE.width" :height="SCENE.height" fill="#eeeedf" />
-          <image
-            v-if="view === 'imagery' && geography.image.value"
-            href="/geodata/imagery-reference.jpg"
-            v-bind="geography.image.value"
-            preserveAspectRatio="none"
-          />
-          <g :class="{ 'imagery-overlay': view === 'imagery' }">
+          <g>
             <path
               v-for="(shape, index) in geography.shapes.value.filter((s) => s.layer === 'boundary')"
               :key="`boundary-${index}`"
@@ -524,13 +515,6 @@ onBeforeUnmount(() => observer?.disconnect())
     role="status"
   >
     正在加载真实路网…
-  </div>
-  <div
-    v-if="view === 'imagery' && geography.imageryError.value"
-    class="geo-map-error"
-    role="status"
-  >
-    影像暂时不可用，请切换真实路网。
   </div>
   <div v-if="inspected && view === 'illustration' && !townOutOfView" class="building-inspection">
     <button

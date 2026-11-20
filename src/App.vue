@@ -34,7 +34,6 @@ const mapViews: { id: MapView; name: string }[] = [
   { id: 'illustration', name: '手绘导览' },
   { id: 'reference', name: '原图对照' },
   { id: 'geographic', name: '真实路网' },
-  { id: 'imagery', name: '影像核对' },
 ]
 const selection = ref<Selection | null>(null)
 const detailModelId = ref<string>()
@@ -192,18 +191,7 @@ function viewOnMap(placeId: string) {
   notify('已为你找到地图中的位置')
 }
 const visiblePlaces = computed(() =>
-  places.filter((place) => {
-    const related = [
-      ...activities.filter((a) => a.placeId === place.id),
-      ...restaurants.filter((r) => r.placeId === place.id),
-    ]
-      .map((a) => a.name)
-      .join(' ')
-    return (
-      (mapFilter.value === 'all' || place.category === mapFilter.value) &&
-      matchesSearch(query.value, place.name, place.subtitle, related)
-    )
-  }),
+  places.filter((place) => mapFilter.value === 'all' || place.category === mapFilter.value),
 )
 const visibleRestaurants = computed(() =>
   restaurants.filter(
@@ -346,14 +334,6 @@ onBeforeUnmount(() => {
         <button class="guide-button" @click="openOverlay('guide')">
           <AppIcon name="book" :size="18" /><span>游园手帖</span>
         </button>
-        <span class="header-divider"></span>
-        <button
-          class="icon-button favorites-button"
-          aria-label="我的收藏"
-          @click="openOverlay('favorites')"
-        >
-          <AppIcon name="heart" :size="21" /><i v-if="favorites.length">{{ favorites.length }}</i>
-        </button>
       </div>
     </header>
 
@@ -374,7 +354,6 @@ onBeforeUnmount(() => {
           :fix="location.fix.value"
           :now="now"
           :focus-location="focusLocation"
-          :query="query"
           @geoselect="openGeoPoint"
           @outside="notify('当前位置在园区视野之外，未将定位点移入园区')"
           @select="(place, modelId) => openSelection({ kind: 'place', id: place.id }, modelId)"
@@ -397,20 +376,6 @@ onBeforeUnmount(() => {
             ><span><i class="road-line"></i>道路与桥梁</span
             ><span><i class="boundary-line"></i>园区边界</span>
           </div>
-          <label class="search-field"
-            ><AppIcon name="search" :size="18" /><input
-              v-model="query"
-              aria-label="搜索地图地点或活动"
-              :placeholder="geographicView ? '查找公开地图中的地点' : '寻一处风景、一场相遇'"
-            /><button
-              v-if="query"
-              class="clear-search"
-              aria-label="清空搜索"
-              @click.prevent="query = ''"
-            >
-              <AppIcon name="close" :size="15" /></button
-            ><span v-else class="search-decoration">⌕</span></label
-          >
         </div>
         <div class="map-view-switch" aria-label="地图视图">
           <button
@@ -463,14 +428,6 @@ onBeforeUnmount(() => {
               target="_blank"
               rel="noopener noreferrer"
               >© OpenStreetMap</a
-            ><template v-if="mapView === 'imagery'">
-              ·
-              <a
-                href="https://goto.arcgisonline.com/maps/World_Imagery"
-                target="_blank"
-                rel="noopener noreferrer"
-                >Esri, Vantor, Earthstar Geographics, GIS User Community</a
-              ></template
             ></span
           ><span class="note-separator">/</span><span class="map-hint">拖动探索 · 双指缩放</span>
         </div>
@@ -827,7 +784,7 @@ onBeforeUnmount(() => {
           <span>壹</span>
           <div>
             <h3>循着地图，随心慢游</h3>
-            <p>拖动地图、双指缩放，点击标记发现地点与活动。也可以通过分类与搜索，找到心仪之处。</p>
+            <p>拖动地图、双指缩放，按分类浏览地点，点击标记查看详情。</p>
           </div>
         </div>
         <div class="guide-step">
@@ -847,7 +804,7 @@ onBeforeUnmount(() => {
         <div class="demo-notice">
           <AppIcon name="info" :size="17" />
           <p>
-            当前是示意地图与演示内容。手绘图保留参考图布局；真实路网与影像按地理坐标展示，可以查看设备位置。暂不提供步行导航。
+            当前是示意地图与演示内容。手绘图保留参考图布局；真实路网按地理坐标展示，可以查看设备位置。暂不提供步行导航。
           </p>
         </div>
         <button class="primary-button full-width" @click="closeModal">
@@ -914,7 +871,7 @@ onBeforeUnmount(() => {
         <div class="demo-notice">
           <AppIcon name="info" :size="17" />
           <p>
-            当前古风地图尚未进行地理校准，暂不在示意图上显示定位点。真实路网和影像视图使用真实地理坐标；公开边界不代表实际开放范围。
+            当前古风地图尚未进行地理校准，暂不在示意图上显示定位点。真实路网使用真实地理坐标；公开边界不代表实际开放范围。
           </p>
         </div>
         <GeoLocationMap :fix="location.fix.value" :now="now" />

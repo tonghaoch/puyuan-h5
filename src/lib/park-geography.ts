@@ -2,13 +2,7 @@ import { computed, onMounted, ref } from 'vue'
 import { createGeoFrame, type GeoCollection, type GeoFeature, type LngLat } from './geography'
 import { SCENE } from './map-camera'
 
-export type MapView = 'illustration' | 'reference' | 'geographic' | 'imagery'
-export interface ImageryExtent {
-  xmin: number
-  ymin: number
-  xmax: number
-  ymax: number
-}
+export type MapView = 'illustration' | 'reference' | 'geographic'
 let geometryRequest: Promise<GeoCollection> | undefined
 async function getGeometry(): Promise<GeoCollection> {
   const response = await fetch('/geodata/puyuan.geojson')
@@ -20,9 +14,7 @@ async function getGeometry(): Promise<GeoCollection> {
 }
 export function useParkGeography() {
   const data = ref<GeoCollection | null>(null)
-  const extent = ref<ImageryExtent | null>(null)
   const error = ref('')
-  const imageryError = ref(false)
   const ring = computed(() => {
     const boundary = data.value?.features.find((f) => f.properties.layer === 'boundary')
     return boundary?.geometry.type === 'Polygon' ? (boundary.geometry.coordinates[0] ?? []) : []
@@ -66,12 +58,6 @@ export function useParkGeography() {
           return [{ feature, point: { x, y }, name: String(feature.properties.name || '地图地点') }]
         }),
   )
-  const image = computed(() => {
-    if (!extent.value || !frame.value) return null
-    const [x, y] = frame.value.projectMeters([extent.value.xmin, extent.value.ymax])
-    const [right, bottom] = frame.value.projectMeters([extent.value.xmax, extent.value.ymin])
-    return { x, y, width: right - x, height: bottom - y }
-  })
   async function load() {
     error.value = ''
     try {
@@ -83,30 +69,11 @@ export function useParkGeography() {
       error.value = reason instanceof Error ? reason.message : '地理地图暂时不可用'
     }
   }
-  async function loadImagery() {
-    try {
-      const response = await fetch('/geodata/imagery-extent.json')
-      if (!response.ok) throw new Error()
-      const result = (await response.json()) as { extent: ImageryExtent }
-      if (
-        ![result.extent.xmin, result.extent.ymin, result.extent.xmax, result.extent.ymax].every(
-          Number.isFinite,
-        )
-      )
-        throw new Error()
-      extent.value = result.extent
-    } catch {
-      imageryError.value = true
-    }
-  }
-  onMounted(() => {
-    void load()
-    void loadImagery()
-  })
-  return { ring, frame, shapes, points, image, error, imageryError, reload: load }
+  onMounted(load)
+  return { ring, frame, shapes, points, error, reload: load }
 }
 export function isGeographicView(view: MapView) {
-  return view === 'geographic' || view === 'imagery'
+  return view === 'geographic'
 }
 export function geoName(feature: GeoFeature) {
   return String(feature.properties.name || '地图地点')
