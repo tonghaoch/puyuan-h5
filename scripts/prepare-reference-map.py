@@ -36,12 +36,20 @@ paint=Image.composite(paint,field,rim)
 # Keep source pixels inside the town. Only the outer lip transitions to the AI edit.
 keep=ImageChops.lighter(scope,scope.filter(ImageFilter.GaussianBlur(4)).point(lambda p:min(255,p*2)))
 original=Image.composite(raw,paint,keep)
+repairs=Image.open(ROOT/'references/reference-label-repairs.webp').convert('RGBA')
+if repairs.size != original.size:
+    raise ValueError('Label repairs must be registered to the reference scene')
+label_mask=repairs.getchannel('A')
+original.paste(repairs,(0,0),label_mask)
 parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--ai-master',type=Path,help='Approved 4x AI image in cropped scene coordinates')
+parser.add_argument('--fsrcnn-x4',type=Path,help='FSRCNN_x4.pb to enhance label repairs at the same density as the master')
 parser.add_argument('--lapsrn-x8',type=Path,help='LapSRN_x8.pb for the high-density close-up layer')
 args=parser.parse_args()
 directory=ROOT/'public/art/reference-tiles'
 if args.ai_master:
+    if not args.fsrcnn_x4:
+        parser.error('--ai-master requires --fsrcnn-x4 for the restored label regions')
     ai=Image.open(args.ai_master)
     if ai.size != (w*4,h*4):
         parser.error(f'Expected an AI master of {w*4} x {h*4} pixels')
@@ -72,6 +80,19 @@ if args.ai_master:
     interior=scope.filter(ImageFilter.GaussianBlur(6)).point(lambda p:max(0,(p-246)*255//9))
     detailed=Image.composite(ai,original.resize(ai.size,Image.Resampling.LANCZOS),
                              interior.resize(ai.size,Image.Resampling.BILINEAR))
+    import cv2
+    import numpy as np
+    model=cv2.dnn_superres.DnnSuperResImpl_create()
+    model.readModel(str(args.fsrcnn_x4))
+    model.setModel('fsrcnn',4)
+    # Include the receptive field on both sides of each repair; never interpolate
+    # just the masked pixels against a sharper AI master.
+    blend=label_mask.filter(ImageFilter.MaxFilter(9))
+    x,y,r,b=blend.getbbox()
+    box=(max(0,x-16),max(0,y-16),min(w,r+16),min(h,b+16))
+    patch=model.upsample(cv2.cvtColor(np.asarray(original.crop(box)),cv2.COLOR_RGB2BGR))
+    patch=Image.fromarray(cv2.cvtColor(patch,cv2.COLOR_BGR2RGB))
+    detailed.paste(patch,(box[0]*4,box[1]*4),blend.crop(box).resize(patch.size,Image.Resampling.BILINEAR))
     save_tiles(clarify_lines(detailed,2.4),4)
 if args.lapsrn_x8:
     import cv2
