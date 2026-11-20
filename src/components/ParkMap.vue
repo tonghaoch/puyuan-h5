@@ -3,10 +3,22 @@ import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import type { Place } from '../data/catalog'
 import { clampCamera, zoomAt, zoomRange, ZOOM_STEP, SCENE, type Camera } from '../lib/map-camera'
 import ReferenceTiles from './ReferenceTiles.vue'
+import referenceMap from '../data/reference-map.json'
 import ReferenceLabels from './ReferenceLabels.vue'
 import AppIcon from './AppIcon.vue'
 import { useParkGeography, isGeographicView, type MapView } from '../lib/park-geography'
 import { classifyFix, type GeographicFix, type GeoFeature } from '../lib/geography'
+// Start point and bearing in the original painting's coordinate system.
+const boatRoutes = [
+  [1040, 895, -12],
+  [1094, 356, 30],
+  [1190, 1100, 80],
+  [662, 476, 0],
+  [982, 440, 160],
+  [1302, 836, 130],
+  [790, 752, 80],
+  [1398, 464, 70],
+] as const
 const props = defineProps<{
   places: Place[]
   focusRequest: { id: string; nonce: number } | null
@@ -268,9 +280,7 @@ onBeforeUnmount(() => observer?.disconnect())
       'has-meadow': !geographic,
     }"
     role="region"
-    :aria-label="
-      geographic ? '古镇真实地理地图，可拖动缩放' : '古镇导览，可拖动缩放'
-    "
+    :aria-label="geographic ? '古镇真实地理地图，可拖动缩放' : '古镇导览，可拖动缩放'"
     tabindex="0"
     @click.capture="guardClick"
     @pointerdown="down"
@@ -300,6 +310,54 @@ onBeforeUnmount(() => observer?.disconnect())
           :width="dimensions.width"
           :height="dimensions.height"
         />
+        <div class="map-water-mask" aria-hidden="true">
+          <svg class="map-effects" :width="SCENE.width" :height="SCENE.height">
+            <defs>
+              <pattern id="guide-ripples" width="70" height="43" patternUnits="userSpaceOnUse">
+                <path class="canal-ripple" d="M-5 12q14 -5 30 -1t28 -2 M28 33q12 -4 29 -1t19 -1" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#guide-ripples)" />
+            <g
+              :transform="`translate(${referenceMap.sourceOffset.x} ${referenceMap.sourceOffset.y})`"
+            >
+              <path
+                v-for="d in referenceMap.waterAnimations"
+                :key="d"
+                :d="d"
+                class="water-highlight"
+              />
+              <path d="M1028 897 Q1090 886 1165 870" class="water-highlight" />
+              <g
+                v-for="([x, y, bearing], i) in boatRoutes"
+                :key="x"
+                :transform="`translate(${x} ${y}) rotate(${bearing})`"
+              >
+                <g
+                  class="guide-boat"
+                  :style="{ animationDuration: `${11 + (i % 4)}s`, animationDelay: `${-2 - i}s` }"
+                >
+                  <g :transform="`scale(${Math.max(1, Math.min(2.5, 0.85 / camera.scale))})`">
+                    <path
+                      d="M-12 -2q-5 -3 -12 -3m12 7q-6 3 -12 3"
+                      fill="none"
+                      stroke="#fff4d9"
+                      stroke-width="1.4"
+                    />
+                    <image
+                      :href="i % 2 ? '/art/boat-covered.webp' : '/art/boat-bamboo.webp'"
+                      x="-15"
+                      y="-13"
+                      width="30"
+                      height="21"
+                      :transform="`rotate(${-bearing}) scale(${bearing > 90 ? -1 : 1} 1)`"
+                    />
+                  </g>
+                </g>
+              </g>
+            </g>
+          </svg>
+        </div>
       </template>
       <template v-else>
         <svg

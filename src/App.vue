@@ -63,7 +63,7 @@ function save(key: string, value: string) {
     /* Browsing remains available when storage is denied. */
   }
 }
-const motion = ref(stored('puyuan.motion') !== 'off' && !media.matches)
+const motion = ref(!media.matches)
 const validKeys = new Set([
   ...places.map((p) => `place:${p.id}`),
   ...activities.map((a) => `activity:${a.id}`),
@@ -168,11 +168,6 @@ function toggleFavorite(item: Selection) {
 }
 function isFavorite(item: Selection) {
   return favorites.value.includes(selectionKey(item))
-}
-function toggleMotion() {
-  motion.value = !motion.value
-  save('puyuan.motion', motion.value ? 'on' : 'off')
-  notify(motion.value ? '已开启地图动态效果' : '已减少地图动态效果')
 }
 function resetFilters(target: Tab) {
   query.value = ''
@@ -287,7 +282,7 @@ function visibility() {
   if (pageVisible.value) now.value = Date.now()
 }
 function motionPreference() {
-  if (media.matches) motion.value = false
+  motion.value = !media.matches
 }
 onMounted(() => {
   window.addEventListener('popstate', readRoute)
@@ -411,18 +406,6 @@ onBeforeUnmount(() => {
             ></span
           ><span class="note-separator">/</span><span class="map-hint">拖动探索 · 双指缩放</span>
         </div>
-        <button
-          class="motion-control"
-          v-if="!geographicView"
-          :aria-pressed="motion"
-          :aria-label="motion ? '减少动态效果' : '开启动效'"
-          @click="toggleMotion"
-        >
-          <AppIcon name="leaf" :size="16" /><span>{{
-            motion ? '风物有声，草木有灵' : '静赏江南'
-          }}</span
-          ><i :class="{ on: motion }"></i>
-        </button>
         <div class="map-vignette" aria-hidden="true"></div>
       </section>
 
@@ -778,7 +761,7 @@ onBeforeUnmount(() => {
           <span>叁</span>
           <div>
             <h3>留一点时间，静赏风物</h3>
-            <p>地图支持减少动态效果。收藏保存在当前设备，关闭页面后仍然保留。</p>
+            <p>导览动画跟随系统的「减少动态效果」设置。收藏保存在当前设备，关闭页面后仍然保留。</p>
           </div>
         </div>
         <div class="demo-notice">
