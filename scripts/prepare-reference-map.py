@@ -35,7 +35,21 @@ for inset in range(min(65,w//2,h//2)):
 paint=Image.composite(paint,field,rim)
 # Keep source pixels inside the town. Only the outer lip transitions to the AI edit.
 keep=ImageChops.lighter(scope,scope.filter(ImageFilter.GaussianBlur(4)).point(lambda p:min(255,p*2)))
+# The north gate approach runs outside the town boundary. Preserve the road,
+# not the printed school label or the cream background beside it.
+if outline := layout.get('northGateRoadOutline'):
+    road=Image.new('L',(w,h))
+    ImageDraw.Draw(road).polygon([(x+dx,y+dy) for x,y in outline],fill=255)
+    keep=ImageChops.lighter(keep,ImageChops.multiply(road.filter(ImageFilter.GaussianBlur(1)),rim))
 original=Image.composite(raw,paint,keep)
+if outlines := layout.get('restoredRoadOutlines'):
+    roads=Image.new('L',(w,h))
+    for outline in outlines.values():
+        ImageDraw.Draw(roads).polygon([(x+dx,y+dy) for x,y in outline],fill=255)
+    # Outside the retained scene the printed road includes clouds and lettering.
+    # Match its unprinted pavement; leave the original interior and trees intact.
+    edge=ImageChops.multiply(roads.filter(ImageFilter.GaussianBlur(.8)),rim)
+    original.paste(source.getpixel((169,1120)),(0,0,w,h),ImageChops.subtract(edge,keep))
 repairs=Image.open(ROOT/'references/reference-label-repairs.webp').convert('RGBA')
 if repairs.size != original.size:
     raise ValueError('Label repairs must be registered to the reference scene')
