@@ -2829,6 +2829,40 @@ body {
   animation: river 20s linear infinite;
   opacity: 0.7;
 }
+.canal-ripple {
+  fill: none;
+  stroke: #f0ffe9;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-dasharray: 9 20 3 28;
+  opacity: 0.57;
+  animation: canal-ripple-flow 4s linear infinite;
+}
+@keyframes canal-ripple-flow {
+  to {
+    stroke-dashoffset: -60;
+  }
+}
+.guide-boat {
+  animation: guide-boat-passage 11s -2s linear infinite;
+}
+@keyframes guide-boat-passage {
+  from {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  8%,
+  92% {
+    opacity: 1;
+  }
+  to {
+    transform: translateX(105px);
+    opacity: 0;
+  }
+}
+.motion-paused .guide-boat {
+  animation-delay: -8s;
+}
 .map-water-mask {
   position: absolute;
   inset: 0;

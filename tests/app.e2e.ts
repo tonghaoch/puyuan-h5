@@ -24,7 +24,9 @@ test('all three views work, restaurant search and categories filter actual resul
   expect(errors).toEqual([])
 })
 
-test('reference labels filter, open a place and link through to restaurant content', async ({ page }) => {
+test('reference labels filter, open a place and link through to restaurant content', async ({
+  page,
+}) => {
   await page.goto('/')
   await page.getByRole('button', { name: '美食', exact: true }).click()
   await expect(page.locator('.reference-labels button')).toHaveCount(3)
@@ -127,10 +129,11 @@ test('permission denial stops prompting and keeps browsing available', async ({ 
 test('reduced motion is respected and viewport never overflows horizontally', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('/')
-  await expect(page.getByRole('button', { name: '开启动效' })).toHaveAttribute(
-    'aria-pressed',
-    'false',
-  )
+  await expect(page.getByRole('button', { name: /开启动效|减少动态效果/ })).toHaveCount(0)
+  const boats = page.locator('.guide-boat')
+  await expect(boats).toHaveCount(8)
+  for (const boat of await boats.all())
+    await expect(boat).toHaveCSS('animation-play-state', 'paused')
   await expect(page.locator('.map-viewport')).toHaveClass(/motion-paused/)
   for (const name of [/^游园地图/, /^寻味濮院/, /^风雅之约/]) {
     await page.getByRole('button', { name }).click()
@@ -321,7 +324,10 @@ test('panning beyond the former crop reveals meadow and can return to town', asy
   await page.getByRole('region', { name: /古镇导览/ }).focus()
   for (let i = 0; i < 22; i++) await page.keyboard.press('ArrowRight')
   await expect(page.getByRole('button', { name: '回到古镇', exact: true })).toBeVisible()
-  await expect(page.locator('.meadow-backdrop')).toHaveCSS('background-image', /reference-meadow\.webp/)
+  await expect(page.locator('.meadow-backdrop')).toHaveCSS(
+    'background-image',
+    /reference-meadow\.webp/,
+  )
   const view = (await page.locator('.map-viewport').boundingBox())!
   const image = (await page.locator('.map-art').boundingBox())!
   expect(image.x + image.width).toBeLessThan(view.x + 35)
