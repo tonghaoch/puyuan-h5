@@ -10,7 +10,7 @@ puyuan-reference.jpg 是用户于 2026-11-17 提供的原始参考图，尺寸 2
 
 2026-11-18：scripts/prepare-reference-map.py 按 src/data/reference-map.json 选取古镇范围，生成 public/art 下的配色版、原色对照和水面动画遮罩。仅做平移、遮罩与配色，原图不覆盖。
 
-`npm run art:reference` 重建 1520 × 1240 的原色概览图和 2 倍保真图块（Lanczos 插值、轻度锐化）。使用 `npm run art:reference -- --ai-master /path/to/puyuan-AI-4x.webp` 可同时切分已对齐的 6080 × 4960 AI 母图；不提供时保留随项目发布的 4 倍图块。两层均为 512 像素无损 WebP，边界图块按实际尺寸裁切。原始 JPG 与手绘导览素材不变。
+`npm run art:reference` 重建 1520 × 1240 的原色概览图和 2 倍保真图块（Lanczos 插值、轻度锐化）。加上 `-- --ai-master /path/to/puyuan-AI-4x.webp --fsrcnn-x4 /path/to/FSRCNN_x4.pb` 可同时生成 4 倍图块：原标牌附近使用去字底图重新超分，其余沿用高清母图。省略这两个参数时保留已发布的 4 倍图块。两层均为 512 像素无损 WebP，边界图块按实际尺寸裁切。原始 JPG 与手绘导览素材不变。
 
 高清层在切块前统一增强明暗边缘，对每个像素的修正量设限，避免地名笔画和屋脊出现过重的亮边。缩放比例乘屏幕像素比超过 1.7 时切入 4 倍层，不必等到 2 倍图已被拉大才加载。
 

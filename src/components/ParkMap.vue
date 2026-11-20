@@ -7,6 +7,7 @@ import LandmarkLayer from './LandmarkLayer.vue'
 import ArchitectureLayer from './ArchitectureLayer.vue'
 import LandscapeLayer from './LandscapeLayer.vue'
 import ReferenceTiles from './ReferenceTiles.vue'
+import ReferenceLabels from './ReferenceLabels.vue'
 import landmarkModels from '../data/landmark-models.json'
 import nativeLandscape from '../data/native-landscape.json'
 import AppIcon from './AppIcon.vue'
@@ -493,8 +494,13 @@ onBeforeUnmount(() => observer?.disconnect())
           ><span class="pin-caption">{{ position.name }}</span>
         </button>
       </template>
+      <ReferenceLabels
+        v-if="view === 'reference'"
+        :places="places"
+        @select="emit('select', $event)"
+      />
       <button
-        v-for="place in geographic ? [] : places"
+        v-for="place in view === 'illustration' ? places : []"
         :key="place.id"
         class="map-pin"
         :class="[

@@ -31,6 +31,9 @@ class PublishedRaster(unittest.TestCase):
             drawing.paste((180,140,100),(80,50,120,90))
             drawing.save(source)
             Image.new('RGB',(160,120),(91,135,75)).save(root/'references/reference-outpaint.webp',lossless=True)
+            repair=Image.new('RGBA',(160,120))
+            repair.paste((50,85,40,255),(50,40,65,55))
+            repair.save(root/'references/reference-label-repairs.webp',lossless=True)
             before = source.read_bytes()
             subprocess.run([sys.executable,str(script)],check=True)
             self.assertEqual(source.read_bytes(),before)
@@ -40,6 +43,7 @@ class PublishedRaster(unittest.TestCase):
                 self.assertEqual(result.getpixel((160,120)),(180,140,100))
                 self.assertEqual(result.getpixel((80,120)),(70,100,130))
                 self.assertEqual(result.getpixel((0,0)),(91,135,75))
+                self.assertEqual(result.getpixel((114,94)),(50,85,40))
 
     def test_blank_landmark_cannot_replace_the_last_good_asset(self):
         with TemporaryDirectory() as directory:
