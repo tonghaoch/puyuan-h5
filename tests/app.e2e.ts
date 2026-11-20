@@ -226,6 +226,27 @@ test('navigation is at the bottom in both desktop preview and mobile', async ({ 
   await expect(page.getByRole('navigation', { name: '主要导航' })).toBeInViewport()
 })
 
+test('zooming the reference map loads local AI tiles and panning replaces them', async ({
+  page,
+}) => {
+  await page.goto('/')
+  await page.getByRole('button', { name: '原图对照', exact: true }).click()
+  const tiles = page.locator('.reference-tiles img[src*="/8/"]')
+  await expect(tiles).toHaveCount(0)
+  for (let i = 0; i < 16; i++) await page.getByRole('button', { name: '放大地图' }).click()
+  await expect(tiles.first()).toBeVisible()
+  await expect(tiles.first()).toHaveJSProperty('naturalWidth', 1024)
+  const firstTile = await tiles.first().getAttribute('src')
+  expect(await tiles.count()).toBeLessThan(30)
+  const viewport = page.locator('.map-viewport')
+  await viewport.focus()
+  for (let i = 0; i < 10; i++) await viewport.press('ArrowRight')
+  await expect(page.locator(`.reference-tiles img[src="${firstTile}"]`)).toHaveCount(0)
+  await expect(tiles.first()).toBeVisible()
+  await viewport.press('Home')
+  await expect(tiles).toHaveCount(0)
+})
+
 test('reference and illustration share geometry, real map and imagery share georeferenced geometry', async ({
   page,
 }) => {
@@ -234,6 +255,14 @@ test('reference and illustration share geometry, real map and imagery share geor
   const initial = await page.locator('.map-scene').getAttribute('style')
   await page.getByRole('button', { name: '原图对照', exact: true }).click()
   await expect(page.locator('.map-art')).toHaveAttribute('src', '/art/puyuan-original-scope.webp')
+  await expect
+    .poll(() =>
+      page.locator('.map-art').evaluate((image: HTMLImageElement) => ({
+        pixels: [image.naturalWidth, image.naturalHeight],
+        scene: [image.width, image.height],
+      })),
+    )
+    .toEqual({ pixels: [1520, 1240], scene: [1520, 1240] })
   await expect(page.locator('.map-scene')).toHaveAttribute('style', initial!)
   await page.getByRole('button', { name: '真实路网', exact: true }).click()
   await expect(page.locator('.real-road').first()).toBeVisible()
