@@ -7,8 +7,11 @@ export type CameraWorld = 'illustration' | 'geographic'
 // SCENE remains the original image/geo frame. Exterior space must never shift its coordinates.
 export const SCENE = { width: 1520, height: 1240 }
 export const MEADOW_MARGIN = 1600
-export const MIN_SCALE = 0.22
-export const MAX_SCALE = 3
+export const ZOOM_STEP = 1.25
+export function zoomRange(width: number, height: number) {
+  const initial = Math.max(0.22, Math.min(width / 1120, (height - 160) / 1040))
+  return { initial, min: initial / ZOOM_STEP, max: initial * ZOOM_STEP ** 8 }
+}
 export function cameraBounds(world: CameraWorld) {
   const margin = world === 'illustration' ? MEADOW_MARGIN : 90
   return { left: -margin, top: -margin, right: SCENE.width + margin, bottom: SCENE.height + margin }
@@ -24,10 +27,8 @@ export function clampCamera(
   height: number,
   world: CameraWorld = 'illustration',
 ): Camera {
-  const scale = Math.max(
-    MIN_SCALE,
-    Math.min(world === 'illustration' ? MAX_SCALE : 1.8, camera.scale),
-  )
+  const { min, max } = zoomRange(width, height)
+  const scale = Math.max(min, Math.min(max, camera.scale))
   const bounds = cameraBounds(world)
   return {
     scale,
@@ -44,10 +45,8 @@ export function zoomAt(
   height: number,
   world: CameraWorld = 'illustration',
 ): Camera {
-  const scale = Math.max(
-    MIN_SCALE,
-    Math.min(world === 'illustration' ? MAX_SCALE : 1.8, camera.scale * factor),
-  )
+  const { min, max } = zoomRange(width, height)
+  const scale = Math.max(min, Math.min(max, camera.scale * factor))
   const ratio = scale / camera.scale
   return clampCamera(
     { scale, x: x - (x - camera.x) * ratio, y: y - (y - camera.y) * ratio },

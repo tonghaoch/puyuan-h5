@@ -2,10 +2,10 @@
 import { computed } from 'vue'
 import { SCENE, visibleScene, type Camera } from '../lib/map-camera'
 
-const props = defineProps<{ camera: Camera; width: number; height: number }>()
+const props = defineProps<{ camera: Camera; width: number; height: number; atMaxZoom: boolean }>()
 const tiles = computed(() => {
   const density = props.camera.scale * window.devicePixelRatio
-  const closeUp = props.camera.scale >= 2.7 || density > 4
+  const closeUp = props.atMaxZoom || props.camera.scale >= 2.7 || density > 4
   const level = closeUp ? 8 : density > 1.7 ? 4 : density > 1.1 ? 2 : 1
   if (level === 1 || !props.width || !props.height) return []
   const step = (closeUp ? 1024 : 512) / level
