@@ -26,14 +26,13 @@ import { dayLabel, shanghaiDate, shiftDay, sessionStatus } from './lib/time'
 
 type Overlay = 'guide' | 'favorites' | 'location' | 'geopoint' | null
 const tab = ref<Tab>('map')
-const mapView = ref<MapView>('illustration')
+const mapView = ref<MapView>('reference')
 const geographicView = computed(() => isGeographicView(mapView.value))
 const focusLocation = ref(0)
 const geoSelection = ref<GeoFeature | null>(null)
 const mapViews: { id: MapView; name: string }[] = [
-  { id: 'illustration', name: '手绘导览' },
-  { id: 'reference', name: '原图对照' },
-  { id: 'geographic', name: '真实路网' },
+  { id: 'reference', name: '导览' },
+  { id: 'geographic', name: '路网' },
 ]
 const selection = ref<Selection | null>(null)
 const detailModelId = ref<string>()
@@ -87,7 +86,6 @@ const motionActive = computed(
   () => motion.value && pageVisible.value && tab.value === 'map' && !hasModal.value,
 )
 const today = computed(() => shanghaiDate(new Date(now.value)))
-const featured = activities[0]!
 const tabs: { id: Tab; label: string; icon: string; english: string }[] = [
   { id: 'map', label: '游园地图', icon: 'map', english: 'EXPLORE' },
   { id: 'food', label: '寻味濮院', icon: 'tea', english: 'TASTE' },
@@ -183,7 +181,7 @@ function resetFilters(target: Tab) {
   if (target === 'activities') activityFilter.value = 'all'
 }
 function viewOnMap(placeId: string) {
-  mapView.value = 'illustration'
+  mapView.value = 'reference'
   query.value = ''
   mapFilter.value = 'all'
   route('map', false, true)
@@ -347,7 +345,6 @@ onBeforeUnmount(() => {
         <ParkMap
           :places="visiblePlaces"
           :all-places="places"
-          :selected-id="currentPlace?.id || focusRequest?.id"
           :focus-request="focusRequest"
           :motion="motionActive"
           :view="mapView"
@@ -356,7 +353,7 @@ onBeforeUnmount(() => {
           :focus-location="focusLocation"
           @geoselect="openGeoPoint"
           @outside="notify('当前位置在园区视野之外，未将定位点移入园区')"
-          @select="(place, modelId) => openSelection({ kind: 'place', id: place.id }, modelId)"
+          @select="(place) => openSelection({ kind: 'place', id: place.id })"
           @locate="openOverlay('location')"
         />
         <div class="map-topbar">
@@ -402,23 +399,6 @@ onBeforeUnmount(() => {
           <p>还没有找到这处风景</p>
           <button @click="resetFilters('map')">查看全部地点</button>
         </div>
-        <button
-          v-if="!geographicView"
-          class="map-feature"
-          @click="openSelection({ kind: 'activity', id: featured.id })"
-        >
-          <span class="feature-image"
-            ><img src="/art/stage.svg" alt="水岸戏台插画" /><span class="image-corner"></span
-          ></span>
-          <span class="feature-copy"
-            ><span class="feature-eyebrow"><i></i> 不妨，赴一场风雅之约</span
-            ><strong>水岸听曲</strong
-            ><span class="feature-info"
-              ><AppIcon name="clock" :size="13" />19:00 · 水上舞台</span
-            ></span
-          >
-          <span class="feature-arrow"><AppIcon name="arrow" :size="18" /></span>
-        </button>
         <div class="map-bottom-note">
           <span class="demo-dot"></span
           ><span v-if="!geographicView">水乡漫游 · {{ places.length }} 处地点</span
@@ -804,7 +784,7 @@ onBeforeUnmount(() => {
         <div class="demo-notice">
           <AppIcon name="info" :size="17" />
           <p>
-            当前是示意地图与演示内容。手绘图保留参考图布局；真实路网按地理坐标展示，可以查看设备位置。暂不提供步行导航。
+            导览是古镇示意图；路网按地理坐标展示，可以查看设备位置。暂不提供步行导航。
           </p>
         </div>
         <button class="primary-button full-width" @click="closeModal">
@@ -871,7 +851,7 @@ onBeforeUnmount(() => {
         <div class="demo-notice">
           <AppIcon name="info" :size="17" />
           <p>
-            当前古风地图尚未进行地理校准，暂不在示意图上显示定位点。真实路网使用真实地理坐标；公开边界不代表实际开放范围。
+            当前古风地图尚未进行地理校准，暂不在示意图上显示定位点。路网使用真实地理坐标；公开边界不代表实际开放范围。
           </p>
         </div>
         <GeoLocationMap :fix="location.fix.value" :now="now" />
@@ -880,7 +860,7 @@ onBeforeUnmount(() => {
           class="secondary-button full-width"
           @click="viewLocationOnMap"
         >
-          <AppIcon name="map" :size="17" />在真实路网中查看位置
+          <AppIcon name="map" :size="17" />在路网中查看位置
         </button>
         <button
           v-if="location.state.value !== 'denied'"

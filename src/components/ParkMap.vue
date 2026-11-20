@@ -1,22 +1,14 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import type { Place } from '../data/catalog'
 import { clampCamera, zoomAt, zoomRange, ZOOM_STEP, SCENE, type Camera } from '../lib/map-camera'
-import MeadowLayer from './MeadowLayer.vue'
-import LandmarkLayer from './LandmarkLayer.vue'
-import ArchitectureLayer from './ArchitectureLayer.vue'
-import LandscapeLayer from './LandscapeLayer.vue'
 import ReferenceTiles from './ReferenceTiles.vue'
 import ReferenceLabels from './ReferenceLabels.vue'
-import landmarkModels from '../data/landmark-models.json'
-import nativeLandscape from '../data/native-landscape.json'
 import AppIcon from './AppIcon.vue'
-import referenceMap from '../data/reference-map.json'
 import { useParkGeography, isGeographicView, type MapView } from '../lib/park-geography'
 import { classifyFix, type GeographicFix, type GeoFeature } from '../lib/geography'
 const props = defineProps<{
   places: Place[]
-  selectedId?: string
   focusRequest: { id: string; nonce: number } | null
   allPlaces: Place[]
   motion: boolean
@@ -26,7 +18,7 @@ const props = defineProps<{
   focusLocation: number
 }>()
 const emit = defineEmits<{
-  select: [place: Place, modelId?: string]
+  select: [place: Place]
   locate: []
   zoom: [value: number]
   geoselect: [feature: GeoFeature]
@@ -37,14 +29,6 @@ const geographic = computed(() => isGeographicView(props.view))
 const cameraWorld = computed(() =>
   geographic.value ? ('geographic' as const) : ('illustration' as const),
 )
-const inspectionIndex = ref(-1)
-const showBuildingPicker = ref(false)
-const inspectionTitle = ref<HTMLButtonElement>()
-function closeBuildingPicker() {
-  showBuildingPicker.value = false
-  void nextTick(() => inspectionTitle.value?.focus())
-}
-const inspected = computed(() => landmarkModels.models[inspectionIndex.value])
 const positions = geography.points
 const userPosition = computed(() =>
   props.fix && geography.frame.value
@@ -70,7 +54,7 @@ const accuracyRadius = computed(() =>
       Math.cos((props.fix.latitude * Math.PI) / 180)
     : 0,
 )
-const savedCameras = new Map<string, Camera>()
+const savedCameras = new Map<MapView, Camera>()
 const viewport = ref<HTMLElement>()
 const camera = reactive<Camera>({ x: 0, y: 0, scale: 0.6 })
 const dimensions = reactive({ width: 0, height: 0 })
@@ -99,20 +83,11 @@ const townOutOfView = computed(
       camera.y + SCENE.height * camera.scale < 145 ||
       camera.y > dimensions.height - 135),
 )
-const icon: Record<string, string> = {
-  performance: 'fan',
-  craft: 'flower',
-  food: 'tea',
-  scenic: 'lantern',
-  service: 'bell',
-}
 function setCamera(value: Camera) {
   Object.assign(camera, clampCamera(value, dimensions.width, dimensions.height, cameraWorld.value))
   emit('zoom', camera.scale)
 }
 function reset() {
-  showBuildingPicker.value = false
-  inspectionIndex.value = -1
   const { width, height } = dimensions
   const scale = limits.value.initial
   setCamera({ scale, x: width / 2 - 850 * scale, y: (height + 5) / 2 - 605 * scale })
@@ -120,12 +95,8 @@ function reset() {
 watch(
   () => props.view,
   (next, previous) => {
-    showBuildingPicker.value = false
-    const previousKind = isGeographicView(previous) ? 'geographic' : 'art'
-    const nextKind = isGeographicView(next) ? 'geographic' : 'art'
-    if (previousKind === nextKind) return
-    savedCameras.set(previousKind, { ...camera })
-    const saved = savedCameras.get(nextKind)
+    savedCameras.set(previous, { ...camera })
+    const saved = savedCameras.get(next)
     if (saved) setCamera(saved)
     else reset()
   },
@@ -159,26 +130,6 @@ function changeZoom(factor: number) {
     ),
   )
 }
-function inspectBuilding(index?: number) {
-  showBuildingPicker.value = false
-  inspectionIndex.value =
-    typeof index === 'number' ? index : (inspectionIndex.value + 1) % landmarkModels.models.length
-  const model = inspected.value!
-  const [x, y, width, height] = model.sourceBounds as [number, number, number, number]
-  const scale = Math.max(
-    0.5,
-    Math.min(3, (dimensions.width - 32) / width, Math.max(180, dimensions.height - 345) / height),
-  )
-  setCamera({
-    scale,
-    x: dimensions.width / 2 - (x + width / 2 + referenceMap.sourceOffset.x) * scale,
-    y: (dimensions.height + 55) / 2 - (y + height / 2 + referenceMap.sourceOffset.y) * scale,
-  })
-}
-function selectBuilding(placeId: string, modelId: string) {
-  const place = props.allPlaces.find((p) => p.id === placeId)
-  if (place) emit('select', place, modelId)
-}
 function guardClick(event: MouseEvent) {
   if (suppressClick) {
     event.preventDefault()
@@ -187,7 +138,6 @@ function guardClick(event: MouseEvent) {
   }
 }
 function focus(place: Place) {
-  inspectionIndex.value = -1
   const scale = Math.max(camera.scale, 0.83)
   setCamera({
     scale,
@@ -208,8 +158,8 @@ function down(event: PointerEvent) {
     dragDistance = 0
   }
   const button = (event.target as Element).closest('button')
-  if ((button && !button.classList.contains('landmark-model')) || event.button > 0) return
-  ;(button || viewport.value)?.setPointerCapture(event.pointerId)
+  if (button || event.button > 0) return
+  viewport.value?.setPointerCapture(event.pointerId)
   pointers.set(event.pointerId, { x: event.clientX, y: event.clientY })
   dragging.value = true
 }
@@ -319,7 +269,7 @@ onBeforeUnmount(() => observer?.disconnect())
     }"
     role="region"
     :aria-label="
-      geographic ? '古镇真实地理地图，可拖动缩放' : '古镇示意地图，手绘水系、建筑与园林，可拖动缩放'
+      geographic ? '古镇真实地理地图，可拖动缩放' : '古镇导览，可拖动缩放'
     "
     tabindex="0"
     @click.capture="guardClick"
@@ -335,111 +285,21 @@ onBeforeUnmount(() => observer?.disconnect())
     <div v-if="!geographic" class="meadow-backdrop" :style="meadowStyle" aria-hidden="true"></div>
     <div class="map-scene" :style="style">
       <template v-if="!geographic">
-        <MeadowLayer
-          v-if="view === 'illustration'"
-          :camera="camera"
-          :width="dimensions.width"
-          :height="dimensions.height"
-        />
         <img
           class="map-art"
-          :src="view === 'reference' ? '/art/puyuan-original-scope.webp' : nativeLandscape.ground"
-          :alt="view === 'reference' ? '原始参考地图' : '原生绘制的古镇水系、石岸、铺装与桥梁'"
+          src="/art/puyuan-original-scope.webp"
+          alt="原始参考地图"
           :width="SCENE.width"
           :height="SCENE.height"
           draggable="false"
           fetchpriority="high"
         />
         <ReferenceTiles
-          v-if="view === 'reference'"
           :at-max-zoom="atMaxZoom"
           :camera="camera"
           :width="dimensions.width"
           :height="dimensions.height"
         />
-        <div v-if="view === 'illustration'" class="map-water-mask">
-          <svg
-            :width="SCENE.width"
-            :height="SCENE.height"
-            :viewBox="`0 0 ${SCENE.width} ${SCENE.height}`"
-            aria-hidden="true"
-          >
-            <g
-              :transform="`translate(${referenceMap.sourceOffset.x} ${referenceMap.sourceOffset.y})`"
-            >
-              <path
-                v-for="d in referenceMap.waterAnimations"
-                :key="d"
-                :d="d"
-                class="water-highlight"
-              />
-            </g>
-          </svg>
-        </div>
-        <img
-          v-if="view === 'illustration'"
-          class="native-waterfront-art"
-          :src="nativeLandscape.waterfronts"
-          :width="SCENE.width"
-          :height="SCENE.height"
-          alt="原生桥梁、码头与游船"
-          draggable="false"
-        />
-        <ArchitectureLayer
-          v-if="view === 'illustration'"
-          :camera="camera"
-          :width="dimensions.width"
-          :height="dimensions.height"
-        />
-        <LandmarkLayer
-          v-if="view === 'illustration'"
-          :camera="camera"
-          :width="dimensions.width"
-          :height="dimensions.height"
-          :selected-id="selectedId"
-          :highlighted-id="inspected?.id"
-          @select="selectBuilding"
-        />
-        <LandscapeLayer
-          v-if="view === 'illustration'"
-          :camera="camera"
-          :width="dimensions.width"
-          :height="dimensions.height"
-        />
-
-        <svg
-          v-if="view === 'illustration'"
-          class="map-effects"
-          :width="SCENE.width"
-          :height="SCENE.height"
-          :viewBox="`0 0 ${SCENE.width} ${SCENE.height}`"
-          aria-hidden="true"
-        >
-          <g
-            :transform="`translate(${referenceMap.sourceOffset.x} ${referenceMap.sourceOffset.y})`"
-          >
-            <g transform="translate(1218 911) rotate(25) scale(.5)">
-              <g class="floating-boat">
-                <path
-                  d="M0-30Q-18-8-12 25Q0 45 12 25Q18-8 0-30Z"
-                  fill="#8c7655"
-                  stroke="#e8d8ae"
-                  stroke-width="2"
-                />
-                <path d="M-10-10Q0-25 10-10V13H-10Z" fill="#617b67" />
-              </g>
-            </g>
-            <g class="lantern-glows" fill="#edc275"><circle cx="1061" cy="365" r="3" /></g>
-            <g class="falling-petals" fill="#d5a39a">
-              <path
-                d="M670 756q-4-7 4-7 8 4-4 7M1030 428q-4-8 4-7 7 3-4 7M945 900q-4-8 4-8 8 4-4 8"
-              />
-            </g>
-            <g class="bird-flight" fill="none" stroke="#fcf7e5" stroke-width="2">
-              <path d="M1020 390q10-10 20 0 10-8 20 0m-75 22q7-7 14 0 7-6 14 0" />
-            </g>
-          </g>
-        </svg>
       </template>
       <template v-else>
         <svg
@@ -499,26 +359,6 @@ onBeforeUnmount(() => observer?.disconnect())
         :places="places"
         @select="emit('select', $event)"
       />
-      <button
-        v-for="place in view === 'illustration' ? places : []"
-        :key="place.id"
-        class="map-pin"
-        :class="[
-          place.category,
-          {
-            selected: place.id === selectedId,
-            secondary: place.secondary,
-            'under-inspection': view === 'illustration' && inspected?.placeId === place.id,
-          },
-        ]"
-        :style="{ left: `${place.point.x}px`, top: `${place.point.y}px` }"
-        :aria-label="`查看${place.name}`"
-        @click.stop="emit('select', place)"
-        @dblclick.stop
-      >
-        <span class="pin-symbol"><AppIcon :name="icon[place.category]!" :size="21" /></span>
-        <span class="pin-caption">{{ place.name }}</span>
-      </button>
     </div>
   </div>
   <div v-if="geographic && geography.error.value" class="geo-map-error" role="status">
@@ -529,59 +369,12 @@ onBeforeUnmount(() => observer?.disconnect())
     class="geo-map-error"
     role="status"
   >
-    正在加载真实路网…
+    正在加载路网…
   </div>
-  <div v-if="inspected && view === 'illustration' && !townOutOfView" class="building-inspection">
-    <button
-      ref="inspectionTitle"
-      class="inspection-title"
-      aria-label="选择要细看的建筑"
-      :aria-expanded="showBuildingPicker"
-      @click="showBuildingPicker = !showBuildingPicker"
-    >
-      <small>古建细赏 · {{ inspectionIndex + 1 }} / {{ landmarkModels.models.length }}</small
-      ><strong>{{ inspected.name }}<AppIcon name="chevron" :size="12" /></strong>
-    </button>
-    <button aria-label="下一处建筑" @click="inspectBuilding()">
-      <AppIcon name="arrow" :size="17" /></button
-    ><button aria-label="退出古建细赏" @click="reset"><AppIcon name="close" :size="16" /></button>
-  </div>
-  <section
-    v-if="showBuildingPicker && inspected && view === 'illustration' && !townOutOfView"
-    class="building-picker"
-    aria-label="古建目录"
-    @keydown.esc.stop="closeBuildingPicker"
-  >
-    <header>
-      <span>古建目录 · {{ landmarkModels.models.length }} 处</span
-      ><button aria-label="关闭古建目录" @click="closeBuildingPicker">
-        <AppIcon name="close" :size="17" />
-      </button>
-    </header>
-    <div>
-      <button
-        v-for="(model, index) in landmarkModels.models"
-        :key="model.id"
-        :class="{ active: inspectionIndex === index }"
-        @click="inspectBuilding(index)"
-      >
-        <span>{{ String(index + 1).padStart(2, '0') }}</span>{{ model.name }}
-      </button>
-    </div>
-  </section>
   <button v-if="townOutOfView" class="return-to-town" @click="reset">
     <AppIcon name="map" :size="16" />回到古镇
   </button>
   <div class="map-tools" aria-label="地图工具">
-    <button
-      v-if="view === 'illustration'"
-      class="map-tool building-tool"
-      aria-label="细看古建"
-      title="细看古建"
-      @click="inspectBuilding()"
-    >
-      <AppIcon name="lantern" :size="22" />
-    </button>
     <button
       class="map-tool locate-tool"
       aria-label="获取我的位置"
