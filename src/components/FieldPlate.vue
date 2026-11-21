@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { t } from '../i18n'
+import { publicAsset } from '../lib/public-asset'
 import { computed, ref } from 'vue'
 import { encounterImage, type FieldEntry } from '../data/offsite'
 const props = defineProps<{ entry: FieldEntry }>()
@@ -37,7 +38,11 @@ function finishLeaf(event: TouchEvent) {
           <div v-if="photo[2] === 'portrait'" class="plate-inscription" aria-hidden="true">
             <span>{{ t('人物小像') }}</span><i>{{ t('濮院') }}</i>
           </div>
-          <img :src="encounterImage(entry.id, selected + 1)" :alt="t(photo[1])" draggable="false" />
+          <img
+            :src="publicAsset(encounterImage(entry.id, selected + 1))"
+            :alt="t(photo[1])"
+            draggable="false"
+          />
         </div>
       </div>
       <figcaption aria-live="polite">

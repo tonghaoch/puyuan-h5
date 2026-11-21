@@ -2630,15 +2630,20 @@ html:lang(en) .text-filters {
 }
 /* Continuous world ground. Its texture tracks the same camera as the town. */
 .map-viewport.has-meadow {
-  background: #e4e6cc;
+  background: #d2d9ab;
 }
 .meadow-backdrop {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: calc(100% + var(--meadow-period));
+  height: calc(100% + var(--meadow-period));
   pointer-events: none;
-  background-color: #e4e6cc;
+  background-color: inherit;
   background-image: url('/art/meadow-tile.svg');
   background-repeat: repeat;
+  background-size: var(--meadow-period) var(--meadow-period);
+  will-change: transform;
 }
 .meadow-layer {
   position: absolute;

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { t } from '../i18n'
+import { publicAsset } from '../lib/public-asset'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import {
   classifyFix,
@@ -56,7 +57,9 @@ const message = computed(() => {
 })
 onMounted(async () => {
   try {
-    const response = await fetch('/geodata/boundary.geojson', { signal: controller.signal })
+    const response = await fetch(publicAsset('/geodata/boundary.geojson'), {
+      signal: controller.signal,
+    })
     if (!response.ok) throw new Error('Map data unavailable')
     const result = (await response.json()) as GeoCollection
     if (result.type !== 'FeatureCollection' || !Array.isArray(result.features))
@@ -78,8 +81,7 @@ onBeforeUnmount(() => controller.abort())
 <template>
   <div class="geo-overview">
     <div class="geo-overview-title">
-      <span>{{ t('位置概览') }}</span
-      ><small>{{ t('真实地理坐标') }}</small>
+      <span>{{ t('位置概览') }}</span><small>{{ t('真实地理坐标') }}</small>
     </div>
     <p v-if="error" class="geo-loading">{{ t('地理概览暂时无法加载，仍可浏览古镇示意图。') }}</p>
     <p v-else-if="!frame" class="geo-loading" role="status">{{ t('正在加载园区位置…') }}</p>

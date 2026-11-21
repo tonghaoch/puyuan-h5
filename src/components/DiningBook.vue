@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { publicAsset } from '../lib/public-asset'
 import { t, matchesBilingual } from '../i18n'
 import { computed, ref } from 'vue'
 import AppIcon from './AppIcon.vue'
@@ -42,7 +43,13 @@ const shown = computed(() =>
       seal="食记"
     >
       <template #art>
-        <img class="dining-art" src="/art/journal-dining.svg" width="300" height="220" alt="" />
+        <img
+          class="dining-art"
+          :src="publicAsset('/art/journal-dining.svg')"
+          width="300"
+          height="220"
+          alt=""
+        />
       </template>
     </FieldHeading>
     <div class="field-inner dining-inner">

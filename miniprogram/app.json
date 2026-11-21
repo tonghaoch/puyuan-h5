@@ -1,0 +1,8 @@
+{
+  "pages": ["pages/guide/index"],
+  "window": {
+    "navigationBarTitleText": "濮院漫游",
+    "navigationBarBackgroundColor": "#f8f5eb",
+    "navigationBarTextStyle": "black"
+  }
+}

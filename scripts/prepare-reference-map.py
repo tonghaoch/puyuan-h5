@@ -25,6 +25,10 @@ if paint.size != (w,h):
     raise ValueError('AI outpaint must be registered to the reference scene')
 # Sample open ground in the northwest of the painting, not a second illustration.
 patch=paint.crop((round(w*.04),round(h*.05),round(w*.1663),round(h*.2048))).resize((192,192),Image.Resampling.LANCZOS)
+flowering_shrub=Image.new('L',patch.size)
+ImageDraw.Draw(flowering_shrub).polygon([(-20,88),(24,87),(47,102),(58,124),(78,131),
+                                        (82,155),(75,168),(41,176),(-20,181)],fill=255)
+patch=Image.composite(ImageChops.offset(patch,-83,0),patch,flowering_shrub.filter(ImageFilter.GaussianBlur(5)))
 strip=Image.new('RGB',(384,192))
 strip.paste(patch);strip.paste(ImageOps.mirror(patch),(192,0))
 grass=Image.new('RGB',(384,384))

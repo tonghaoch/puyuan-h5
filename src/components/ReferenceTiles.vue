@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { publicAsset } from '../lib/public-asset'
 import { SCENE, visibleScene, type Camera } from '../lib/map-camera'
 
 const props = defineProps<{ camera: Camera; width: number; height: number; atMaxZoom: boolean }>()
@@ -22,7 +23,7 @@ const tiles = computed(() => {
       x++
     ) {
       tiles.push({
-        src: `/art/reference-tiles/${level}/${x}-${y}.webp`,
+        src: publicAsset(`/art/reference-tiles/${level}/${x}-${y}.webp`),
         left: x * step,
         top: y * step,
         width: Math.min(step, SCENE.width - x * step),
