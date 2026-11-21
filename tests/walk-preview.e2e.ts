@@ -60,5 +60,6 @@ test('a reduced-motion preview steps manually; the regular map has no fake locat
   await page.goto('/')
   await expect(page.locator('.walk-preview-control, .walker-anchor')).toHaveCount(0)
   await page.getByRole('button', { name: '获取我的位置' }).click()
-  await expect(page.getByRole('dialog', { name: '我的位置' })).toBeVisible()
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+  await expect(page.locator('.geo-overview')).toBeVisible()
 })

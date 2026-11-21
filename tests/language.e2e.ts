@@ -76,7 +76,7 @@ test('all book chapters, map labels and legacy dialogs render English on a narro
     ['map/place/temple/temple-pagoda', 'Temple Pagoda'],
     ['map/restaurant/r-tea', 'Canal Lane Tea House'],
     ['map/restaurant/late-supper', 'About 50 seats'],
-    ['map/location', 'Geographic coordinates'],
+    ['map/location', 'Location overview'],
     ['map/favorites', 'Nothing saved yet.'],
   ]) {
     await page.goto(`/#${route}`)

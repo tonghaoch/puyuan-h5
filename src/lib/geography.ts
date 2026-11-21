@@ -20,6 +20,7 @@ export interface GeographicFix {
   timestamp: number
 }
 const RADIUS = 6378137
+export const FIX_LIFETIME_MS = 60000
 export function mercator([longitude, latitude]: LngLat): XY {
   const clamped = Math.max(-85.05112878, Math.min(85.05112878, latitude))
   return [
@@ -55,7 +56,7 @@ export function classifyFix(
   ring: readonly LngLat[],
   now = Date.now(),
 ): 'inside' | 'outside' | 'uncertain' | 'stale' {
-  if (now - fix.timestamp > 60000) return 'stale'
+  if (now - fix.timestamp >= FIX_LIFETIME_MS) return 'stale'
   if (!Number.isFinite(fix.accuracy) || fix.accuracy < 0 || ring.length < 3) return 'uncertain'
   const coordinate: LngLat = [fix.longitude, fix.latitude]
   const projected = mercator(coordinate)

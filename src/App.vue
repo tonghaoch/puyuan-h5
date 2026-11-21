@@ -26,11 +26,12 @@ import {
   type Selection,
 } from './data/catalog'
 import { useLocation } from './lib/location'
+import { walkPreviewEnabled } from './lib/walk-preview'
 import { publicAsset } from './lib/public-asset'
 import { t, locale, languageAction, toggleLanguage, matchesBilingual } from './i18n'
 import { dayLabel, shanghaiDate, shiftDay, sessionStatus } from './lib/time'
 
-type Overlay = 'favorites' | 'location' | null
+type Overlay = 'favorites' | null
 const tab = ref<Tab>('map')
 const bookSection = ref('')
 const activeQuest = ref<Quest>()
@@ -40,6 +41,7 @@ let gameOpener: HTMLElement | undefined
 const selection = ref<Selection | null>(null)
 const detailModelId = ref<string>()
 const overlay = ref<Overlay>(null)
+const showLocation = ref(false)
 const query = ref('')
 const visibleLayers = reactive<Record<MapLayer, boolean>>({ quest: true, npc: true, places: false })
 const activityFilter = ref('all')
@@ -83,7 +85,7 @@ function loadFavorites(): string[] {
   }
 }
 const favorites = ref<string[]>(loadFavorites())
-const location = useLocation()
+const location = useLocation(() => !walkPreviewEnabled && pageVisible.value && tab.value === 'map')
 const activeEntry = computed(() => activeQuest.value ?? activeNpc.value)
 const mapEntry = computed(() => (tab.value === 'map' ? activeEntry.value : undefined))
 const hasModal = computed(() => !!selection.value || !!overlay.value || !!mapEntry.value)
@@ -140,7 +142,8 @@ function readRoute() {
   }
   selection.value = kind && id ? validSelection(kind, id) : null
   detailModelId.value = kind === 'place' ? modelId : undefined
-  overlay.value = kind === 'favorites' || kind === 'location' ? kind : null
+  overlay.value = kind === 'favorites' ? kind : null
+  showLocation.value = !walkPreviewEnabled && tab.value === 'map' && kind === 'location'
 }
 function route(path: string, modal = false, replace = false) {
   const method = replace ? 'replaceState' : 'pushState'
@@ -175,9 +178,6 @@ function leaveQuest() {
 }
 function openSelection(next: Selection, modelId?: string) {
   route(`${tab.value}/${next.kind}/${next.id}${modelId ? `/${modelId}` : ''}`, true, hasModal.value)
-}
-function openOverlay(next: Exclude<Overlay, null>) {
-  route(`${tab.value}/${next}`, true, hasModal.value)
 }
 function closeModal() {
   if (window.history.state?.puyuanModal) window.history.back()
@@ -301,16 +301,25 @@ const locationMessage = computed(
     ({
       idle: '点击下方按钮，允许设备获取你的位置。',
       loading: '正在获取位置，请稍候…',
-      available: '已获取设备位置',
-      denied: '定位权限未开启。你仍然可以自由浏览地图和全部内容。',
+      available: '正在更新设备位置',
+      denied: '定位权限未开启。你可以继续浏览，或在系统设置中允许定位后重试。',
       unavailable: '当前环境暂不支持定位。请通过 HTTPS 地址在手机浏览器中打开。',
       timeout: '定位暂时超时，可以到开阔处后重试。',
       error: '暂时无法获取位置，请检查系统定位设置后重试。',
+      stale: '位置已过期，正在等待新的定位。',
     })[location.state.value],
 )
 function visibility() {
   pageVisible.value = !document.hidden
   if (pageVisible.value) now.value = Date.now()
+}
+function pageHide() {
+  pageVisible.value = false
+}
+function toggleMyLocation() {
+  showLocation.value = !showLocation.value
+  if (showLocation.value && ['loading', 'timeout', 'error', 'stale'].includes(location.state.value))
+    location.retry()
 }
 function motionPreference() {
   motion.value = !media.matches
@@ -319,6 +328,8 @@ onMounted(() => {
   window.addEventListener('popstate', readRoute)
   window.addEventListener('hashchange', readRoute)
   document.addEventListener('visibilitychange', visibility)
+  window.addEventListener('pagehide', pageHide)
+  window.addEventListener('pageshow', visibility)
   media.addEventListener('change', motionPreference)
   clockTimer = setInterval(() => {
     now.value = Date.now()
@@ -328,6 +339,8 @@ onBeforeUnmount(() => {
   window.removeEventListener('popstate', readRoute)
   window.removeEventListener('hashchange', readRoute)
   document.removeEventListener('visibilitychange', visibility)
+  window.removeEventListener('pagehide', pageHide)
+  window.removeEventListener('pageshow', visibility)
   media.removeEventListener('change', motionPreference)
   clearInterval(clockTimer)
   clearTimeout(toastTimer)
@@ -398,12 +411,22 @@ onBeforeUnmount(() => {
           :layers="visibleLayers"
           :focus-request="focusRequest"
           :motion="motionActive"
+          :show-location="showLocation"
           :active-quest-id="activeQuest?.id"
           :active-npc-id="activeNpc?.id"
           @game="openQuest"
           @npc="openNpc"
           @select="(place) => openSelection({ kind: 'place', id: place.id })"
-          @locate="openOverlay('location')"
+          @locate="toggleMyLocation"
+        />
+        <GeoLocationMap
+          v-if="showLocation"
+          id="map-location-note"
+          :fix="location.fix.value"
+          :now="now"
+          :device-message="locationMessage"
+          :can-retry="['denied', 'timeout', 'error', 'stale'].includes(location.state.value)"
+          @retry="location.retry()"
         />
         <div class="map-topbar">
           <div class="filter-pills" role="group" :aria-label="t('地图图层')">
@@ -796,63 +819,6 @@ onBeforeUnmount(() => {
           </div>
         </div></div
     ></AppDialog>
-  </Transition>
-  <Transition name="sheet">
-    <AppDialog v-if="overlay === 'location'" label="我的位置" @close="closeModal"
-      ><div class="simple-dialog location-dialog">
-        <span class="dialog-emblem"><AppIcon name="locate" :size="30" /></span>
-        <p class="eyebrow">{{ t('FIND YOUR PLACE') }}</p>
-        <h2>{{ t('此刻，你在何处') }}</h2>
-        <p class="dialog-intro">{{ t('位置仅用于当前设备，不会上传或保存轨迹。') }}</p>
-        <div class="location-state" :class="location.state.value" role="status">
-          <span v-if="location.state.value === 'loading'" class="spinner"></span
-          ><AppIcon
-            v-else
-            :name="location.state.value === 'available' ? 'check' : 'pin'"
-            :size="28"
-          />
-          <p>{{ t(locationMessage) }}</p>
-          <small v-if="location.fix.value">{{
-            t('设备报告精度约 {meters} 米 · {time} 获取', {
-              meters: Math.round(location.fix.value.accuracy),
-              time: new Date(location.fix.value.timestamp).toLocaleTimeString(locale, {
-                hour: '2-digit',
-                minute: '2-digit',
-              }),
-            })
-          }}</small>
-        </div>
-        <div class="demo-notice">
-          <AppIcon name="info" :size="17" />
-          <p>
-            {{
-              t(
-                '设备位置只显示在下方的园区边界概览中，不会标在手绘导览上。公开边界不代表实际开放范围。',
-              )
-            }}
-          </p>
-        </div>
-        <GeoLocationMap :fix="location.fix.value" :now="now" />
-        <button
-          v-if="location.state.value !== 'denied'"
-          class="primary-button full-width"
-          :disabled="location.state.value === 'loading'"
-          @click="location.locate()"
-        >
-          <AppIcon name="locate" :size="18" />{{
-            t(
-              location.state.value === 'loading'
-                ? '正在定位…'
-                : location.state.value === 'idle'
-                  ? '获取设备位置'
-                  : '重新获取位置',
-            )
-          }}</button
-        ><button v-else class="primary-button full-width" @click="closeModal">
-          {{ t('继续浏览地图') }}
-        </button>
-      </div></AppDialog
-    >
   </Transition>
   <Transition name="toast"
     ><div v-if="toast" class="toast-message" role="status">

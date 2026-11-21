@@ -1,5 +1,9 @@
 import { computed, ref, watch } from 'vue'
 
+export const walkPreviewEnabled =
+  (import.meta.env.DEV || import.meta.env.MODE === 'location-preview') &&
+  new URLSearchParams(window.location.search).get('preview') === 'walk'
+
 export function useWalkPreview(motion: () => boolean) {
   const path = [
     [852, 752],

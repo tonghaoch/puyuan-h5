@@ -355,10 +355,10 @@ test('device geolocation remains separate from the uncalibrated scene', async ({
   await page.goto('/')
   await page.getByRole('button', { name: '古镇地点', exact: true }).click()
   await page.getByRole('button', { name: '获取我的位置' }).click()
-  await page.getByRole('button', { name: '获取设备位置', exact: true }).click()
-  await expect(page.getByRole('dialog').getByText('已获取设备位置', { exact: true })).toBeVisible()
-  await expect(page.getByText(/设备报告精度约 18 米/)).toBeVisible()
-  await expect(page.getByRole('dialog').getByText(/位置在园区附近视野之外/)).toBeVisible()
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+  await expect(page.getByText(/精度约 18 米/)).toBeVisible()
+  await expect(page.getByText(/园区范围外/)).toBeVisible()
+  await expect(page.locator('.geo-map')).toHaveCount(0)
   await expect(page.locator('.geo-user')).toHaveCount(0)
   await expect(page.locator('.reference-labels button')).toHaveCount(18)
 })
@@ -368,18 +368,26 @@ test('permission denial stops prompting and keeps browsing available', async ({ 
     Object.defineProperty(navigator, 'geolocation', {
       configurable: true,
       value: {
-        getCurrentPosition: (_success: unknown, failure: (error: { code: number }) => void) =>
-          failure({ code: 1 }),
+        watchPosition: (_success: unknown, failure: (error: { code: number }) => void) => {
+          const data = document.documentElement.dataset
+          data.permissionRequests = String(Number(data.permissionRequests || 0) + 1)
+          failure({ code: 1 })
+          return 0
+        },
+        clearWatch: () => {},
       },
     })
   })
   await page.goto('/')
   await page.getByRole('button', { name: '获取我的位置' }).click()
-  await page.getByRole('button', { name: '获取设备位置', exact: true }).click()
   await expect(page.getByText(/定位权限未开启/)).toBeVisible()
-  await expect(page.getByRole('button', { name: '重新获取位置' })).toHaveCount(0)
-  await page.getByRole('button', { name: '继续浏览地图' }).click()
   await expect(page.getByRole('dialog')).toHaveCount(0)
+  await page.getByRole('button', { name: '游戏', exact: true }).click()
+  await page.getByRole('button', { name: '地图', exact: true }).click()
+  await page.getByRole('button', { name: '获取我的位置' }).click()
+  await expect(page.locator('html')).toHaveAttribute('data-permission-requests', '1')
+  await page.getByRole('button', { name: '手动请求定位' }).click()
+  await expect(page.locator('html')).toHaveAttribute('data-permission-requests', '2')
 })
 
 test('reduced motion is respected and viewport never overflows horizontally', async ({ page }) => {
@@ -455,20 +463,25 @@ test('near-park GPS is plotted only on the attributed geographic overview', asyn
   await page.goto('/')
   await page.getByRole('button', { name: '获取我的位置' }).click()
   await expect(page.locator('.geo-map')).toBeVisible()
-  await page.getByRole('button', { name: '获取设备位置', exact: true }).click()
   await expect(page.locator('.geo-user')).toBeVisible()
   await expect(page.locator('.geo-boundary')).toBeVisible()
   await expect(page.getByRole('button', { name: /路网/ })).toHaveCount(0)
   await expect(page.getByText('你的位置在公开资料记录的园区范围内。')).toBeVisible()
   await expect(page.getByRole('link', { name: '© OpenStreetMap 贡献者' })).toBeVisible()
   expect(Number(await page.locator('.geo-accuracy').getAttribute('r'))).toBeGreaterThan(0)
-  await expect(page.locator('.map-scene .geo-user')).toHaveCount(0)
+  const before = await page.locator('.geo-user').getAttribute('transform')
+  await context.setGeolocation({ latitude: 30.6828, longitude: 120.6293, accuracy: 15 })
+  await expect(page.locator('.geo-user')).not.toHaveAttribute('transform', before!)
+  await expect(page.getByText(/精度约 15 米/)).toBeVisible()
+  await context.setGeolocation({ latitude: 30.6828, longitude: 120.6293, accuracy: 2000 })
+  await expect(page.getByText(/暂无法确认是否在园内/)).toBeVisible()
+  await expect(page.locator('.geo-user')).toHaveCount(0)
+  await expect(page.locator('.map-scene .geo-user, .walker-anchor')).toHaveCount(0)
 })
 
 test('close button stays available when a long dialog is scrolled', async ({ page }) => {
-  await page.goto('/')
-  await page.getByRole('button', { name: '获取我的位置' }).click()
-  await expect(page.locator('.geo-map')).toBeVisible()
+  await page.goto('/#map/place/temple/temple-pagoda')
+  await expect(page.locator('.detail-hero')).toBeVisible()
   await page.locator('.dialog-content').evaluate((el) => {
     el.scrollTop = el.scrollHeight
   })
@@ -649,8 +662,20 @@ test('location is the only camera-area control and clears the bottom nav and leg
   expect(button.x + button.width).toBeCloseTo(nav.x + nav.width - 14, 0)
   expect(button.y + button.height).toBeCloseTo(nav.y - 13, 0)
   expect(legend.x + legend.width).toBeLessThan(button.x)
+  const viewport = page.locator('.map-viewport')
+  await viewport.press('=')
+  const camera = await page.locator('.map-scene').getAttribute('style')
+  const historySize = await page.evaluate(() => history.length)
   await locate.click()
-  await expect(page.getByRole('dialog', { name: 'My location' })).toBeVisible()
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+  await expect(page.locator('.geo-overview')).toBeInViewport()
+  await expect(page.locator('.map-scene')).toHaveAttribute('style', camera!)
+  await expect(page).toHaveURL(/\/#map$/)
+  expect(await page.evaluate(() => history.length)).toBe(historySize)
+  await page.getByRole('button', { name: 'Places', exact: true }).click()
+  await expect(page.locator('.reference-labels button')).toHaveCount(18)
+  await locate.click()
+  await expect(page.locator('.geo-overview')).toHaveCount(0)
 })
 
 test('the tower link survives reload without changing the temple place or its default card', async ({

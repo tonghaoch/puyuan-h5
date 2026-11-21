@@ -12,9 +12,13 @@
 
 [微信官方 web-view 说明](https://developers.weixin.qq.com/miniprogram/dev/component/web-view.html) · [网络与开发调试说明](https://developers.weixin.qq.com/miniprogram/dev/framework/ability/network.html)
 
-## 给同事一个 GitHub Pages 链接
+## 定位验收
+
+真实定位验收请在手机微信用受信任的 **HTTPS 测试部署**打开普通导览，不要使用局域网 HTTP 或模拟步行链接。点右下角「我的位置」，应停留在原视野：园内显示角落边界小图和精度圈，园外只显示提示。地图仍可拖动、缩放，点原按钮可收起。走动、切后台再返回，检查位置更新；拒绝授权不影响浏览，可在提示中手动重试。未校准的手绘图不显示真实 GPS 点。
 
 定位 UI 的本地验收：启动 `npm run dev`，在开发地址后加 `?preview=walk`。靛蓝圆印是模拟位置，不会读取设备 GPS。点「模拟步行」可暂停或继续；系统开启减少动态效果时改为手动单步。拖动或缩放后，点右下角定位键可回到圆印，当前缩放倍数不变。单独构建手机 UI 预览时使用 Vite 的 `--mode location-preview`；常规构建和 Pages 即使带上相同参数也不启用模拟。
+
+## 给同事一个 GitHub Pages 链接
 
 - `npm run build:review` 生成 `dist-review/`。它是可独立部署的静态站点，支持仓库子路径和 `#map` 等深链接。不要上传整个源码仓库、原 PPT、参考图目录或个人开发者工具配置。**成品仍包含行程、集合地点和活动图片**，公开审阅前需确认这些可对外展示。
 - 在 **Settings → Pages → Build and deployment → Source** 选 **GitHub Actions**。推送到 `main` 后会自动运行测试、构建和网页检查；全部通过才会部署到 Pages。也可在 **Actions → Publish H5 review to Pages → Run workflow** 手动重新部署。成功后分享部署返回的网址或其普通二维码，微信扫一扫即可打开，无需安装开发者工具。

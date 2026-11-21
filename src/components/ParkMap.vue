@@ -4,7 +4,7 @@ import { publicAsset } from '../lib/public-asset'
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import type { MapLayer, Place } from '../data/catalog'
 import { clampCamera, zoomAt, zoomRange, SCENE, type Camera } from '../lib/map-camera'
-import { useWalkPreview } from '../lib/walk-preview'
+import { useWalkPreview, walkPreviewEnabled } from '../lib/walk-preview'
 import ReferenceTiles from './ReferenceTiles.vue'
 import referenceMap from '../data/reference-map.json'
 import ReferenceLabels from './ReferenceLabels.vue'
@@ -28,6 +28,7 @@ const props = defineProps<{
   focusRequest: { id: string; nonce: number } | null
   layers: Record<MapLayer, boolean>
   motion: boolean
+  showLocation: boolean
   activeQuestId?: string
   activeNpcId?: string
 }>()
@@ -69,11 +70,7 @@ function openPin(pin: (typeof pins)[number], event: MouseEvent) {
   else emit('npc', pin.id, opener)
 }
 const viewport = ref<HTMLElement>()
-const walkPreview =
-  (import.meta.env.DEV || import.meta.env.MODE === 'location-preview') &&
-  new URLSearchParams(window.location.search).get('preview') === 'walk'
-    ? useWalkPreview(() => props.motion)
-    : null
+const walkPreview = walkPreviewEnabled ? useWalkPreview(() => props.motion) : null
 const position = computed(() => walkPreview?.point.value)
 const locateLabel = computed(() => (position.value ? '回到我的位置' : '获取我的位置'))
 const camera = reactive<Camera>({ x: 0, y: 0, scale: 0.6 })
@@ -412,7 +409,8 @@ onBeforeUnmount(() => observer?.disconnect())
     class="locate-tool"
     :aria-label="t(locateLabel)"
     :title="t(locateLabel)"
-    :aria-haspopup="position ? undefined : 'dialog'"
+    :aria-expanded="position ? undefined : showLocation"
+    :aria-controls="showLocation ? 'map-location-note' : undefined"
     @click="locateOrRecenter"
   >
     <AppIcon name="locate" :size="22" />

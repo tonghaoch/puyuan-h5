@@ -2315,27 +2315,46 @@ button {
 }
 
 .geo-overview {
-  border: 1px solid #dfe1cb;
-  border-radius: 6px;
-  overflow: hidden;
-  margin: 20px 0;
-  background: #f5f4e8;
-}
-.geo-overview-title {
-  display: flex;
-  justify-content: space-between;
-  padding: 12px 14px;
-  border-bottom: 1px solid #dfe1cb;
+  position: absolute;
+  right: max(14px, env(safe-area-inset-right));
+  bottom: 64px;
+  z-index: 7;
+  display: grid;
+  align-items: center;
+  gap: 3px 8px;
+  width: max-content;
+  max-width: min(238px, calc(100% - 32px));
+  padding: 8px 11px;
+  border: 1px solid #cdbea1;
+  border-radius: 5px;
+  background: #fff8eaf5;
+  color: #394f59;
   font-size: 12px;
-  color: #6b7e5d;
+  line-height: 1.45;
+  pointer-events: none;
 }
-.geo-overview-title small {
-  font-size: 9px;
-  color: #9da184;
+.geo-overview > :is(strong, .geo-message, small, button) {
+  grid-column: 1;
+}
+.geo-overview > strong {
+  font: 700 13px/1.4 var(--serif);
+}
+.geo-overview > button {
+  justify-self: start;
+  min-height: 36px;
+  color: #294760;
+  text-decoration: underline;
+  pointer-events: auto;
+}
+.locate-tool[aria-expanded='true'] {
+  border-color: #637e8a;
+  color: #294760;
 }
 .geo-map {
+  grid-column: 2;
+  grid-row: 1 / span 3;
   display: block;
-  width: 100%;
+  width: 90px;
   height: auto;
   overflow: hidden;
 }
@@ -2360,45 +2379,14 @@ button {
   stroke-width: 2.5;
   filter: drop-shadow(0 1px 2px #4b6a5a55);
 }
-.geo-user.stale {
-  opacity: 0.5;
-}
-.geo-user-label {
-  font-size: 9px;
-  fill: #547e82;
-}
-.geo-message {
-  font-size: 10px;
-  color: #829272;
-  padding: 12px 14px 5px;
-  line-height: 1.8;
-}
 .geo-source {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  font-size: 8px;
-  color: #a1a48e;
-  padding: 5px 14px 12px;
+  grid-column: 1 / span 2;
+  text-align: right;
+  font-size: 10px;
 }
 .geo-source a {
-  text-decoration: none;
-}
-.geo-source a:hover {
   text-decoration: underline;
-}
-.geo-loading {
-  font-size: 11px;
-  color: #919c7d;
-  padding: 30px 18px;
-  text-align: center;
-  line-height: 1.9;
-}
-.location-dialog > .primary-button {
-  position: sticky;
-  bottom: 0;
-  z-index: 3;
-  box-shadow: 0 -12px 18px 8px #faf7ed;
+  pointer-events: auto;
 }
 .dialog-content {
   min-height: 0;
