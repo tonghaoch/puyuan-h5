@@ -1,6 +1,9 @@
 name: Publish H5 review to Pages
 
-on: workflow_dispatch
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
 
 concurrency:
   group: review-pages
