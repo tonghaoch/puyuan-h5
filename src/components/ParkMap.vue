@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
-import type { Place } from '../data/catalog'
+import type { MapLayer, Place } from '../data/catalog'
 import { clampCamera, zoomAt, zoomRange, ZOOM_STEP, SCENE, type Camera } from '../lib/map-camera'
 import ReferenceTiles from './ReferenceTiles.vue'
 import referenceMap from '../data/reference-map.json'
 import ReferenceLabels from './ReferenceLabels.vue'
 import QuestToken from './QuestToken.vue'
+import EncounterToken from './EncounterToken.vue'
 import AppIcon from './AppIcon.vue'
-import { gameSites, roamingAreas } from '../data/offsite'
+import { quests, wanderers } from '../data/offsite'
 import { useParkGeography, isGeographicView, type MapView } from '../lib/park-geography'
 import { classifyFix, type GeographicFix, type GeoFeature } from '../lib/geography'
 // Start point and bearing in the original painting's coordinate system.
@@ -24,9 +25,10 @@ const boatRoutes = [
 const props = defineProps<{
   places: Place[]
   focusRequest: { id: string; nonce: number } | null
-  allPlaces: Place[]
+  layers: Record<MapLayer, boolean>
   motion: boolean
   activeQuestId?: string
+  activeNpcId?: string
   view: MapView
   fix: GeographicFix | null
   now: number
@@ -39,6 +41,7 @@ const emit = defineEmits<{
   geoselect: [feature: GeoFeature]
   outside: []
   game: [id: string, opener: HTMLElement]
+  npc: [id: string, opener: HTMLElement]
 }>()
 const geography = useParkGeography()
 const geographic = computed(() => isGeographicView(props.view))
@@ -59,10 +62,36 @@ const userVisible = computed(
     userPosition.value[1] >= 0 &&
     userPosition.value[1] <= SCENE.height,
 )
-const roamingName = computed(() =>
-  props.focusRequest?.id.startsWith('area:') ? props.focusRequest.id.slice(5) : '',
-)
-const roamingPoint = computed(() => roamingAreas[roamingName.value])
+const pins = [
+  ...quests.map(({ id, place, name, point }) => ({
+    kind: 'quest' as const,
+    key: `quest:${id}`,
+    id,
+    place,
+    name,
+    point,
+  })),
+  ...wanderers.flatMap((npc) =>
+    npc.point
+      ? [
+          {
+            kind: 'npc' as const,
+            key: `npc:${npc.id}`,
+            id: npc.id,
+            name: npc.name,
+            point: npc.point,
+            area: npc.area,
+          },
+        ]
+      : [],
+  ),
+]
+const fieldMarkers = computed(() => pins.filter((pin) => props.layers[pin.kind]))
+function openPin(pin: (typeof pins)[number], event: MouseEvent) {
+  const opener = event.currentTarget as HTMLElement
+  if (pin.kind === 'quest') emit('game', pin.id, opener)
+  else emit('npc', pin.id, opener)
+}
 const userStatus = computed(() =>
   props.fix && geography.ring.value.length
     ? classifyFix(props.fix, geography.ring.value, props.now)
@@ -90,6 +119,7 @@ let dragDistance = 0
 const style = computed(() => ({
   transform: `translate3d(${camera.x}px, ${camera.y}px, 0) scale(${camera.scale})`,
   '--inverse-scale': 1 / camera.scale,
+  '--field-scale': 1 / limits.value.initial,
 }))
 const meadowStyle = computed(() => ({
   backgroundSize: `${384 * camera.scale}px ${384 * camera.scale}px`,
@@ -167,11 +197,10 @@ function focus(point: Place['point']) {
 }
 function applyFocus(request: typeof props.focusRequest) {
   if (!request || !ready.value) return
-  const place = props.allPlaces.find((p) => p.id === request?.id)
+  const place = props.places.find((p) => p.id === request?.id)
   if (place) focus(place.point)
-  const site = gameSites.find((s) => `quest:${s.id}` === request?.id)
-  if (site) focus({ x: site.point[0], y: site.point[1] })
-  if (roamingPoint.value) focus({ x: roamingPoint.value[0], y: roamingPoint.value[1] })
+  const pin = pins.find((item) => item.key === request.id)
+  if (pin) focus({ x: pin.point[0], y: pin.point[1] })
 }
 watch(() => props.focusRequest, applyFocus, { flush: 'post' })
 function down(event: PointerEvent) {
@@ -180,7 +209,7 @@ function down(event: PointerEvent) {
     dragDistance = 0
   }
   const button = (event.target as Element).closest('button')
-  if ((button && !button.classList.contains('quest-pin')) || event.button > 0) return
+  if ((button && !button.classList.contains('field-pin')) || event.button > 0) return
   // Keep taps on the flag, but allow a drag starting on it to pan the map.
   const captureTarget = button ?? viewport.value
   captureTarget?.setPointerCapture(event.pointerId)
@@ -426,37 +455,44 @@ onBeforeUnmount(() => observer?.disconnect())
         </button>
       </template>
       <ReferenceLabels
-        v-if="view === 'reference'"
+        v-if="view === 'reference' && layers.places"
         :places="places"
         @select="emit('select', $event)"
       />
-      <template v-if="view === 'reference'">
+      <div v-if="view === 'reference'" class="field-markers">
         <div
-          v-if="roamingPoint"
-          class="roaming-area"
-          :style="{ left: `${roamingPoint[0]}px`, top: `${roamingPoint[1]}px` }"
-        >
-          <span>{{ roamingName }} · 活动范围示意</span>
-        </div>
-        <button
-          v-for="site in gameSites"
-          :key="site.id"
-          class="quest-pin"
+          v-for="pin in fieldMarkers"
+          :key="pin.key"
+          class="field-marker"
+          :data-marker="pin.key"
           :class="{
-            'pin-west': site.id === 'treasure' || site.id === 'mime',
-            'pin-east': site.id === 'relay' || site.id === 'drum',
-            'pin-selected': activeQuestId === site.id,
+            'npc-marker': pin.kind === 'npc',
+            'pin-selected': pin.kind === 'npc' ? activeNpcId === pin.id : activeQuestId === pin.id,
           }"
-          :style="{ left: `${site.point[0]}px`, top: `${site.point[1]}px` }"
-          :aria-label="`游戏：${site.place} · ${site.challenges.map((c) => c.name).join('、')}`"
-          :title="`${site.place} · ${site.challenges.map((c) => c.name).join('、')}`"
-          aria-haspopup="dialog"
-          @click.stop="emit('game', site.id, $event.currentTarget as HTMLElement)"
-          @dblclick.stop
+          :style="{ left: `${pin.point[0]}px`, top: `${pin.point[1]}px` }"
         >
-          <QuestToken />
-        </button>
-      </template>
+          <svg class="marker-leader" width="1" height="1" aria-hidden="true">
+            <line y2="-4" />
+            <circle r="2.3" />
+          </svg>
+          <button
+            class="field-pin"
+            :class="pin.kind === 'npc' ? 'npc-pin' : 'quest-pin'"
+            :aria-label="
+              pin.kind === 'quest'
+                ? `游戏：${pin.place} · ${pin.name}`
+                : `游走 NPC：${pin.name} · ${pin.area}`
+            "
+            :title="pin.name"
+            aria-haspopup="dialog"
+            @click.stop="openPin(pin, $event)"
+            @dblclick.stop
+          >
+            <QuestToken v-if="pin.kind === 'quest'" /><EncounterToken v-else />
+            <span v-if="camera.scale >= 0.8" class="marker-name">{{ pin.name }}</span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
   <div v-if="geographic && geography.error.value" class="geo-map-error" role="status">

@@ -2,12 +2,11 @@
 import { computed } from 'vue'
 import AppIcon from './AppIcon.vue'
 import QuestToken from './QuestToken.vue'
-import { gameSites, type GameSite } from '../data/offsite'
-const props = defineProps<{ site: GameSite; index: number; sheet?: boolean }>()
-defineEmits<{ back: []; map: []; choose: [index: number] }>()
-const current = computed(() => props.site.challenges[props.index]!)
+import { quests, type Quest } from '../data/offsite'
+const props = defineProps<{ quest: Quest; sheet?: boolean }>()
+defineEmits<{ back: []; map: [] }>()
 const number = computed(() =>
-  String(gameSites.findIndex((s) => s.id === props.site.id) + 1).padStart(2, '0'),
+  String(quests.findIndex((quest) => quest.id === props.quest.id) + 1).padStart(2, '0'),
 )
 </script>
 <template>
@@ -19,39 +18,24 @@ const number = computed(() =>
       <header class="warrant-heading">
         <QuestToken />
         <div>
-          <p class="section-kicker">
-            江湖令 {{ number }} <i></i> {{ sheet ? site.place : '濮院诗简' }}
-          </p>
-          <h2 v-if="sheet">{{ current.name }}</h2>
-          <h1 v-else>{{ site.place }}</h1>
+          <p class="section-kicker">江湖令 {{ number }} <i></i> {{ quest.place }}</p>
+          <h2 v-if="sheet">{{ quest.name }}</h2>
+          <h1 v-else>{{ quest.name }}</h1>
         </div>
       </header>
-      <div v-if="site.challenges.length > 1" class="field-tabs detail-tabs" aria-label="选择挑战">
-        <button
-          v-for="(c, i) in site.challenges"
-          :key="c.name"
-          :aria-pressed="index === i"
-          @click="$emit('choose', i)"
-        >
-          {{ c.name }}
-        </button>
-      </div>
-      <template v-if="!sheet">
-        <p class="section-kicker mission-kicker">关卡手札 <i></i> MISSION BRIEF</p>
-        <h2 class="field-title">{{ current.name }}</h2>
-      </template>
+      <p v-if="!sheet" class="section-kicker mission-kicker">关卡手札 <i></i> MISSION BRIEF</p>
       <div class="rule-block">
         <span>壹</span>
         <div>
           <h3>怎么玩</h3>
-          <p>{{ current.setup }}</p>
+          <p>{{ quest.setup }}</p>
         </div>
       </div>
       <div class="rule-block">
         <span>贰</span>
         <div>
           <h3>怎样过关</h3>
-          <p>{{ current.goal }}</p>
+          <p>{{ quest.goal }}</p>
         </div>
       </div>
       <button v-if="!sheet" class="field-action" @click="$emit('map')">

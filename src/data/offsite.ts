@@ -1,125 +1,132 @@
-// v1119 participant brief. Coordinates are approximate illustration points, not GPS fixes.
-export interface Challenge {
+// Illustration-plane points registered from the pin tips in references/offsite-registration.json.
+export interface Quest {
+  id: string
+  place: string
+  point: [number, number]
   name: string
   setup: string
   goal: string
 }
-export interface GameSite {
-  id: string
-  place: string
-  point: [number, number]
-  challenges: Challenge[]
-}
-export const gameSites: GameSite[] = [
+export const quests: Quest[] = [
   {
     id: 'relay',
     place: '关帝庙',
-    point: [1023, 1057],
-    challenges: [
-      {
-        name: '袱传货物',
-        setup: '两人一组撑开袱布，在指定区域接力。传递时只能用布，不能用手拿货物。',
-        goal: '把大蒜、土豆、玉米三件货物全部传完。',
-      },
-    ],
+    name: '袱传货物',
+    point: [1049, 1008],
+    setup: '两人一组撑开袱布，在指定区域接力。传递时只能用布，不能用手拿货物。',
+    goal: '把大蒜、土豆、玉米三件货物全部传完。',
   },
   {
     id: 'drum',
     place: '翠冷台',
-    point: [1046, 514],
-    challenges: [
-      {
-        name: '同心击鼓',
-        setup: '队员各拉一根鼓绳，把球放上鼓面。配合收放绳子颠球，手不碰鼓面。',
-        goal: '球不落地，连续颠起 8 次。',
-      },
-    ],
+    name: '同心击鼓',
+    point: [1124, 510],
+    setup: '队员各拉一根鼓绳，把球放上鼓面。配合收放绳子颠球，手不碰鼓面。',
+    goal: '球不落地，连续颠起 8 次。',
   },
   {
-    id: 'lawn',
+    id: 'cuju',
     place: '大草坪',
-    point: [1008, 588],
-    challenges: [
-      {
-        name: '蹴鞠达人',
-        setup: '全队累计 15 人次，每人有两次射门机会，由守关人记录得分。',
-        goal: '全队总分超过 250 分。个人双球高分还有机会抽特殊道具，门槛以裁判口径为准。',
-      },
-      {
-        name: '一锤定音',
-        setup: '15 位队员依次接力，每人有 15 秒进入指定区域敲气球。',
-        goal: '全队合计敲破超过 12 个气球。',
-      },
-    ],
+    name: '蹴鞠达人',
+    point: [1085, 564],
+    setup: '全队累计 15 人次，每人有两次射门机会，由守关人记录得分。',
+    goal: '全队总分超过 250 分。个人双球高分还有机会抽特殊道具，门槛以裁判口径为准。',
+  },
+  {
+    id: 'hammer',
+    place: '大草坪',
+    name: '一锤定音',
+    point: [1084, 603],
+    setup: '15 位队员依次接力，每人有 15 秒进入指定区域敲气球。',
+    goal: '全队合计敲破超过 12 个气球。',
   },
   {
     id: 'mime',
     place: '梅泾剧场',
-    point: [762, 757],
-    challenges: [
-      {
-        name: '哑戏猜古词',
-        setup: '选两位队员上台看词卡，只能用动作提示，不能说话。其余队员负责猜词。',
-        goal: '在 120 秒内尽量猜对，交守关人计数。',
-      },
-    ],
+    name: '哑戏猜古词',
+    point: [734, 757],
+    setup: '选两位队员上台看词卡，只能用动作提示，不能说话。其余队员负责猜词。',
+    goal: '在 120 秒内尽量猜对，交守关人计数。',
   },
   {
     id: 'treasure',
     place: '珍宝馆',
-    point: [967, 1076],
-    challenges: [
-      {
-        name: '珍宝馆里的奥秘',
-        setup: '全队到馆内领取奥秘卡，根据卡上的提示寻找对应藏品。',
-        goal: '填齐卡上的奥秘信息，交给守关人核验。',
-      },
-    ],
+    name: '珍宝馆里的奥秘',
+    point: [988, 1027],
+    setup: '全队到馆内领取奥秘卡，根据卡上的提示寻找对应藏品。',
+    goal: '填齐卡上的奥秘信息，交给守关人核验。',
   },
   {
     id: 'mugwort',
     place: '福善寺',
-    point: [915, 674],
-    challenges: [
-      {
-        name: '福善艾草锤',
-        setup: '和队员一起领取现场材料，跟随守关人的指引制作艾草锤。',
-        goal: '全队共同完成艾草锤 DIY。',
-      },
-    ],
+    name: '福善艾草锤',
+    point: [904, 671],
+    setup: '和队员一起领取现场材料，跟随守关人的指引制作艾草锤。',
+    goal: '全队共同完成艾草锤 DIY。',
   },
   {
     id: 'candy',
     place: '关王庙',
-    point: [605, 695],
-    challenges: [
-      {
-        name: '诸葛帽吃糖',
-        setup: '选 7 位队员戴上诸葛帽，双手放在身后，不能用手碰帽子或糖果。',
-        goal: '晃动帽枝，用嘴咬到吊起的糖果。',
-      },
-    ],
+    name: '诸葛帽吃糖',
+    point: [565, 718],
+    setup: '选 7 位队员戴上诸葛帽，双手放在身后，不能用手碰帽子或糖果。',
+    goal: '晃动帽枝，用嘴咬到吊起的糖果。',
   },
 ]
-export const wanderers = [
-  [
-    '巡捕',
-    '全古镇',
-    '听见铃声，留意巡捕。触发划拳后，至少半数队员获胜可免罚；否则要交出一份随机碎片。',
-  ],
-  ['游侠', '濮绸作坊附近', '至少 5 人结伴，向游侠学习招式，完成动作并记录后领取线索。'],
-  ['镖师', '福善塔附近', '寻找 5 个装有货物的镖码宝箱，再找镖师破解谜题，换取线索。'],
-  ['大理寺卿', '魔方塔附近', '抽取两宗案件，和队员一起找出疑点，提交给大理寺卿。'],
-  ['黑市商人', '北更楼附近', '用本队交子换特殊卡；也可接受商人的挑战，连赢三局随机抽卡。'],
-  ['蒙面大侠', 'ID 设计公寓附近', '找到蒙面大侠，挑战极速三子棋，获胜后取得线索。'],
-] as const
-// Only named areas that can be identified on the illustration; never a live NPC pin.
-export const roamingAreas: Record<string, [number, number]> = {
-  福善塔附近: [886, 378],
-  北更楼附近: [515, 364],
-  魔方塔附近: [827, 930],
-  濮绸作坊附近: [1085, 817],
+export function questForRoute(id?: string, legacyIndex?: string) {
+  const questId = id === 'lawn' ? (legacyIndex === '1' ? 'hammer' : 'cuju') : id
+  return quests.find((quest) => quest.id === questId)
 }
+interface Wanderer {
+  id: string
+  name: string
+  area: string
+  description: string
+  point?: [number, number]
+}
+export const wanderers: Wanderer[] = [
+  {
+    id: 'constable',
+    name: '巡捕',
+    area: '全古镇',
+    description: '听见铃声，留意巡捕。触发划拳后，至少半数队员获胜可免罚；否则要交出一份随机碎片。',
+  },
+  {
+    id: 'ranger',
+    name: '游侠',
+    area: '濮绸作坊附近',
+    point: [1148, 800],
+    description: '至少 5 人结伴，向游侠学习招式，完成动作并记录后领取线索。',
+  },
+  {
+    id: 'escort',
+    name: '镖师',
+    area: '福善塔附近',
+    point: [883, 406],
+    description: '寻找 5 个装有货物的镖码宝箱，再找镖师破解谜题，换取线索。',
+  },
+  {
+    id: 'magistrate',
+    name: '大理寺卿',
+    area: '魔方塔附近',
+    point: [821, 926],
+    description: '抽取两宗案件，和队员一起找出疑点，提交给大理寺卿。',
+  },
+  {
+    id: 'trader',
+    name: '黑市商人',
+    area: '北更楼附近',
+    point: [524, 399],
+    description: '用本队交子换特殊卡；也可接受商人的挑战，连赢三局随机抽卡。',
+  },
+  {
+    id: 'masked',
+    name: '蒙面大侠',
+    area: 'ID 设计公寓附近',
+    point: [1316, 377],
+    description: '找到蒙面大侠，挑战极速三子棋，获胜后取得线索。',
+  },
+]
 export const tools = [
   ['通关卡', 50, '领取一个 NPC 任务的通关奖励。'],
   ['运气卡', 50, '掷出 4、5、6 点可得 100 交子。'],

@@ -52,14 +52,12 @@ export const categoryLabels: Record<Category, string> = {
   scenic: '古镇漫游',
   service: '游园服务',
 }
-export const mapFilters: { id: Category | 'all'; name: string; icon: string }[] = [
-  { id: 'all', name: '全部', icon: 'sparkles' },
-  { id: 'performance', name: '演艺', icon: 'fan' },
-  { id: 'craft', name: '雅集', icon: 'flower' },
-  { id: 'food', name: '美食', icon: 'tea' },
-  { id: 'service', name: '服务', icon: 'bell' },
-  { id: 'scenic', name: '探景', icon: 'lantern' },
-]
+export const mapLayers = [
+  { id: 'quest', name: '江湖令牌' },
+  { id: 'npc', name: '行走 NPC' },
+  { id: 'places', name: '古镇地点' },
+] as const
+export type MapLayer = (typeof mapLayers)[number]['id']
 export const places: Place[] = referenceMap.landmarks.map((landmark, index) => ({
   id: landmark.id,
   name: landmark.name,

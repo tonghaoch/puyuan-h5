@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import FieldHeading from './FieldHeading.vue'
 import AppIcon from './AppIcon.vue'
-import { gameSites, wanderers, tools, roamingAreas } from '../data/offsite'
+import { quests, wanderers, tools } from '../data/offsite'
 defineProps<{ section: string }>()
-defineEmits<{ open: [id: string]; map: [id: string] }>()
+defineEmits<{ open: [id: string, opener: HTMLElement]; map: [id: string] }>()
 const sections = [
   ['', '点位挑战'],
   ['roaming', '游走 NPC'],
@@ -40,16 +40,16 @@ const sections = [
         领取乱码诗碑拓片，按地图上的江湖令找到守关人。完成挑战收集词条，最后拼出诗篇，交裁判校验。
       </p>
       <a
-        v-for="(site, i) in gameSites"
-        :key="site.id"
+        v-for="(quest, index) in quests"
+        :key="quest.id"
         class="quest-row"
-        :href="`#games/task/${site.id}`"
-        @click.exact.prevent="$emit('open', site.id)"
+        :href="`#games/task/${quest.id}`"
+        @click.exact.prevent="$emit('open', quest.id, $event.currentTarget as HTMLElement)"
       >
-        <span class="quest-index">{{ String(i + 1).padStart(2, '0') }}</span>
+        <span class="quest-index">{{ String(index + 1).padStart(2, '0') }}</span>
         <div>
-          <small>{{ site.place }}</small>
-          <h3>{{ site.challenges.map((c) => c.name).join(' / ') }}</h3>
+          <small>{{ quest.place }}</small>
+          <h3>{{ quest.name }}</h3>
         </div>
         <AppIcon name="chevron" :size="16" />
       </a>
@@ -58,11 +58,11 @@ const sections = [
       <p class="section-kicker">ENCOUNTERS</p>
       <h2 class="field-title">巷中遇见谁</h2>
       <p class="field-copy">以下是活动范围，不是实时位置。在附近留意角色装扮，遇见时再触发挑战。</p>
-      <article v-for="[name, area, rule] in wanderers" :key="name" class="journal-panel">
-        <small>{{ area }}</small>
-        <h3>{{ name }}</h3>
-        <p>{{ rule }}</p>
-        <button v-if="roamingAreas[area]" class="ink-link" @click="$emit('map', `area:${area}`)">
+      <article v-for="npc in wanderers" :key="npc.id" class="journal-panel">
+        <small>{{ npc.area }}</small>
+        <h3>{{ npc.name }}</h3>
+        <p>{{ npc.description }}</p>
+        <button v-if="npc.point" class="ink-link" @click="$emit('map', `npc:${npc.id}`)">
           查看活动范围 <AppIcon name="arrow" :size="14" />
         </button>
       </article>

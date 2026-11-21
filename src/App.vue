@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import AppIcon from './components/AppIcon.vue'
 import TripBook from './components/TripBook.vue'
 import GameBook from './components/GameBook.vue'
 import QuestDetail from './components/QuestDetail.vue'
 import QuestToken from './components/QuestToken.vue'
+import EncounterToken from './components/EncounterToken.vue'
 import DiningBook from './components/DiningBook.vue'
-import { dinnerSpots, gameSites } from './data/offsite'
+import { dinnerSpots, questForRoute, wanderers, type Quest } from './data/offsite'
 import ParkMap from './components/ParkMap.vue'
 import AppDialog from './components/AppDialog.vue'
 import GeoLocationMap from './components/GeoLocationMap.vue'
@@ -19,12 +20,12 @@ import {
   restaurants,
   places,
   categoryLabels,
-  mapFilters,
+  mapLayers,
   matchesSearch,
   placeById,
   selectionKey,
   type Tab,
-  type Category,
+  type MapLayer,
   type Selection,
 } from './data/catalog'
 import { useLocation } from './lib/location'
@@ -33,10 +34,10 @@ import { dayLabel, shanghaiDate, shiftDay, sessionStatus } from './lib/time'
 type Overlay = 'guide' | 'favorites' | 'location' | 'geopoint' | null
 const tab = ref<Tab>('map')
 const bookSection = ref('')
-const activeSite = ref<(typeof gameSites)[number]>()
-const challengeIndex = ref(0)
+const activeQuest = ref<Quest>()
+const activeNpc = ref<(typeof wanderers)[number]>()
 const questOrigin = ref<'map' | 'games' | null>(null)
-let questOpener: HTMLElement | null = null
+let gameOpener: HTMLElement | undefined
 const mapView = ref<MapView>('reference')
 const geographicView = computed(() => isGeographicView(mapView.value))
 const focusLocation = ref(0)
@@ -49,7 +50,7 @@ const selection = ref<Selection | null>(null)
 const detailModelId = ref<string>()
 const overlay = ref<Overlay>(null)
 const query = ref('')
-const mapFilter = ref<Category | 'all'>('all')
+const visibleLayers = reactive<Record<MapLayer, boolean>>({ quest: true, npc: true, places: false })
 const activityFilter = ref('all')
 const dayFilter = ref(0)
 const focusRequest = ref<{ id: string; nonce: number } | null>(null)
@@ -92,8 +93,10 @@ function loadFavorites(): string[] {
 }
 const favorites = ref<string[]>(loadFavorites())
 const location = useLocation()
-const mapQuest = computed(() => tab.value === 'map' && !!activeSite.value)
-const hasModal = computed(() => !!selection.value || !!overlay.value || mapQuest.value)
+const mapQuest = computed(() => tab.value === 'map' && !!activeQuest.value)
+const hasModal = computed(
+  () => !!selection.value || !!overlay.value || mapQuest.value || !!activeNpc.value,
+)
 const motionActive = computed(
   () => motion.value && pageVisible.value && tab.value === 'map' && !hasModal.value,
 )
@@ -125,16 +128,20 @@ function readRoute() {
         ? ['roaming', 'tokens']
         : []
   bookSection.value = kind && sections.includes(kind) ? kind : ''
-  const previous = activeSite.value
-  activeSite.value =
+  const hadGameDetail = !!activeQuest.value || !!activeNpc.value
+  activeQuest.value =
     (nextTab === 'map' || nextTab === 'games') && kind === 'task'
-      ? gameSites.find((s) => s.id === id)
+      ? questForRoute(id, modelId)
       : undefined
-  challengeIndex.value = activeSite.value?.challenges[Number(modelId)] ? Number(modelId) : 0
+  activeNpc.value =
+    nextTab === 'map' && kind === 'npc' ? wanderers.find((npc) => npc.id === id) : undefined
   questOrigin.value = window.history.state?.questOrigin ?? null
-  if (mapQuest.value) mapView.value = 'reference'
-  if (previous && !activeSite.value && questOpener?.isConnected) {
-    const opener = questOpener
+  if (mapQuest.value || activeNpc.value) {
+    mapView.value = 'reference'
+    visibleLayers[mapQuest.value ? 'quest' : 'npc'] = true
+  }
+  if (hadGameDetail && !activeQuest.value && !activeNpc.value && gameOpener?.isConnected) {
+    const opener = gameOpener
     nextTick(() => {
       if (opener.getClientRects().length) opener.focus({ preventScroll: true })
     })
@@ -160,38 +167,31 @@ function route(path: string, modal = false, replace = false) {
   readRoute()
 }
 function changeTab(next: Tab) {
-  if (next !== tab.value || hasModal.value || activeSite.value || bookSection.value) {
+  if (next !== tab.value || hasModal.value || activeQuest.value || bookSection.value) {
     query.value = ''
     route(next)
   }
 }
-function openQuest(id: string, opener?: HTMLElement) {
-  questOpener =
-    opener ?? (document.activeElement instanceof HTMLElement ? document.activeElement : null)
-  window.history.pushState({ questOrigin: tab.value }, '', `#${tab.value}/task/${id}`)
+function openNpc(id: string, opener: HTMLElement) {
+  gameOpener = opener
+  route(`map/npc/${id}`, true)
+}
+function openQuest(id: string, opener: HTMLElement) {
+  gameOpener = opener
+  const path = `${tab.value}/task/${id}`
+  window.history.pushState({ questOrigin: tab.value }, '', `#${path}`)
   readRoute()
   if (!mapQuest.value)
     nextTick(() =>
       document.querySelector<HTMLElement>('.quest-detail')?.focus({ preventScroll: true }),
     )
 }
-function chooseChallenge(i: number) {
-  if (!activeSite.value) return
-  window.history.replaceState(
-    window.history.state,
-    '',
-    `#${tab.value}/task/${activeSite.value.id}/${i}`,
-  )
-  readRoute()
-}
 function leaveQuest() {
   if (questOrigin.value) window.history.back()
   else route(tab.value, false, true)
 }
 function mapForQuest() {
-  if (!activeSite.value) return
-  if (questOrigin.value === 'map') leaveQuest()
-  else viewOnMap(`quest:${activeSite.value.id}`)
+  if (activeQuest.value) viewOnMap(`quest:${activeQuest.value.id}`)
 }
 function openSelection(next: Selection, modelId?: string) {
   route(`${tab.value}/${next.kind}/${next.id}${modelId ? `/${modelId}` : ''}`, true, hasModal.value)
@@ -234,22 +234,19 @@ function toggleFavorite(item: Selection) {
 function isFavorite(item: Selection) {
   return favorites.value.includes(selectionKey(item))
 }
-function resetFilters(target: Tab) {
+function resetActivityFilters() {
   query.value = ''
-  if (target === 'map') mapFilter.value = 'all'
-  if (target === 'activities') activityFilter.value = 'all'
+  activityFilter.value = 'all'
 }
-function viewOnMap(placeId: string) {
+function viewOnMap(id: string) {
   mapView.value = 'reference'
   query.value = ''
-  mapFilter.value = 'all'
-  route('map', false, true)
-  focusRequest.value = { id: placeId, nonce: Date.now() }
-  notify('已为你找到地图中的位置')
+  const npcArea = id.startsWith('npc:')
+  visibleLayers[npcArea ? 'npc' : id.startsWith('quest:') ? 'quest' : 'places'] = true
+  route('map', false, !npcArea)
+  focusRequest.value = { id, nonce: Date.now() }
+  notify(npcArea ? '已标出角色活动范围，非实时位置' : '已为你找到地图中的位置')
 }
-const visiblePlaces = computed(() =>
-  places.filter((place) => mapFilter.value === 'all' || place.category === mapFilter.value),
-)
 const selectedDinner = computed(() =>
   selection.value?.kind === 'restaurant'
     ? dinnerSpots.find((s) => s.id === selection.value!.id)
@@ -406,31 +403,37 @@ onBeforeUnmount(() => {
         aria-label="游园地图"
       >
         <ParkMap
-          :places="visiblePlaces"
-          :all-places="places"
+          :places="places"
+          :layers="visibleLayers"
           :focus-request="focusRequest"
           :motion="motionActive"
-          :active-quest-id="activeSite?.id"
+          :active-quest-id="activeQuest?.id"
+          :active-npc-id="activeNpc?.id"
           :view="mapView"
           :fix="location.fix.value"
           :now="now"
           :focus-location="focusLocation"
           @geoselect="openGeoPoint"
           @game="openQuest"
+          @npc="openNpc"
           @outside="notify('当前位置在园区视野之外，未将定位点移入园区')"
           @select="(place) => openSelection({ kind: 'place', id: place.id })"
           @locate="openOverlay('location')"
         />
         <div class="map-topbar">
-          <div v-if="!geographicView" class="filter-pills" aria-label="地图地点分类">
+          <div v-if="!geographicView" class="filter-pills" role="group" aria-label="地图图层">
             <button
-              v-for="filter in mapFilters"
-              :key="filter.id"
-              :class="{ active: mapFilter === filter.id }"
-              :aria-pressed="mapFilter === filter.id"
-              @click="mapFilter = filter.id"
+              v-for="layer in mapLayers"
+              :key="layer.id"
+              type="button"
+              :data-layer="layer.id"
+              :aria-pressed="visibleLayers[layer.id]"
+              @click="visibleLayers[layer.id] = !visibleLayers[layer.id]"
             >
-              <AppIcon :name="filter.icon" :size="17" />{{ filter.name }}
+              <QuestToken v-if="layer.id === 'quest'" />
+              <EncounterToken v-else-if="layer.id === 'npc'" />
+              <AppIcon v-else name="lantern" :size="17" />
+              {{ layer.name }}
             </button>
           </div>
           <div v-else class="geo-layer-legend">
@@ -459,22 +462,28 @@ onBeforeUnmount(() => {
           <p class="intro-copy">循水巷，过石桥，听一曲婉转。<br />把脚步放慢，让风景发生。</p>
           <span class="intro-caption">A LITTLE WANDER, A LOT TO DISCOVER.</span>
         </div>
-        <div v-if="!geographicView && !visiblePlaces.length" class="map-empty">
-          <AppIcon name="search" :size="24" />
-          <p>还没有找到这处风景</p>
-          <button @click="resetFilters('map')">查看全部地点</button>
-        </div>
-        <div class="map-bottom-note">
-          <span v-if="geographicView" class="demo-dot"></span
-          ><span v-if="!geographicView" class="quest-legend"><QuestToken /> 江湖令 · 团建挑战</span
-          ><span v-else
-            ><a
+        <div
+          v-if="geographicView || visibleLayers.quest || visibleLayers.npc"
+          class="map-bottom-note"
+        >
+          <template v-if="!geographicView">
+            <span v-if="visibleLayers.quest" class="quest-legend"
+              ><QuestToken />江湖令 · 团建挑战</span
+            >
+            <span v-if="visibleLayers.npc" class="quest-legend"
+              ><EncounterToken />行走 NPC · 活动范围</span
+            >
+          </template>
+          <template v-else>
+            <span class="demo-dot"></span>
+            <a
               href="https://www.openstreetmap.org/copyright"
               target="_blank"
               rel="noopener noreferrer"
               >© OpenStreetMap</a
-            ></span
-          ><span class="note-separator">/</span><span class="map-hint">拖动探索 · 双指缩放</span>
+            >
+          </template>
+          <span class="note-separator">/</span><span class="map-hint">拖动探索 · 双指缩放</span>
         </div>
         <div class="map-vignette" aria-hidden="true"></div>
       </section>
@@ -482,19 +491,17 @@ onBeforeUnmount(() => {
       <TripBook v-if="tab === 'itinerary'" :key="bookSection" :section="bookSection" />
       <GameBook
         v-if="tab === 'games'"
-        v-show="!activeSite"
+        v-show="!activeQuest"
         :section="bookSection"
         @open="openQuest"
         @map="viewOnMap"
       />
       <QuestDetail
-        v-if="activeSite && !mapQuest"
-        :site="activeSite"
-        :index="challengeIndex"
+        v-if="activeQuest && !mapQuest"
+        :quest="activeQuest"
         tabindex="-1"
         @back="leaveQuest"
         @map="mapForQuest"
-        @choose="chooseChallenge"
       />
       <DiningBook
         v-if="tab === 'food'"
@@ -620,7 +627,7 @@ onBeforeUnmount(() => {
           <AppIcon name="fan" :size="38" />
           <h2>暂时没有这类活动</h2>
           <p>试着换个关键词或分类，发现另一种相遇。</p>
-          <button class="primary-button" @click="resetFilters('activities')">查看全部活动</button>
+          <button class="primary-button" @click="resetActivityFilters">查看全部活动</button>
         </div>
         <p class="catalog-footnote">— 不赶时间，只赴好时光 —</p>
       </section>
@@ -642,12 +649,48 @@ onBeforeUnmount(() => {
 
   <Transition name="quest-rise" :css="motion" appear>
     <AppDialog
-      v-if="mapQuest && activeSite"
+      v-if="mapQuest && activeQuest"
       class="quest-sheet"
-      :label="`${activeSite.place} · 江湖挑战令`"
+      :label="activeQuest.name"
       @close="leaveQuest"
     >
-      <QuestDetail :site="activeSite" :index="challengeIndex" sheet @choose="chooseChallenge" />
+      <QuestDetail :quest="activeQuest" sheet />
+    </AppDialog>
+  </Transition>
+
+  <Transition name="quest-rise" :css="motion" appear>
+    <AppDialog
+      v-if="activeNpc"
+      class="quest-sheet npc-sheet"
+      :label="activeNpc.name"
+      @close="closeModal"
+    >
+      <article class="quest-brief">
+        <div class="field-inner">
+          <header class="warrant-heading">
+            <EncounterToken />
+            <div>
+              <p class="section-kicker">游走 NPC <i></i> 江湖偶遇</p>
+              <h2>{{ activeNpc.name }}</h2>
+            </div>
+          </header>
+          <div class="rule-block">
+            <AppIcon name="pin" :size="16" />
+            <div>
+              <h3>活动范围</h3>
+              <p>{{ activeNpc.area }}</p>
+            </div>
+          </div>
+          <div class="rule-block">
+            <AppIcon name="book" :size="16" />
+            <div>
+              <h3>相遇规则</h3>
+              <p>{{ activeNpc.description }}</p>
+            </div>
+          </div>
+          <p class="field-fine">活动范围仅作示意，不是实时位置；请在现场留意角色装扮。</p>
+        </div>
+      </article>
     </AppDialog>
   </Transition>
 
@@ -792,7 +835,9 @@ onBeforeUnmount(() => {
           <span>壹</span>
           <div>
             <h3>循着地图，随心慢游</h3>
-            <p>拖动地图、双指缩放，按分类浏览地点，点击标记查看详情。</p>
+            <p>
+              点亮上方牌签，显示对应标记；再点一次即可隐藏。拖动地图或双指缩放，点标记查看详情。
+            </p>
           </div>
         </div>
         <div class="guide-step">
@@ -800,7 +845,8 @@ onBeforeUnmount(() => {
           <div>
             <h3>寻味赴约，各有欢喜</h3>
             <p>
-              打开「行程」查看两天安排。点导览上的江湖令查看游戏规则，「餐厅」收录自由晚餐推荐。
+              打开「行程」查看两天安排，「餐厅」收录自由晚餐推荐。导览上点红色江湖令看对应挑战，点靛青侠客看游走
+              NPC 的规则和活动范围（非实时位置）。
             </p>
           </div>
         </div>
