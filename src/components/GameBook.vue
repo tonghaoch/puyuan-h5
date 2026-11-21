@@ -32,12 +32,12 @@ const sections = [
       <div class="field-section-head">
         <div>
           <p class="section-kicker">CHAPTER 01</p>
-          <h2 class="field-title">沿旗寻关</h2>
+          <h2 class="field-title">循令寻关</h2>
         </div>
         <span class="section-count">7 处 · 8 项挑战</span>
       </div>
       <p class="field-copy">
-        领取乱码诗碑拓片，按地图朱旗找到守关人。完成挑战收集词条，最后拼出诗篇，交裁判校验。
+        领取乱码诗碑拓片，按地图上的江湖令找到守关人。完成挑战收集词条，最后拼出诗篇，交裁判校验。
       </p>
       <a
         v-for="(site, i) in gameSites"

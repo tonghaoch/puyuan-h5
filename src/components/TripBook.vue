@@ -9,20 +9,27 @@ const sections = [
   ['studio', '体验'],
   ['shows', '演出'],
 ] as const
-function jumpToSecondDay() {
-  document.getElementById('trip-day-02')?.scrollIntoView({ block: 'start' })
+function jumpToDay(number: '01' | '02') {
+  const day = document.getElementById(`trip-day-${number}`)
+  if (!day) return
+  day.scrollIntoView({ block: 'start' })
+  day.focus({ preventScroll: true })
 }
 </script>
 <template>
-  <section class="field-page" aria-label="两天行程">
+  <section class="field-page trip-book" aria-label="两天行程">
     <FieldHeading
       theme="journey"
       edition="TRAVEL JOURNAL"
       title="濮院两日记"
       note="苏州出发，循水入镇。两日的相聚与去处。"
       seal="同行"
-    />
-    <nav class="field-tabs" aria-label="行程内容">
+    >
+      <template #art>
+        <img class="journey-print" src="/art/journal-journey.svg" width="320" height="236" alt="" />
+      </template>
+    </FieldHeading>
+    <nav class="field-tabs trip-tabs" aria-label="行程内容">
       <a
         v-for="[key, label] in sections"
         :key="key"
@@ -37,27 +44,42 @@ function jumpToSecondDay() {
         :id="`trip-day-${day.number}`"
         :key="day.number"
         class="trip-day"
+        :aria-labelledby="`day-title-${day.number}`"
+        tabindex="-1"
       >
-        <header class="day-heading">
-          <span
-            >DAY <b>{{ day.number }}</b></span
+        <header class="trip-chapter">
+          <span class="day-number" :aria-label="`第${day.number === '01' ? '一' : '二'}天`">
+            DAY <b>{{ day.number }}</b>
+          </span>
+          <div>
+            <p class="day-route">{{ day.number === '01' ? '苏州 → 濮院' : '濮院 → 苏州' }}</p>
+            <h2 :id="`day-title-${day.number}`">{{ day.title }}</h2>
+          </div>
+          <button
+            class="chapter-turn"
+            type="button"
+            :aria-controls="day.number === '01' ? 'trip-day-02' : 'trip-day-01'"
+            @click="jumpToDay(day.number === '01' ? '02' : '01')"
           >
-          <h2>{{ day.title }}</h2>
-          <button v-if="day.number === '01'" class="day-jump" @click="jumpToSecondDay">
-            看第二天 ↓
+            {{ day.number === '01' ? '看第二天' : '回第一天' }}
+            <span aria-hidden="true">{{ day.number === '01' ? '↓' : '↑' }}</span>
           </button>
         </header>
-        <ol class="timeline">
-          <li v-for="row in day.rows" :key="row[0]">
-            <div class="timeline-time">{{ row[0] }}</div>
-            <h3>{{ row[1] }}</h3>
-            <p>{{ row[2] }}</p>
-            <a v-if="row.length === 5" class="ink-link" :href="`#${row[3]}`"
-              >{{ row[4] }} <AppIcon name="arrow" :size="14"
-            /></a>
-            <a v-if="row[3] === 'itinerary/walk'" class="ink-link" href="#itinerary/studio"
-              >查看体验 <AppIcon name="arrow" :size="14"
-            /></a>
+        <ol class="trip-entries" role="list">
+          <li v-for="row in day.rows" :key="row[0]" class="trip-entry">
+            <div class="entry-time">{{ row[0] }}</div>
+            <div class="entry-body">
+              <h3>{{ row[1] }}</h3>
+              <p>{{ row[2] }}</p>
+              <div v-if="row.length === 5" class="entry-links">
+                <a class="ink-link" :href="`#${row[3]}`">
+                  {{ row[4] }} <AppIcon name="arrow" :size="14" />
+                </a>
+                <a v-if="row[3] === 'itinerary/walk'" class="ink-link" href="#itinerary/studio">
+                  查看体验 <AppIcon name="arrow" :size="14" />
+                </a>
+              </div>
+            </div>
           </li>
         </ol>
       </section>
@@ -109,3 +131,177 @@ function jumpToSecondDay() {
     </div>
   </section>
 </template>
+
+<style scoped>
+.trip-book {
+  --trip-ink: #304e41;
+  --trip-rule: #d7ceba;
+  container-type: inline-size;
+}
+.journey-print {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: right center;
+}
+.trip-tabs {
+  padding-inline: max(12px, calc((100% - 46rem) / 2));
+  border-bottom-color: var(--trip-rule);
+}
+.trip-tabs a[aria-current='page'] {
+  color: var(--trip-ink);
+  border-bottom-color: var(--trip-ink);
+  background: #eaece0;
+}
+.trip-book .field-inner {
+  max-width: 46rem;
+  margin-inline: auto;
+  padding: 22px clamp(16px, 4%, 32px) 36px;
+}
+.trip-day {
+  --chapter-ink: var(--trip-ink);
+  scroll-margin-block-start: 4rem;
+}
+.trip-day + .trip-day {
+  --chapter-ink: #825034;
+  margin-top: 28px;
+}
+.trip-day:focus-visible {
+  outline: 2px solid var(--chapter-ink);
+  outline-offset: 4px;
+}
+.trip-chapter {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: clamp(8px, 2.5%, 16px);
+  border-block: 2px solid var(--chapter-ink);
+  border-bottom: 1px solid var(--trip-rule);
+  padding: 12px 0;
+}
+.day-number {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  width: 46px;
+  min-height: 52px;
+  background: var(--chapter-ink);
+  color: #fff3d8;
+  font: 650 10px/1.25 sans-serif;
+  letter-spacing: 0.14em;
+}
+.day-number b {
+  font:
+    500 28px/1 Georgia,
+    serif;
+  letter-spacing: 0;
+}
+.day-route {
+  color: var(--chapter-ink);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+}
+.trip-chapter h2 {
+  margin-top: 3px;
+  color: #293d32;
+  font: 650 22px/1.35 var(--serif);
+  text-wrap: balance;
+}
+.chapter-turn {
+  padding: 0 4px;
+  min-height: 44px;
+  color: var(--chapter-ink);
+  font-size: 13px;
+  white-space: nowrap;
+}
+.chapter-turn span {
+  display: inline-grid;
+  place-items: center;
+  width: 19px;
+  height: 19px;
+  border: 1px solid var(--trip-rule);
+  border-radius: 50%;
+}
+.chapter-turn:hover,
+.entry-links a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.trip-entries {
+  margin: 20px 0 0 5px;
+  padding: 0;
+  list-style: none;
+}
+.trip-entry {
+  position: relative;
+  display: grid;
+  gap: 3px 20px;
+  border-inline-start: 1px solid var(--trip-rule);
+  padding: 0 0 19px 19px;
+}
+.trip-entry:last-child {
+  border-color: transparent;
+  padding-bottom: 0;
+}
+.trip-entry::before {
+  position: absolute;
+  content: '';
+  inset: 5px auto auto -5px;
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--chapter-ink);
+  border-radius: 50%;
+  background: #faf7ee;
+}
+.trip-entry:is(:first-child, :last-child)::before {
+  background: var(--chapter-ink);
+}
+.entry-time {
+  color: var(--chapter-ink);
+  font:
+    650 13px/1.5 ui-monospace,
+    monospace;
+  font-variant-numeric: tabular-nums;
+}
+.entry-body h3 {
+  color: #2e3b32;
+  font: 650 18px/1.45 var(--serif);
+}
+.entry-body p {
+  margin-top: 3px;
+  color: #596154;
+  font-size: 14px;
+  line-height: 1.65;
+}
+.entry-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 16px;
+}
+.entry-links .ink-link {
+  margin: 0;
+  min-height: 44px;
+  color: var(--trip-ink);
+}
+@container (min-width: 32rem) {
+  .trip-entry {
+    grid-template-columns: 6.5rem minmax(0, 1fr);
+  }
+  .entry-time {
+    padding-top: 3px;
+  }
+  .trip-entry::before {
+    top: 8px;
+  }
+}
+@container (max-width: 22rem) {
+  .trip-chapter h2 {
+    font-size: 19px;
+  }
+  .chapter-turn span {
+    width: auto;
+    border: 0;
+  }
+}
+</style>

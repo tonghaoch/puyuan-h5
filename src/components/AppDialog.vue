@@ -76,34 +76,32 @@ onBeforeUnmount(() => {
 })
 </script>
 <template>
-  <Teleport to="body">
-    <div class="dialog-backdrop" @click.self="emit('close')">
-      <section
-        ref="panel"
-        class="dialog-panel"
-        :class="{ wide, dragging }"
-        :style="dragOffset ? { transform: `translateY(${dragOffset}px)` } : undefined"
-        role="dialog"
-        aria-modal="true"
-        :aria-label="label"
-        tabindex="-1"
+  <div class="dialog-backdrop" @click.self="emit('close')">
+    <section
+      ref="panel"
+      class="dialog-panel"
+      :class="{ wide, dragging }"
+      :style="dragOffset ? { transform: `translateY(${dragOffset}px)` } : undefined"
+      role="dialog"
+      aria-modal="true"
+      :aria-label="label"
+      tabindex="-1"
+    >
+      <button
+        class="sheet-grip"
+        aria-label="收起弹层"
+        @pointerdown="startDrag"
+        @pointermove="moveDrag"
+        @pointerup="endDrag"
+        @pointercancel="endDrag"
+        @click="handleGripClick"
       >
-        <button
-          class="sheet-grip"
-          aria-label="收起弹层"
-          @pointerdown="startDrag"
-          @pointermove="moveDrag"
-          @pointerup="endDrag"
-          @pointercancel="endDrag"
-          @click="handleGripClick"
-        >
-          <span></span>
-        </button>
-        <button class="dialog-close icon-button" aria-label="关闭弹窗" @click="emit('close')">
-          <AppIcon name="close" />
-        </button>
-        <div class="dialog-content"><slot /></div>
-      </section>
-    </div>
-  </Teleport>
+        <span></span>
+      </button>
+      <button class="dialog-close icon-button" aria-label="关闭弹窗" @click="emit('close')">
+        <AppIcon name="close" />
+      </button>
+      <div class="dialog-content"><slot /></div>
+    </section>
+  </div>
 </template>

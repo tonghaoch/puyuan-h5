@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import AppIcon from './AppIcon.vue'
+import QuestToken from './QuestToken.vue'
 import { gameSites, type GameSite } from '../data/offsite'
-const props = defineProps<{ site: GameSite; index: number; fromMap: boolean }>()
+const props = defineProps<{ site: GameSite; index: number; sheet?: boolean }>()
 defineEmits<{ back: []; map: []; choose: [index: number] }>()
 const current = computed(() => props.site.challenges[props.index]!)
 const number = computed(() =>
@@ -10,16 +11,20 @@ const number = computed(() =>
 )
 </script>
 <template>
-  <section class="field-page quest-detail" aria-label="游戏详情">
+  <section class="quest-detail" :class="sheet ? 'quest-brief' : 'field-page'" aria-label="游戏详情">
     <div class="field-inner">
-      <button class="back-link" @click="$emit('back')">
-        <AppIcon name="chevron" :size="16" />{{ fromMap ? '返回地图' : '返回游戏手册' }}
+      <button v-if="!sheet" class="back-link" @click="$emit('back')">
+        <AppIcon name="chevron" :size="16" />返回游戏手册
       </button>
-      <header class="quest-banner">
-        <p class="folio-kicker">PUYUAN QUEST <i></i> {{ number }}</p>
-        <h1>{{ site.place }}</h1>
-        <p>濮院诗简 · 固定挑战</p>
-        <AppIcon name="flag" :size="64" />
+      <header class="warrant-heading">
+        <QuestToken />
+        <div>
+          <p class="section-kicker">
+            江湖令 {{ number }} <i></i> {{ sheet ? site.place : '濮院诗简' }}
+          </p>
+          <h2 v-if="sheet">{{ current.name }}</h2>
+          <h1 v-else>{{ site.place }}</h1>
+        </div>
       </header>
       <div v-if="site.challenges.length > 1" class="field-tabs detail-tabs" aria-label="选择挑战">
         <button
@@ -31,8 +36,10 @@ const number = computed(() =>
           {{ c.name }}
         </button>
       </div>
-      <p class="section-kicker">MISSION BRIEF</p>
-      <h2 class="field-title">{{ current.name }}</h2>
+      <template v-if="!sheet">
+        <p class="section-kicker mission-kicker">关卡手札 <i></i> MISSION BRIEF</p>
+        <h2 class="field-title">{{ current.name }}</h2>
+      </template>
       <div class="rule-block">
         <span>壹</span>
         <div>
@@ -47,10 +54,10 @@ const number = computed(() =>
           <p>{{ current.goal }}</p>
         </div>
       </div>
-      <button class="field-action" @click="$emit('map')">
-        <AppIcon name="flag" :size="18" />{{ fromMap ? '返回地图' : '在导览中查看' }}
+      <button v-if="!sheet" class="field-action" @click="$emit('map')">
+        <AppIcon name="map" :size="18" />在导览中查看
       </button>
-      <p class="field-fine">朱旗标示活动参考区域，具体集合点以现场守关人为准。</p>
+      <p class="field-fine">令牌标示挑战区域，集合点以现场守关人为准。</p>
     </div>
   </section>
 </template>

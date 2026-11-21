@@ -10,13 +10,18 @@ test('four event sections, dinner search, and day two programme', async ({ page 
   await expect(page.locator('.dinner-row')).toHaveCount(10)
   await page.getByRole('button', { name: '特色风味' }).click()
   await expect(page.locator('.dinner-row')).toHaveCount(3)
+  await expect(page.getByRole('status')).toContainText('3 家推荐')
   await page.getByRole('searchbox', { name: '搜索餐厅' }).fill('不存在的餐厅')
   await expect(page.getByText('没有找到这家餐厅')).toBeVisible()
   await page.getByRole('button', { name: /查看全部餐厅/ }).click()
+  await expect(page.getByRole('searchbox', { name: '搜索餐厅' })).toBeFocused()
   await expect(page.locator('.dinner-row')).toHaveCount(10)
   await page.getByRole('button', { name: '行程', exact: true }).click()
   await page.getByRole('button', { name: /看第二天/ }).click()
   await expect(page.getByRole('heading', { name: '慢游水乡，返程' })).toBeInViewport()
+  await page.getByRole('button', { name: /回第一天/ }).click()
+  await expect(page.getByRole('heading', { name: '到濮院，入戏' })).toBeInViewport()
+  await page.getByRole('button', { name: /看第二天/ }).click()
   await page.getByRole('link', { name: '查看体验' }).click()
   await expect(page.locator('.directory-row')).toHaveCount(12)
   await page.getByRole('link', { name: '演出', exact: true }).click()
@@ -24,17 +29,31 @@ test('four event sections, dinner search, and day two programme', async ({ page 
   expect(errors).toEqual([])
 })
 
-test('one lawn flag opens both rules and returns to the same map camera', async ({ page }) => {
+test('one lawn token opens both challenges in a bottom sheet without leaving the map', async ({
+  page,
+}) => {
   await page.goto('/')
   const flag = page.getByRole('button', { name: /^游戏：大草坪/ })
   const scene = page.locator('.map-scene')
+  await page.getByRole('button', { name: '放大地图' }).click()
   await expect(flag).toBeInViewport()
   const camera = await scene.getAttribute('style')
   await flag.click()
-  await expect(page.getByRole('heading', { name: '蹴鞠达人' })).toBeVisible()
-  await page.getByRole('button', { name: '一锤定音' }).click()
-  await expect(page.getByText('全队合计敲破超过 12 个气球。')).toBeVisible()
+  const sheet = page.getByRole('dialog', { name: '大草坪 · 江湖挑战令' })
+  await expect(sheet.getByRole('heading', { name: '蹴鞠达人' })).toBeVisible()
+  await expect(page.locator('.app-shell')).toHaveJSProperty('inert', true)
+  await expect(page.locator('.map-page')).toBeVisible()
+  await expect(sheet).toBeFocused()
+  await sheet.getByRole('button', { name: '一锤定音', exact: true }).click()
+  await expect(sheet.getByText('全队合计敲破超过 12 个气球。')).toBeVisible()
+  await expect(page).toHaveURL(/#map\/task\/lawn\/1$/)
+  const bounds = (await sheet.boundingBox())!
+  const height = page.viewportSize()!.height
+  expect(bounds.y).toBeGreaterThan(height * 0.25)
+  expect(Math.abs(bounds.y + bounds.height - height)).toBeLessThan(2)
   await page.goBack()
+  await expect(sheet).toHaveCount(0)
+  await expect(flag).toBeFocused()
   await expect(scene).toHaveAttribute('style', camera!)
   await expect(flag).toBeInViewport()
   await page.goto('/#games/task/treasure')
@@ -46,6 +65,22 @@ test('one lawn flag opens both rules and returns to the same map camera', async 
   expect(Math.abs(viewport.x + viewport.width / 2 - pos.x - pos.width / 2)).toBeLessThan(35)
   await page.getByRole('button', { name: '路网', exact: true }).click()
   await expect(page.locator('.quest-pin')).toHaveCount(0)
+})
+
+test('linked map challenge restores the chosen rule and dismisses locally', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/#map/task/lawn/1')
+  const sheet = page.getByRole('dialog')
+  await expect(sheet.getByRole('heading', { name: '一锤定音' })).toBeVisible()
+  await page.reload()
+  await expect(sheet.getByRole('button', { name: '一锤定音' })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  )
+  await sheet.getByRole('button', { name: '关闭弹窗' }).click()
+  await expect(page).toHaveURL(/#map$/)
+  await expect(sheet).toHaveCount(0)
+  await expect(page.getByRole('button', { name: /^游戏：大草坪/ })).toBeVisible()
 })
 
 test('reference labels filter, open a place and link through to restaurant content', async ({

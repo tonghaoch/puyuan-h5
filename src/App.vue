@@ -4,6 +4,7 @@ import AppIcon from './components/AppIcon.vue'
 import TripBook from './components/TripBook.vue'
 import GameBook from './components/GameBook.vue'
 import QuestDetail from './components/QuestDetail.vue'
+import QuestToken from './components/QuestToken.vue'
 import DiningBook from './components/DiningBook.vue'
 import { dinnerSpots, gameSites } from './data/offsite'
 import ParkMap from './components/ParkMap.vue'
@@ -91,7 +92,8 @@ function loadFavorites(): string[] {
 }
 const favorites = ref<string[]>(loadFavorites())
 const location = useLocation()
-const hasModal = computed(() => !!selection.value || !!overlay.value)
+const mapQuest = computed(() => tab.value === 'map' && !!activeSite.value)
+const hasModal = computed(() => !!selection.value || !!overlay.value || mapQuest.value)
 const motionActive = computed(
   () => motion.value && pageVisible.value && tab.value === 'map' && !hasModal.value,
 )
@@ -125,9 +127,12 @@ function readRoute() {
   bookSection.value = kind && sections.includes(kind) ? kind : ''
   const previous = activeSite.value
   activeSite.value =
-    tab.value === 'games' && kind === 'task' ? gameSites.find((s) => s.id === id) : undefined
+    (nextTab === 'map' || nextTab === 'games') && kind === 'task'
+      ? gameSites.find((s) => s.id === id)
+      : undefined
   challengeIndex.value = activeSite.value?.challenges[Number(modelId)] ? Number(modelId) : 0
   questOrigin.value = window.history.state?.questOrigin ?? null
+  if (mapQuest.value) mapView.value = 'reference'
   if (previous && !activeSite.value && questOpener?.isConnected) {
     const opener = questOpener
     nextTick(() => {
@@ -160,22 +165,28 @@ function changeTab(next: Tab) {
     route(next)
   }
 }
-function openQuest(id: string) {
-  questOpener = document.activeElement instanceof HTMLElement ? document.activeElement : null
-  window.history.pushState({ questOrigin: tab.value }, '', `#games/task/${id}`)
+function openQuest(id: string, opener?: HTMLElement) {
+  questOpener =
+    opener ?? (document.activeElement instanceof HTMLElement ? document.activeElement : null)
+  window.history.pushState({ questOrigin: tab.value }, '', `#${tab.value}/task/${id}`)
   readRoute()
-  nextTick(() =>
-    document.querySelector<HTMLElement>('.quest-detail')?.focus({ preventScroll: true }),
-  )
+  if (!mapQuest.value)
+    nextTick(() =>
+      document.querySelector<HTMLElement>('.quest-detail')?.focus({ preventScroll: true }),
+    )
 }
 function chooseChallenge(i: number) {
   if (!activeSite.value) return
-  window.history.replaceState(window.history.state, '', `#games/task/${activeSite.value.id}/${i}`)
+  window.history.replaceState(
+    window.history.state,
+    '',
+    `#${tab.value}/task/${activeSite.value.id}/${i}`,
+  )
   readRoute()
 }
 function leaveQuest() {
   if (questOrigin.value) window.history.back()
-  else route('games', false, true)
+  else route(tab.value, false, true)
 }
 function mapForQuest() {
   if (!activeSite.value) return
@@ -399,6 +410,7 @@ onBeforeUnmount(() => {
           :all-places="places"
           :focus-request="focusRequest"
           :motion="motionActive"
+          :active-quest-id="activeSite?.id"
           :view="mapView"
           :fix="location.fix.value"
           :now="now"
@@ -453,7 +465,8 @@ onBeforeUnmount(() => {
           <button @click="resetFilters('map')">查看全部地点</button>
         </div>
         <div class="map-bottom-note">
-          <span class="demo-dot"></span><span v-if="!geographicView">朱旗 · 团建挑战</span
+          <span v-if="geographicView" class="demo-dot"></span
+          ><span v-if="!geographicView" class="quest-legend"><QuestToken /> 江湖令 · 团建挑战</span
           ><span v-else
             ><a
               href="https://www.openstreetmap.org/copyright"
@@ -475,10 +488,9 @@ onBeforeUnmount(() => {
         @map="viewOnMap"
       />
       <QuestDetail
-        v-if="activeSite"
+        v-if="activeSite && !mapQuest"
         :site="activeSite"
         :index="challengeIndex"
-        :from-map="questOrigin === 'map'"
         tabindex="-1"
         @back="leaveQuest"
         @map="mapForQuest"
@@ -628,6 +640,17 @@ onBeforeUnmount(() => {
     </nav>
   </div>
 
+  <Transition name="quest-rise" :css="motion" appear>
+    <AppDialog
+      v-if="mapQuest && activeSite"
+      class="quest-sheet"
+      :label="`${activeSite.place} · 江湖挑战令`"
+      @close="leaveQuest"
+    >
+      <QuestDetail :site="activeSite" :index="challengeIndex" sheet @choose="chooseChallenge" />
+    </AppDialog>
+  </Transition>
+
   <Transition name="sheet">
     <AppDialog
       v-if="selection && (selectedDinner || detail)"
@@ -776,7 +799,9 @@ onBeforeUnmount(() => {
           <span>贰</span>
           <div>
             <h3>寻味赴约，各有欢喜</h3>
-            <p>打开「行程」查看两天安排。导览上的朱旗直达游戏规则，「餐厅」收录自由晚餐推荐。</p>
+            <p>
+              打开「行程」查看两天安排。点导览上的江湖令查看游戏规则，「餐厅」收录自由晚餐推荐。
+            </p>
           </div>
         </div>
         <div class="guide-step">

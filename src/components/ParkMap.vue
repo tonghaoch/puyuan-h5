@@ -5,6 +5,7 @@ import { clampCamera, zoomAt, zoomRange, ZOOM_STEP, SCENE, type Camera } from '.
 import ReferenceTiles from './ReferenceTiles.vue'
 import referenceMap from '../data/reference-map.json'
 import ReferenceLabels from './ReferenceLabels.vue'
+import QuestToken from './QuestToken.vue'
 import AppIcon from './AppIcon.vue'
 import { gameSites, roamingAreas } from '../data/offsite'
 import { useParkGeography, isGeographicView, type MapView } from '../lib/park-geography'
@@ -25,6 +26,7 @@ const props = defineProps<{
   focusRequest: { id: string; nonce: number } | null
   allPlaces: Place[]
   motion: boolean
+  activeQuestId?: string
   view: MapView
   fix: GeographicFix | null
   now: number
@@ -36,7 +38,7 @@ const emit = defineEmits<{
   zoom: [value: number]
   geoselect: [feature: GeoFeature]
   outside: []
-  game: [id: string]
+  game: [id: string, opener: HTMLElement]
 }>()
 const geography = useParkGeography()
 const geographic = computed(() => isGeographicView(props.view))
@@ -440,18 +442,19 @@ onBeforeUnmount(() => observer?.disconnect())
           v-for="site in gameSites"
           :key="site.id"
           class="quest-pin"
-          :class="{ 'pin-west': site.id === 'treasure', 'pin-east': site.id === 'relay' }"
+          :class="{
+            'pin-west': site.id === 'treasure' || site.id === 'mime',
+            'pin-east': site.id === 'relay' || site.id === 'drum',
+            'pin-selected': activeQuestId === site.id,
+          }"
           :style="{ left: `${site.point[0]}px`, top: `${site.point[1]}px` }"
           :aria-label="`游戏：${site.place} · ${site.challenges.map((c) => c.name).join('、')}`"
           :title="`${site.place} · ${site.challenges.map((c) => c.name).join('、')}`"
-          @click.stop="emit('game', site.id)"
+          aria-haspopup="dialog"
+          @click.stop="emit('game', site.id, $event.currentTarget as HTMLElement)"
           @dblclick.stop
         >
-          <span
-            ><AppIcon name="flag" :size="16" /><b v-if="site.challenges.length > 1">{{
-              site.challenges.length
-            }}</b></span
-          >
+          <QuestToken />
         </button>
       </template>
     </div>

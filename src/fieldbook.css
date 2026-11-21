@@ -14,8 +14,7 @@
   outline: 2px solid #aa502e;
   outline-offset: 2px;
 }
-.field-heading,
-.quest-banner {
+.field-heading {
   isolation: isolate;
   overflow: hidden;
   position: relative;
@@ -36,9 +35,53 @@
   background-image:
     linear-gradient(90deg, #622e24 24%, #622e24dd 46%, #622e2473), url('/art/temple.svg');
 }
-.field-food::before {
-  background-image:
-    linear-gradient(90deg, #513c2a 24%, #513c2add 46%, #513c2a83), url('/art/food.svg');
+.illustrated-heading {
+  display: flex;
+  align-items: center;
+  min-height: 158px;
+  background: #263f36;
+  border-bottom: 3px double #cabb94;
+}
+.illustrated-heading.field-food {
+  background: #54392c;
+}
+.illustrated-heading::before {
+  display: none;
+}
+.folio-art {
+  position: absolute;
+  inset: auto -1% 0 auto;
+  width: 43%;
+  height: 100%;
+  pointer-events: none;
+}
+.folio-art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: right bottom;
+}
+.illustrated-heading .folio-caption {
+  position: relative;
+  max-width: 60%;
+}
+.illustrated-heading .folio-note {
+  text-wrap: balance;
+}
+.illustrated-heading .folio-kicker {
+  font-size: 9px;
+  letter-spacing: 1px;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.illustrated-heading .folio-seal {
+  top: 11px;
+  right: 12px;
+  font-size: 10px;
+  color: #fee4b4;
+  background: #88402e;
+  border: 1px solid #d5ac80;
 }
 .folio-kicker,
 .section-kicker {
@@ -57,14 +100,12 @@
   width: 23px;
   border-top: 1px solid currentColor;
 }
-.field-heading h1,
-.quest-banner h1 {
+.field-heading h1 {
   font: 600 clamp(28px, 8vw, 38px)/1.35 var(--serif);
   letter-spacing: 2px;
   margin: 9px 0;
 }
-.folio-note,
-.quest-banner > p:last-of-type {
+.folio-note {
   font-size: 13px;
   line-height: 1.7;
   color: #fff4db;
@@ -121,8 +162,7 @@
   color: #7d6040;
   margin-bottom: 4px;
 }
-.field-title,
-.day-heading h2 {
+.field-title {
   font: 650 24px/1.45 var(--serif);
   text-wrap: balance;
 }
@@ -130,8 +170,7 @@
 .journal-panel p,
 .directory-row p,
 .rule-block p,
-.field-fine,
-.dining-note p {
+.field-fine {
   line-height: 1.75;
   color: #5d6457;
 }
@@ -139,68 +178,12 @@
   margin: 8px 0 18px;
   font-size: 14px;
 }
-.day-heading,
 .field-section-head {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-bottom: 12px;
 }
-.day-heading > span {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: #e8e9da;
-  color: #36523e;
-  padding: 5px 8px;
-  font: 700 9px/1.3 sans-serif;
-  letter-spacing: 1px;
-  border-radius: 4px;
-}
-.day-heading b {
-  font:
-    600 22px/1 Georgia,
-    serif;
-}
-.day-heading h2 {
-  font-size: 21px;
-}
-.trip-day + .trip-day {
-  margin-top: 30px;
-}
-.timeline {
-  list-style: none;
-  padding: 0 0 0 14px;
-  margin: 0;
-}
-.timeline li {
-  position: relative;
-  padding: 3px 4px 17px 18px;
-  border-left: 1px solid #d5cfbc;
-}
-.timeline li:last-child {
-  border-left-color: transparent;
-  padding-bottom: 0;
-}
-.timeline li::before {
-  content: '';
-  position: absolute;
-  top: 8px;
-  left: -4px;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #a67a51;
-  outline: 3px solid #faf7ee;
-}
-.timeline-time {
-  color: #805b39;
-  letter-spacing: 0.6px;
-  font-size: 12px;
-  font-weight: 650;
-  font-variant-numeric: tabular-nums;
-}
-.timeline h3,
 .directory-row h3,
 .quest-row h3,
 .journal-panel h3,
@@ -208,7 +191,6 @@
   font: 650 18px/1.5 var(--serif);
   margin: 2px 0;
 }
-.timeline p,
 .directory-row p,
 .journal-panel p {
   font-size: 13px;
@@ -277,8 +259,7 @@
   color: #87452c;
   font-size: 14px;
 }
-.journal-panel,
-.dining-note {
+.journal-panel {
   background: #f2edde;
   border: 1px solid #ded5c0;
   border-radius: 8px;
@@ -337,19 +318,112 @@
 .back-link svg {
   transform: rotate(180deg);
 }
-.quest-banner {
-  background: linear-gradient(110deg, #723b2a, #844733);
-  border-radius: 8px;
-  margin: 4px 0 20px;
-  padding: 22px;
+.warrant-heading {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 2px 0 14px;
+  margin-bottom: 14px;
+  border-bottom: 3px double #d7c6a9;
 }
-.quest-banner > svg {
-  position: absolute;
-  right: 18px;
-  bottom: 15px;
-  color: #edc8a9;
-  opacity: 0.5;
-  transform: rotate(-8deg);
+.warrant-heading .quest-token {
+  width: 38px;
+  height: 48px;
+  filter: drop-shadow(0 1px 1px #633e2e55);
+}
+.warrant-heading :is(h1, h2) {
+  font: 650 23px/1.35 var(--serif);
+  letter-spacing: 2px;
+}
+.warrant-heading i,
+.mission-kicker i {
+  width: 16px;
+  border-top: 1px solid currentColor;
+}
+.quest-sheet.dialog-backdrop {
+  align-items: flex-end;
+  padding: 0;
+  background: #192e283d;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.quest-sheet .dialog-panel {
+  width: 100%;
+  max-height: 71vh;
+  max-height: 71dvh;
+  padding: 27px 0 env(safe-area-inset-bottom);
+  border-radius: 19px 19px 0 0;
+  border: 1px solid #d1bd98;
+  border-bottom: 0;
+  box-shadow: 0 -6px 40px #33332034;
+  background: linear-gradient(118deg, #fffaf0, #f8f2e4 80%, #eee4cf);
+}
+.quest-sheet .dialog-close {
+  top: 9px;
+  right: 10px;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  background: transparent;
+}
+.quest-brief {
+  --faint: #e2d7be;
+  color: #303e33;
+}
+.quest-brief .field-inner {
+  padding: 0 22px 18px;
+}
+.quest-brief .warrant-heading {
+  padding-right: 36px;
+  margin-bottom: 8px;
+}
+.quest-brief :is(.warrant-heading, .detail-tabs) + .rule-block {
+  border-top: 0;
+}
+.quest-detail .detail-tabs {
+  margin-bottom: 15px;
+  border: 1px solid #d7cab2;
+  padding: 3px;
+}
+.quest-detail .detail-tabs button {
+  border: 0;
+  border-radius: 3px;
+  padding: 8px 4px;
+}
+.quest-detail .detail-tabs button[aria-pressed='true'] {
+  color: #fff7e2;
+  background: #774333;
+}
+.quest-brief .rule-block {
+  gap: 10px;
+  padding: 10px 0;
+}
+.quest-brief .rule-block > span {
+  border: 1px solid #c5a57a;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 13px;
+}
+.quest-brief .field-fine {
+  border-top: 1px solid var(--faint);
+  padding-top: 9px;
+  margin-top: 2px;
+}
+.quest-rise-enter-active,
+.quest-rise-leave-active {
+  transition: opacity 0.32s ease;
+}
+.quest-rise-enter-active .dialog-panel,
+.quest-rise-leave-active .dialog-panel {
+  transition: transform 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.quest-rise-enter-from,
+.quest-rise-leave-to {
+  opacity: 0;
+}
+.quest-rise-enter-from .dialog-panel,
+.quest-rise-leave-to .dialog-panel {
+  transform: translateY(100%);
 }
 .detail-tabs {
   position: static;
@@ -369,23 +443,6 @@
 }
 .quest-detail .field-title {
   margin: 3px 0 15px;
-}
-.dining-note {
-  margin: 0 0 15px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.dining-note svg {
-  flex-shrink: 0;
-  color: #85522d;
-}
-.dining-note p {
-  font-size: 12px;
-}
-.dining-note a {
-  text-decoration: underline;
-  text-underline-offset: 2px;
 }
 .book-search {
   display: flex;
@@ -441,31 +498,37 @@
   place-items: center;
   transform-origin: 50% 100%;
   transform: translate(-50%, -100%) scale(var(--inverse-scale));
-  width: 32px;
-  height: 34px;
+  width: 44px;
+  height: 44px;
   padding: 0;
-  filter: drop-shadow(0 1px 2px #30231881);
+  background: none;
 }
-.quest-pin span {
-  display: flex;
+.quest-pin .quest-token {
+  width: 30px;
+  height: 37.5px;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 1.2px #342f23aa);
+}
+.quest-pin:focus-visible {
+  border-radius: 6px;
+  outline: 2px solid #fff0c8;
+  box-shadow: 0 0 0 4px #693b2c;
+}
+.quest-pin.pin-selected {
+  z-index: 5;
+}
+.pin-selected .quest-token {
+  filter: drop-shadow(0 0 2px #fff3c9) drop-shadow(0 1px 2px #542d18);
+  transform: scale(1.13);
+}
+.quest-legend {
+  display: inline-flex;
   align-items: center;
-  gap: 1px;
-  padding: 3px 4px 4px;
-  background: #973d28;
-  color: #fff4df;
-  border: 1.5px solid #fff4da;
-  border-radius: 7px 7px 7px 0;
+  gap: 3px;
 }
-.quest-pin span:after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 8px;
-  border: 4px solid transparent;
-  border-top: 6px solid #fff4da;
-}
-.quest-pin b {
-  font: 700 10px/1 sans-serif;
+.quest-legend svg {
+  width: 16px;
+  height: 20px;
 }
 .roaming-area {
   position: absolute;
@@ -496,23 +559,26 @@
   transform-origin: 0 100%;
   transform: translate(0, -100%) scale(var(--inverse-scale));
 }
-.quest-pin.pin-west span:after {
-  right: 3px;
-  left: auto;
+.quest-pin:is(.pin-east, .pin-west)::before {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  width: 50%;
+  height: 1px;
+  background: #825034;
+  box-shadow: 0 1px #fff3cd;
+  pointer-events: none;
 }
-.quest-pin.pin-east span:after {
-  left: 3px;
+.quest-pin.pin-west::before {
+  right: 0;
+  transform: rotate(17deg);
 }
-.day-jump {
-  margin-left: auto;
-  color: #67583e;
-  font-size: 12px;
-  padding: 10px 0;
+.quest-pin.pin-east::before {
+  left: 0;
+  transform: rotate(-17deg);
 }
-.trip-day {
-  scroll-margin-top: 62px;
-}
-.quest-pin:hover span,
-.quest-pin:focus-visible span {
-  background: #6f2617;
+@media (hover: hover) {
+  .quest-pin:hover .quest-token {
+    transform: translateY(-2px);
+  }
 }
