@@ -6,6 +6,7 @@ import ReferenceTiles from './ReferenceTiles.vue'
 import referenceMap from '../data/reference-map.json'
 import ReferenceLabels from './ReferenceLabels.vue'
 import AppIcon from './AppIcon.vue'
+import { gameSites, roamingAreas } from '../data/offsite'
 import { useParkGeography, isGeographicView, type MapView } from '../lib/park-geography'
 import { classifyFix, type GeographicFix, type GeoFeature } from '../lib/geography'
 // Start point and bearing in the original painting's coordinate system.
@@ -35,6 +36,7 @@ const emit = defineEmits<{
   zoom: [value: number]
   geoselect: [feature: GeoFeature]
   outside: []
+  game: [id: string]
 }>()
 const geography = useParkGeography()
 const geographic = computed(() => isGeographicView(props.view))
@@ -55,6 +57,10 @@ const userVisible = computed(
     userPosition.value[1] >= 0 &&
     userPosition.value[1] <= SCENE.height,
 )
+const roamingName = computed(() =>
+  props.focusRequest?.id.startsWith('area:') ? props.focusRequest.id.slice(5) : '',
+)
+const roamingPoint = computed(() => roamingAreas[roamingName.value])
 const userStatus = computed(() =>
   props.fix && geography.ring.value.length
     ? classifyFix(props.fix, geography.ring.value, props.now)
@@ -149,29 +155,33 @@ function guardClick(event: MouseEvent) {
     suppressClick = false
   }
 }
-function focus(place: Place) {
+function focus(point: Place['point']) {
   const scale = Math.max(camera.scale, 0.83)
   setCamera({
     scale,
-    x: dimensions.width / 2 - place.point.x * scale,
-    y: dimensions.height * 0.45 - place.point.y * scale,
+    x: dimensions.width / 2 - point.x * scale,
+    y: dimensions.height * 0.45 - point.y * scale,
   })
 }
-watch(
-  () => props.focusRequest,
-  (request) => {
-    const place = props.allPlaces.find((p) => p.id === request?.id)
-    if (place) focus(place)
-  },
-)
+function applyFocus(request: typeof props.focusRequest) {
+  if (!request || !ready.value) return
+  const place = props.allPlaces.find((p) => p.id === request?.id)
+  if (place) focus(place.point)
+  const site = gameSites.find((s) => `quest:${s.id}` === request?.id)
+  if (site) focus({ x: site.point[0], y: site.point[1] })
+  if (roamingPoint.value) focus({ x: roamingPoint.value[0], y: roamingPoint.value[1] })
+}
+watch(() => props.focusRequest, applyFocus, { flush: 'post' })
 function down(event: PointerEvent) {
   if (pointers.size === 0) {
     suppressClick = false
     dragDistance = 0
   }
   const button = (event.target as Element).closest('button')
-  if (button || event.button > 0) return
-  viewport.value?.setPointerCapture(event.pointerId)
+  if ((button && !button.classList.contains('quest-pin')) || event.button > 0) return
+  // Keep taps on the flag, but allow a drag starting on it to pan the map.
+  const captureTarget = button ?? viewport.value
+  captureTarget?.setPointerCapture(event.pointerId)
   pointers.set(event.pointerId, { x: event.clientX, y: event.clientY })
   dragging.value = true
 }
@@ -261,6 +271,7 @@ onMounted(() => {
     if (!ready.value) {
       reset()
       ready.value = true
+      applyFocus(props.focusRequest)
     } else setCamera({ ...camera, x: camera.x + dx / 2, y: camera.y + dy / 2 })
   })
   observer.observe(viewport.value!)
@@ -417,6 +428,32 @@ onBeforeUnmount(() => observer?.disconnect())
         :places="places"
         @select="emit('select', $event)"
       />
+      <template v-if="view === 'reference'">
+        <div
+          v-if="roamingPoint"
+          class="roaming-area"
+          :style="{ left: `${roamingPoint[0]}px`, top: `${roamingPoint[1]}px` }"
+        >
+          <span>{{ roamingName }} · 活动范围示意</span>
+        </div>
+        <button
+          v-for="site in gameSites"
+          :key="site.id"
+          class="quest-pin"
+          :class="{ 'pin-west': site.id === 'treasure', 'pin-east': site.id === 'relay' }"
+          :style="{ left: `${site.point[0]}px`, top: `${site.point[1]}px` }"
+          :aria-label="`游戏：${site.place} · ${site.challenges.map((c) => c.name).join('、')}`"
+          :title="`${site.place} · ${site.challenges.map((c) => c.name).join('、')}`"
+          @click.stop="emit('game', site.id)"
+          @dblclick.stop
+        >
+          <span
+            ><AppIcon name="flag" :size="16" /><b v-if="site.challenges.length > 1">{{
+              site.challenges.length
+            }}</b></span
+          >
+        </button>
+      </template>
     </div>
   </div>
   <div v-if="geographic && geography.error.value" class="geo-map-error" role="status">
