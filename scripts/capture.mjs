@@ -45,24 +45,13 @@ for (const [name, viewport] of [
   await page.getByRole('button', { name: '选择要细看的建筑' }).click()
   await page.screenshot({ path: `artifacts/${name}-building-directory.png` })
   await page.getByRole('button', { name: '关闭古建目录' }).click()
-  await page.getByRole('button', { name: '重置地图视野' }).click()
-  await page.getByRole('region', { name: /古镇示意地图/ }).focus()
+  const mapViewport = page.locator('.map-viewport')
+  await mapViewport.press('Home')
   for (let i = 0; i < 20; i++) await page.keyboard.press('ArrowRight')
   await page.waitForTimeout(500)
   await page.screenshot({ path: `artifacts/${name}-meadow.png` })
-  await page.getByRole('button', { name: '回到古镇', exact: true }).click()
+  await mapViewport.press('Home')
 
-  for (const [view, label] of [
-    ['reference', '原图对照'],
-    ['geographic', '真实路网'],
-    ['imagery', '影像核对'],
-  ]) {
-    await page.getByRole('button', { name: label, exact: true }).click()
-    if (view !== 'reference') await page.locator('.real-road').first().waitFor({ state: 'visible' })
-    await page.waitForTimeout(300)
-    await page.screenshot({ path: `artifacts/${name}-${view}.png` })
-  }
-  await page.getByRole('button', { name: '手绘导览', exact: true }).click()
   await page.getByRole('button', { name: /^寻味濮院/ }).click()
   await page.screenshot({ path: `artifacts/${name}-food.png` })
   await page.getByRole('button', { name: /^风雅之约/ }).click()
@@ -85,9 +74,6 @@ for (const [name, viewport] of [
   await page.locator('.geo-user').waitFor({ state: 'visible' })
   await page.locator('.geo-overview').scrollIntoViewIfNeeded()
   await page.screenshot({ path: `artifacts/${name}-location-simulated.png` })
-  await page.getByRole('button', { name: '在真实路网中查看位置' }).click()
-  await page.locator('.main-user-position').waitFor({ state: 'visible' })
-  await page.screenshot({ path: `artifacts/${name}-real-gps-simulated.png` })
   await page.close()
 }
 await browser.close()

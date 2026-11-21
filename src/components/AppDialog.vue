@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from '../i18n'
 import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import AppIcon from './AppIcon.vue'
 defineProps<{ label: string; wide?: boolean }>()
@@ -84,12 +85,12 @@ onBeforeUnmount(() => {
       :style="dragOffset ? { transform: `translateY(${dragOffset}px)` } : undefined"
       role="dialog"
       aria-modal="true"
-      :aria-label="label"
+      :aria-label="t(label)"
       tabindex="-1"
     >
       <button
         class="sheet-grip"
-        aria-label="收起弹层"
+        :aria-label="t('收起弹层')"
         @pointerdown="startDrag"
         @pointermove="moveDrag"
         @pointerup="endDrag"
@@ -98,7 +99,7 @@ onBeforeUnmount(() => {
       >
         <span></span>
       </button>
-      <button class="dialog-close icon-button" aria-label="关闭弹窗" @click="emit('close')">
+      <button class="dialog-close icon-button" :aria-label="t('关闭弹窗')" @click="emit('close')">
         <AppIcon name="close" />
       </button>
       <div class="dialog-content"><slot /></div>

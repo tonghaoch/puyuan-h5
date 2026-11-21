@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from '../i18n'
 import FieldHeading from './FieldHeading.vue'
 import ChapterTabs from './ChapterTabs.vue'
 import AppIcon from './AppIcon.vue'
@@ -16,7 +17,7 @@ const sections = [
 ] as const
 </script>
 <template>
-  <section class="field-page" aria-label="游戏手册">
+  <section class="field-page" :aria-label="t('游戏手册')">
     <FieldHeading
       theme="games"
       edition="FIELD QUESTS"
@@ -28,13 +29,17 @@ const sections = [
     <div v-if="!section" class="field-inner">
       <div class="field-section-head">
         <div>
-          <p class="section-kicker">CHAPTER 01</p>
-          <h2 class="field-title">循令寻关</h2>
+          <p class="section-kicker">{{ t('CHAPTER 01') }}</p>
+          <h2 class="field-title">{{ t('循令寻关') }}</h2>
         </div>
-        <span class="section-count">7 处 · 8 项挑战</span>
+        <span class="section-count">{{ t('7 处 · 8 项挑战') }}</span>
       </div>
       <p class="field-copy">
-        领取乱码诗碑拓片，按地图上的江湖令找到守关人。完成挑战收集词条，最后拼出诗篇，交裁判校验。
+        {{
+          t(
+            '领取乱码诗碑拓片，按地图上的江湖令找到守关人。完成挑战收集词条，最后拼出诗篇，交裁判校验。',
+          )
+        }}
       </p>
       <a
         v-for="(quest, index) in quests"
@@ -53,16 +58,18 @@ const sections = [
           /><span>{{ String(index + 1).padStart(2, '0') }}</span></span
         >
         <div>
-          <small>{{ quest.place }}</small>
-          <h3>{{ quest.name }}</h3>
+          <small>{{ t(quest.place) }}</small>
+          <h3>{{ t(quest.name) }}</h3>
         </div>
         <AppIcon name="chevron" :size="16" />
       </a>
     </div>
     <div v-else-if="section === 'roaming'" class="field-inner">
-      <p class="section-kicker">ENCOUNTERS</p>
-      <h2 class="field-title">巷中遇见谁</h2>
-      <p class="field-copy">以下是活动范围，不是实时位置。在附近留意角色装扮，遇见时再触发挑战。</p>
+      <p class="section-kicker">{{ t('ENCOUNTERS') }}</p>
+      <h2 class="field-title">{{ t('巷中遇见谁') }}</h2>
+      <p class="field-copy">
+        {{ t('以下是活动范围，不是实时位置。在附近留意角色装扮，遇见时再触发挑战。') }}
+      </p>
       <article v-for="npc in wanderers" :key="npc.id" class="journal-panel">
         <a
           class="npc-entry"
@@ -77,35 +84,37 @@ const sections = [
             loading="lazy"
           />
           <div>
-            <small>{{ npc.area }}</small>
-            <h3>{{ npc.name }}</h3>
+            <small>{{ t(npc.area) }}</small>
+            <h3>{{ t(npc.name) }}</h3>
           </div>
-          <span>人物手札 <AppIcon name="chevron" :size="14" /></span>
+          <span>{{ t('人物手札') }} <AppIcon name="chevron" :size="14" /></span>
         </a>
-        <p>{{ npc.description }}</p>
+        <p>{{ t(npc.description) }}</p>
         <button v-if="npc.point" class="ink-link" @click="$emit('map', `npc:${npc.id}`)">
-          查看活动范围 <AppIcon name="arrow" :size="14" />
+          {{ t('查看活动范围') }} <AppIcon name="arrow" :size="14" />
         </button>
       </article>
     </div>
     <div v-else class="field-inner">
-      <p class="section-kicker">FIELD NOTES</p>
-      <h2 class="field-title">本队的交子怎么用</h2>
+      <p class="section-kicker">{{ t('FIELD NOTES') }}</p>
+      <h2 class="field-title">{{ t('本队的交子怎么用') }}</h2>
       <p class="field-copy">
-        与景区自营 NPC 互动可赚交子，仅限本队使用，不可转让或买卖。以下规则以现场裁判为准。
+        {{
+          t('与景区自营 NPC 互动可赚交子，仅限本队使用，不可转让或买卖。以下规则以现场裁判为准。')
+        }}
       </p>
       <div class="journal-panel">
-        <small>情报处 · 隐藏任务</small>
-        <h3>兑换藏宝线索</h3>
-        <p>初、中、高级情报的方案示例为 20 / 50 / 100 交子。实际价格请向情报处确认。</p>
+        <small>{{ t('情报处 · 隐藏任务') }}</small>
+        <h3>{{ t('兑换藏宝线索') }}</h3>
+        <p>{{ t('初、中、高级情报的方案示例为 20 / 50 / 100 交子。实际价格请向情报处确认。') }}</p>
       </div>
-      <h3 class="field-subtitle">北更楼附近 · 黑市商人的卡片</h3>
+      <h3 class="field-subtitle">{{ t('北更楼附近 · 黑市商人的卡片') }}</h3>
       <article v-for="[name, price, rule] in tools" :key="name" class="directory-row">
         <div>
-          <h3>{{ name }}</h3>
-          <p>{{ rule }}</p>
+          <h3>{{ t(name) }}</h3>
+          <p>{{ t(rule) }}</p>
         </div>
-        <b class="directory-price">{{ price }} 交子</b>
+        <b class="directory-price">{{ price }} {{ t('交子') }}</b>
       </article>
     </div>
   </section>

@@ -32,22 +32,19 @@ test('zoom preserves the world point beneath the pointer until scene limits inte
   assert.ok(Math.abs((point.x - next.x) / next.scale - before.x) < 1e-8)
   assert.ok(Math.abs((point.y - next.y) / next.scale - before.y) < 1e-8)
 })
-test('expanded camera retains a bounded meadow and gives geography its own limits', () => {
+test('guide camera retains a bounded meadow at its zoom limits', () => {
   const zoomIn = zoomAt({ x: 0, y: 0, scale: 0.7 }, 1000, 200, 300, 390, 700)
   const zoomOut = zoomAt(zoomIn, 0.0001, 200, 300, 390, 700)
   const { initial } = zoomRange(390, 700)
   assert.equal(zoomIn.scale, initial * 1.25 ** 8)
   assert.equal(zoomOut.scale, initial / 1.25)
   const clamped = clampCamera({ x: 1e9, y: -1e9, scale: 1 }, 390, 700)
-  const world = cameraBounds('illustration')
+  const world = cameraBounds()
   assert.ok(clamped.x + world.left <= 0)
   assert.ok(clamped.x + world.right >= 390)
   assert.ok(clamped.y + world.top <= 0)
   assert.ok(clamped.y + world.bottom >= 700)
   assert.ok(clamped.x > 390, 'the town may leave the viewport so the meadow can be explored')
-  const real = clampCamera({ x: 1e9, y: -1e9, scale: 8 }, 390, 700, 'geographic')
-  assert.equal(real.scale, zoomIn.scale)
-  assert.ok(real.x < 390, 'decorative margins do not alter the geographic map')
   const view = visibleScene({ x: -300, y: -200, scale: 2 }, 400, 600, 0)
   assert.deepEqual(view, { left: 150, top: 100, right: 350, bottom: 400 })
 })
@@ -77,19 +74,15 @@ test('published park data has an attributed WGS84 polygon and matches the record
   const { readFile } = await import('node:fs/promises')
   const { pointInRing } = await import('../src/lib/geography.ts')
   const data = JSON.parse(
-    await readFile(new URL('../public/geodata/puyuan.geojson', import.meta.url), 'utf8'),
+    await readFile(new URL('../public/geodata/boundary.geojson', import.meta.url), 'utf8'),
   )
-  const feature = data.features.find(
-    (f: { properties: { layer: string } }) => f.properties.layer === 'boundary',
-  )
+  assert.equal(data.features.length, 1)
+  const [feature] = data.features
   const ring = feature.geometry.coordinates[0]
   assert.equal(feature.geometry.type, 'Polygon')
   assert.deepEqual(ring[0], ring.at(-1))
   assert.ok(pointInRing([120.6296382, 30.6828922], ring))
   assert.match(data.attribution, /OpenStreetMap/)
-  assert.ok(
-    data.features.some((f: { properties: { layer: string } }) => f.properties.layer === 'water'),
-  )
 })
 
 test('source-aligned map retains reference landmark order and exact image-space translation', async () => {
@@ -119,11 +112,9 @@ test('satellite image uses service-returned projected extent in the same frame a
   const { readFile } = await import('node:fs/promises')
   const { createGeoFrame, mercator } = await import('../src/lib/geography.ts')
   const data = JSON.parse(
-    await readFile(new URL('../public/geodata/puyuan.geojson', import.meta.url), 'utf8'),
+    await readFile(new URL('../public/geodata/boundary.geojson', import.meta.url), 'utf8'),
   )
-  const boundary = data.features.find(
-    (f: { properties: { layer: string } }) => f.properties.layer === 'boundary',
-  ).geometry.coordinates[0]
+  const boundary = data.features[0].geometry.coordinates[0]
   const frame = createGeoFrame(boundary, 1520, 1240, 100)
   const metadata = JSON.parse(
     await readFile(

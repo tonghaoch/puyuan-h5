@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { t } from '../i18n'
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import type { MapLayer, Place } from '../data/catalog'
-import { clampCamera, zoomAt, zoomRange, ZOOM_STEP, SCENE, type Camera } from '../lib/map-camera'
+import { clampCamera, zoomAt, zoomRange, SCENE, type Camera } from '../lib/map-camera'
 import ReferenceTiles from './ReferenceTiles.vue'
 import referenceMap from '../data/reference-map.json'
 import ReferenceLabels from './ReferenceLabels.vue'
@@ -9,8 +10,6 @@ import QuestToken from './QuestToken.vue'
 import EncounterToken from './EncounterToken.vue'
 import AppIcon from './AppIcon.vue'
 import { quests, wanderers } from '../data/offsite'
-import { useParkGeography, isGeographicView, type MapView } from '../lib/park-geography'
-import { classifyFix, type GeographicFix, type GeoFeature } from '../lib/geography'
 // Start point and bearing in the original painting's coordinate system.
 const boatRoutes = [
   [1040, 895, -12],
@@ -29,39 +28,14 @@ const props = defineProps<{
   motion: boolean
   activeQuestId?: string
   activeNpcId?: string
-  view: MapView
-  fix: GeographicFix | null
-  now: number
-  focusLocation: number
 }>()
 const emit = defineEmits<{
   select: [place: Place]
   locate: []
   zoom: [value: number]
-  geoselect: [feature: GeoFeature]
-  outside: []
   game: [id: string, opener: HTMLElement]
   npc: [id: string, opener: HTMLElement]
 }>()
-const geography = useParkGeography()
-const geographic = computed(() => isGeographicView(props.view))
-const cameraWorld = computed(() =>
-  geographic.value ? ('geographic' as const) : ('illustration' as const),
-)
-const positions = geography.points
-const userPosition = computed(() =>
-  props.fix && geography.frame.value
-    ? geography.frame.value.project([props.fix.longitude, props.fix.latitude])
-    : null,
-)
-const userVisible = computed(
-  () =>
-    userPosition.value &&
-    userPosition.value[0] >= 0 &&
-    userPosition.value[0] <= SCENE.width &&
-    userPosition.value[1] >= 0 &&
-    userPosition.value[1] <= SCENE.height,
-)
 const pins = [
   ...quests.map(({ id, place, name, point }) => ({
     kind: 'quest' as const,
@@ -92,24 +66,11 @@ function openPin(pin: (typeof pins)[number], event: MouseEvent) {
   if (pin.kind === 'quest') emit('game', pin.id, opener)
   else emit('npc', pin.id, opener)
 }
-const userStatus = computed(() =>
-  props.fix && geography.ring.value.length
-    ? classifyFix(props.fix, geography.ring.value, props.now)
-    : null,
-)
-const accuracyRadius = computed(() =>
-  props.fix && geography.frame.value
-    ? (Math.max(0, props.fix.accuracy) * geography.frame.value.scale) /
-      Math.cos((props.fix.latitude * Math.PI) / 180)
-    : 0,
-)
-const savedCameras = new Map<MapView, Camera>()
 const viewport = ref<HTMLElement>()
 const camera = reactive<Camera>({ x: 0, y: 0, scale: 0.6 })
 const dimensions = reactive({ width: 0, height: 0 })
 const limits = computed(() => zoomRange(dimensions.width, dimensions.height))
 const atMaxZoom = computed(() => camera.scale >= limits.value.max - 1e-9)
-const atMinZoom = computed(() => camera.scale <= limits.value.min + 1e-9)
 const dragging = ref(false)
 const ready = ref(false)
 const pointers = new Map<number, { x: number; y: number }>()
@@ -125,16 +86,8 @@ const meadowStyle = computed(() => ({
   backgroundSize: `${384 * camera.scale}px ${384 * camera.scale}px`,
   backgroundPosition: `${camera.x}px ${camera.y}px`,
 }))
-const townOutOfView = computed(
-  () =>
-    !geographic.value &&
-    (camera.x + SCENE.width * camera.scale < 35 ||
-      camera.x > dimensions.width - 35 ||
-      camera.y + SCENE.height * camera.scale < 145 ||
-      camera.y > dimensions.height - 135),
-)
 function setCamera(value: Camera) {
-  Object.assign(camera, clampCamera(value, dimensions.width, dimensions.height, cameraWorld.value))
+  Object.assign(camera, clampCamera(value, dimensions.width, dimensions.height))
   emit('zoom', camera.scale)
 }
 function reset() {
@@ -142,31 +95,6 @@ function reset() {
   const scale = limits.value.initial
   setCamera({ scale, x: width / 2 - 850 * scale, y: (height + 5) / 2 - 605 * scale })
 }
-watch(
-  () => props.view,
-  (next, previous) => {
-    savedCameras.set(previous, { ...camera })
-    const saved = savedCameras.get(next)
-    if (saved) setCamera(saved)
-    else reset()
-  },
-)
-watch(
-  () => props.focusLocation,
-  () => {
-    if (!userVisible.value || !userPosition.value) {
-      emit('outside')
-      return
-    }
-    const scale = Math.max(camera.scale, 0.72)
-    setCamera({
-      scale,
-      x: dimensions.width / 2 - userPosition.value[0] * scale,
-      y: dimensions.height * 0.45 - userPosition.value[1] * scale,
-    })
-  },
-)
-
 function changeZoom(factor: number) {
   setCamera(
     zoomAt(
@@ -176,7 +104,6 @@ function changeZoom(factor: number) {
       dimensions.height / 2,
       dimensions.width,
       dimensions.height,
-      cameraWorld.value,
     ),
   )
 }
@@ -247,7 +174,6 @@ function move(event: PointerEvent) {
       midY,
       dimensions.width,
       dimensions.height,
-      cameraWorld.value,
     )
     result.x += (c.x + d.x - a.x - b.x) / 2
     result.y += (c.y + d.y - a.y - b.y) / 2
@@ -270,7 +196,6 @@ function wheel(event: WheelEvent) {
       event.clientY - bounds.top,
       dimensions.width,
       dimensions.height,
-      cameraWorld.value,
     ),
   )
 }
@@ -313,16 +238,14 @@ onBeforeUnmount(() => observer?.disconnect())
 <template>
   <div
     ref="viewport"
-    class="map-viewport"
+    class="map-viewport has-meadow"
     :class="{
       dragging,
       'motion-paused': !motion,
       'compact-pins': camera.scale < 0.58,
-      'is-geographic': geographic,
-      'has-meadow': !geographic,
     }"
     role="region"
-    :aria-label="geographic ? '古镇真实地理地图，可拖动缩放' : '古镇导览，可拖动缩放'"
+    :aria-label="t('古镇导览，可拖动缩放')"
     tabindex="0"
     @click.capture="guardClick"
     @pointerdown="down"
@@ -334,132 +257,73 @@ onBeforeUnmount(() => observer?.disconnect())
     @keydown="keyboard"
     @dblclick="changeZoom(1.3)"
   >
-    <div v-if="!geographic" class="meadow-backdrop" :style="meadowStyle" aria-hidden="true"></div>
+    <div class="meadow-backdrop" :style="meadowStyle" aria-hidden="true"></div>
     <div class="map-scene" :style="style">
-      <template v-if="!geographic">
-        <img
-          class="map-art"
-          src="/art/puyuan-original-scope.webp"
-          alt="原始参考地图"
-          :width="SCENE.width"
-          :height="SCENE.height"
-          draggable="false"
-          fetchpriority="high"
-        />
-        <ReferenceTiles
-          :at-max-zoom="atMaxZoom"
-          :camera="camera"
-          :width="dimensions.width"
-          :height="dimensions.height"
-        />
-        <div class="map-water-mask" aria-hidden="true">
-          <svg class="map-effects" :width="SCENE.width" :height="SCENE.height">
-            <defs>
-              <pattern id="guide-ripples" width="70" height="43" patternUnits="userSpaceOnUse">
-                <path class="canal-ripple" d="M-5 12q14 -5 30 -1t28 -2 M28 33q12 -4 29 -1t19 -1" />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#guide-ripples)" />
+      <img
+        class="map-art"
+        src="/art/puyuan-original-scope.webp"
+        :alt="t('原始参考地图')"
+        :width="SCENE.width"
+        :height="SCENE.height"
+        draggable="false"
+        fetchpriority="high"
+      />
+      <ReferenceTiles
+        :at-max-zoom="atMaxZoom"
+        :camera="camera"
+        :width="dimensions.width"
+        :height="dimensions.height"
+      />
+      <div class="map-water-mask" aria-hidden="true">
+        <svg class="map-effects" :width="SCENE.width" :height="SCENE.height">
+          <defs>
+            <pattern id="guide-ripples" width="70" height="43" patternUnits="userSpaceOnUse">
+              <path class="canal-ripple" d="M-5 12q14 -5 30 -1t28 -2 M28 33q12 -4 29 -1t19 -1" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#guide-ripples)" />
+          <g
+            :transform="`translate(${referenceMap.sourceOffset.x} ${referenceMap.sourceOffset.y})`"
+          >
+            <path
+              v-for="d in referenceMap.waterAnimations"
+              :key="d"
+              :d="d"
+              class="water-highlight"
+            />
+            <path d="M1028 897 Q1090 886 1165 870" class="water-highlight" />
             <g
-              :transform="`translate(${referenceMap.sourceOffset.x} ${referenceMap.sourceOffset.y})`"
+              v-for="([x, y, bearing], i) in boatRoutes"
+              :key="x"
+              :transform="`translate(${x} ${y}) rotate(${bearing})`"
             >
-              <path
-                v-for="d in referenceMap.waterAnimations"
-                :key="d"
-                :d="d"
-                class="water-highlight"
-              />
-              <path d="M1028 897 Q1090 886 1165 870" class="water-highlight" />
               <g
-                v-for="([x, y, bearing], i) in boatRoutes"
-                :key="x"
-                :transform="`translate(${x} ${y}) rotate(${bearing})`"
+                class="guide-boat"
+                :style="{ animationDuration: `${11 + (i % 4)}s`, animationDelay: `${-2 - i}s` }"
               >
-                <g
-                  class="guide-boat"
-                  :style="{ animationDuration: `${11 + (i % 4)}s`, animationDelay: `${-2 - i}s` }"
-                >
-                  <g :transform="`scale(${Math.max(1, Math.min(2.5, 0.85 / camera.scale))})`">
-                    <path
-                      d="M-12 -2q-5 -3 -12 -3m12 7q-6 3 -12 3"
-                      fill="none"
-                      stroke="#fff4d9"
-                      stroke-width="1.4"
-                    />
-                    <image
-                      :href="i % 2 ? '/art/boat-covered.webp' : '/art/boat-bamboo.webp'"
-                      x="-15"
-                      y="-13"
-                      width="30"
-                      height="21"
-                      :transform="`rotate(${-bearing}) scale(${bearing > 90 ? -1 : 1} 1)`"
-                    />
-                  </g>
+                <g :transform="`scale(${Math.max(1, Math.min(2.5, 0.85 / camera.scale))})`">
+                  <path
+                    d="M-12 -2q-5 -3 -12 -3m12 7q-6 3 -12 3"
+                    fill="none"
+                    stroke="#fff4d9"
+                    stroke-width="1.4"
+                  />
+                  <image
+                    :href="i % 2 ? '/art/boat-covered.webp' : '/art/boat-bamboo.webp'"
+                    x="-15"
+                    y="-13"
+                    width="30"
+                    height="21"
+                    :transform="`rotate(${-bearing}) scale(${bearing > 90 ? -1 : 1} 1)`"
+                  />
                 </g>
               </g>
             </g>
-          </svg>
-        </div>
-      </template>
-      <template v-else>
-        <svg
-          class="real-map-scene"
-          :width="SCENE.width"
-          :height="SCENE.height"
-          :viewBox="`0 0 ${SCENE.width} ${SCENE.height}`"
-          aria-label="公开地图道路、水道、桥梁和园区范围"
-        >
-          <rect :width="SCENE.width" :height="SCENE.height" fill="#eeeedf" />
-          <g>
-            <path
-              v-for="(shape, index) in geography.shapes.value.filter((s) => s.layer === 'boundary')"
-              :key="`boundary-${index}`"
-              :d="shape.d"
-              class="real-boundary"
-            />
-            <path
-              v-for="(shape, index) in geography.shapes.value.filter((s) => s.layer === 'road')"
-              :key="`road-${index}`"
-              :d="shape.d"
-              class="real-road-casing"
-            />
-            <path
-              v-for="(shape, index) in geography.shapes.value.filter((s) => s.layer !== 'boundary')"
-              :key="index"
-              :d="shape.d"
-              :class="[`real-${shape.layer}`, { 'real-bridge': shape.bridge }]"
-              fill-rule="evenodd"
-            />
-          </g>
-          <g
-            v-if="userVisible && userPosition"
-            class="main-user-position"
-            :class="{ stale: userStatus === 'stale' }"
-            :transform="`translate(${userPosition[0]},${userPosition[1]})`"
-          >
-            <circle :r="accuracyRadius" class="geo-accuracy" />
-            <circle :r="7 / camera.scale" class="geo-position" :stroke-width="2 / camera.scale" />
           </g>
         </svg>
-        <button
-          v-for="position in positions"
-          :key="position.feature.id"
-          class="map-pin geo-landmark scenic"
-          :style="{ left: `${position.point.x}px`, top: `${position.point.y}px` }"
-          :aria-label="`查看地图资料：${position.name}`"
-          @click.stop="emit('geoselect', position.feature)"
-          @dblclick.stop
-        >
-          <span class="pin-symbol"><AppIcon name="pin" :size="18" /></span
-          ><span class="pin-caption">{{ position.name }}</span>
-        </button>
-      </template>
-      <ReferenceLabels
-        v-if="view === 'reference' && layers.places"
-        :places="places"
-        @select="emit('select', $event)"
-      />
-      <div v-if="view === 'reference'" class="field-markers">
+      </div>
+      <ReferenceLabels v-if="layers.places" :places="places" @select="emit('select', $event)" />
+      <div class="field-markers">
         <div
           v-for="pin in fieldMarkers"
           :key="pin.key"
@@ -480,69 +344,29 @@ onBeforeUnmount(() => observer?.disconnect())
             :class="pin.kind === 'npc' ? 'npc-pin' : 'quest-pin'"
             :aria-label="
               pin.kind === 'quest'
-                ? `游戏：${pin.place} · ${pin.name}`
-                : `游走 NPC：${pin.name} · ${pin.area}`
+                ? t('游戏：{place} · {name}', { place: pin.place, name: pin.name })
+                : t('游走 NPC：{name} · {area}', { name: pin.name, area: pin.area })
             "
-            :title="pin.name"
+            :title="t(pin.name)"
             aria-haspopup="dialog"
             @click.stop="openPin(pin, $event)"
             @dblclick.stop
           >
             <QuestToken v-if="pin.kind === 'quest'" /><EncounterToken v-else />
-            <span v-if="camera.scale >= 0.8" class="marker-name">{{ pin.name }}</span>
+            <span v-if="camera.scale >= 0.8" class="marker-name">{{ t(pin.name) }}</span>
           </button>
         </div>
       </div>
     </div>
   </div>
-  <div v-if="geographic && geography.error.value" class="geo-map-error" role="status">
-    {{ geography.error.value }}<button @click="geography.reload()">重新加载</button>
-  </div>
-  <div
-    v-if="geographic && !geography.frame.value && !geography.error.value"
-    class="geo-map-error"
-    role="status"
+  <button
+    type="button"
+    class="locate-tool"
+    :aria-label="t('获取我的位置')"
+    :title="t('获取我的位置')"
+    aria-haspopup="dialog"
+    @click="emit('locate')"
   >
-    正在加载路网…
-  </div>
-  <button v-if="townOutOfView" class="return-to-town" @click="reset">
-    <AppIcon name="map" :size="16" />回到古镇
+    <AppIcon name="locate" :size="22" />
   </button>
-  <div class="map-tools" aria-label="地图工具">
-    <button
-      class="map-tool locate-tool"
-      aria-label="获取我的位置"
-      title="获取我的位置"
-      @click="emit('locate')"
-    >
-      <AppIcon name="locate" :size="22" />
-    </button>
-    <div class="zoom-tools">
-      <button
-        class="map-tool"
-        aria-label="放大地图"
-        :disabled="atMaxZoom"
-        @click="changeZoom(ZOOM_STEP)"
-      >
-        <AppIcon name="plus" /></button
-      ><span></span
-      ><button
-        class="map-tool"
-        aria-label="缩小地图"
-        :disabled="atMinZoom"
-        @click="changeZoom(1 / ZOOM_STEP)"
-      >
-        <AppIcon name="minus" />
-      </button>
-    </div>
-    <button class="map-tool" aria-label="重置地图视野" title="重置地图视野" @click="reset">
-      <AppIcon name="reset" />
-    </button>
-  </div>
-  <div v-if="geographic" class="compass" aria-hidden="true">
-    <span>{{ geographic ? '北' : '览' }}</span><svg width="32" height="40" viewBox="0 0 32 40">
-      <path d="M16 3 26 34 16 28 6 34Z" fill="#a49a7b" />
-      <path d="M16 3 16 28 6 34Z" fill="#476456" />
-    </svg>
-  </div>
 </template>

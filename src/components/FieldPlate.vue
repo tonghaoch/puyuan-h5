@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from '../i18n'
 import { computed, ref } from 'vue'
 import { encounterImage, type FieldEntry } from '../data/offsite'
 const props = defineProps<{ entry: FieldEntry }>()
@@ -25,7 +26,7 @@ function finishLeaf(event: TouchEvent) {
 </script>
 <template>
   <div class="field-plate">
-    <figure :aria-label="`${entry.name}图录`">
+    <figure :aria-label="t('{name}图录', { name: entry.name })">
       <div
         class="plate-mount"
         @touchstart.passive="startLeaf"
@@ -34,16 +35,21 @@ function finishLeaf(event: TouchEvent) {
       >
         <div :key="selected" class="plate-leaf" :class="photo[2]">
           <div v-if="photo[2] === 'portrait'" class="plate-inscription" aria-hidden="true">
-            <span>人物小像</span><i>濮院</i>
+            <span>{{ t('人物小像') }}</span><i>{{ t('濮院') }}</i>
           </div>
-          <img :src="encounterImage(entry.id, selected + 1)" :alt="photo[1]" draggable="false" />
+          <img :src="encounterImage(entry.id, selected + 1)" :alt="t(photo[1])" draggable="false" />
         </div>
       </div>
       <figcaption aria-live="polite">
-        <span class="plate-imprint">图记</span><span>{{ photo[1] }}</span>
+        <span class="plate-imprint">{{ t('图记') }}</span><span>{{ t(photo[1]) }}</span>
       </figcaption>
     </figure>
-    <div v-if="entry.photos.length > 1" class="plate-choices" role="group" aria-label="选择图版">
+    <div
+      v-if="entry.photos.length > 1"
+      class="plate-choices"
+      role="group"
+      :aria-label="t('选择图版')"
+    >
       <button
         v-for="([label], index) in entry.photos"
         :key="label"
@@ -51,7 +57,7 @@ function finishLeaf(event: TouchEvent) {
         :aria-pressed="selected === index"
         @click="selected = index"
       >
-        <span aria-hidden="true">{{ folioMarks[index] ?? index + 1 }}</span>{{ label }}
+        <span aria-hidden="true">{{ t(folioMarks[index] ?? index + 1) }}</span>{{ t(label) }}
       </button>
     </div>
   </div>

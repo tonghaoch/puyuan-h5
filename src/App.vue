@@ -12,9 +12,6 @@ import { dinnerSpots, questForRoute, wanderers, type Quest } from './data/offsit
 import ParkMap from './components/ParkMap.vue'
 import AppDialog from './components/AppDialog.vue'
 import GeoLocationMap from './components/GeoLocationMap.vue'
-import { isGeographicView, geoName, type MapView } from './lib/park-geography'
-import type { GeoCollection, GeoFeature } from './lib/geography'
-import geographicPois from './data/geographic-pois.json'
 import landmarkModels from './data/landmark-models.json'
 import {
   activities,
@@ -22,7 +19,6 @@ import {
   places,
   categoryLabels,
   mapLayers,
-  matchesSearch,
   placeById,
   selectionKey,
   type Tab,
@@ -30,23 +26,16 @@ import {
   type Selection,
 } from './data/catalog'
 import { useLocation } from './lib/location'
+import { t, locale, languageAction, toggleLanguage, matchesBilingual } from './i18n'
 import { dayLabel, shanghaiDate, shiftDay, sessionStatus } from './lib/time'
 
-type Overlay = 'guide' | 'favorites' | 'location' | 'geopoint' | null
+type Overlay = 'favorites' | 'location' | null
 const tab = ref<Tab>('map')
 const bookSection = ref('')
 const activeQuest = ref<Quest>()
 const activeNpc = ref<(typeof wanderers)[number]>()
 const questOrigin = ref<'map' | 'games' | null>(null)
 let gameOpener: HTMLElement | undefined
-const mapView = ref<MapView>('reference')
-const geographicView = computed(() => isGeographicView(mapView.value))
-const focusLocation = ref(0)
-const geoSelection = ref<GeoFeature | null>(null)
-const mapViews: { id: MapView; name: string }[] = [
-  { id: 'reference', name: '导览' },
-  { id: 'geographic', name: '路网' },
-]
 const selection = ref<Selection | null>(null)
 const detailModelId = ref<string>()
 const overlay = ref<Overlay>(null)
@@ -111,6 +100,10 @@ function validSelection(kind: string, id: string): Selection | null {
 }
 function readRoute() {
   const [nextTab, kind, id, modelId] = window.location.hash.slice(1).split('/')
+  if (kind === 'geopoint' || kind === 'guide') {
+    route('map', false, true)
+    return
+  }
   tab.value =
     nextTab === 'food' || nextTab === 'activities' || nextTab === 'itinerary' || nextTab === 'games'
       ? nextTab
@@ -136,7 +129,6 @@ function readRoute() {
     window.history.state?.questOrigin ??
     (activeNpc.value && window.history.state?.puyuanModal ? 'map' : null)
   if (mapEntry.value) {
-    mapView.value = 'reference'
     visibleLayers[activeQuest.value ? 'quest' : 'npc'] = true
   }
   if (hadGameDetail && !activeQuest.value && !activeNpc.value && gameOpener?.isConnected) {
@@ -147,18 +139,7 @@ function readRoute() {
   }
   selection.value = kind && id ? validSelection(kind, id) : null
   detailModelId.value = kind === 'place' ? modelId : undefined
-  geoSelection.value =
-    kind === 'geopoint'
-      ? ((geographicPois as unknown as GeoCollection).features.find(
-          (f) => f.id?.replace('/', '-') === id,
-        ) ?? null)
-      : null
-  if (geoSelection.value && !isGeographicView(mapView.value)) mapView.value = 'geographic'
-  overlay.value = geoSelection.value
-    ? 'geopoint'
-    : kind === 'guide' || kind === 'favorites' || kind === 'location'
-      ? kind
-      : null
+  overlay.value = kind === 'favorites' || kind === 'location' ? kind : null
 }
 function route(path: string, modal = false, replace = false) {
   const method = replace ? 'replaceState' : 'pushState'
@@ -197,19 +178,6 @@ function openSelection(next: Selection, modelId?: string) {
 function openOverlay(next: Exclude<Overlay, null>) {
   route(`${tab.value}/${next}`, true, hasModal.value)
 }
-function openGeoPoint(feature: GeoFeature) {
-  route(`${tab.value}/geopoint/${feature.id!.replace('/', '-')}`, true, hasModal.value)
-}
-function changeMapView(next: MapView) {
-  mapView.value = next
-  query.value = ''
-}
-function viewLocationOnMap() {
-  mapView.value = 'geographic'
-  query.value = ''
-  route('map', false, true)
-  focusLocation.value = Date.now()
-}
 function closeModal() {
   if (window.history.state?.puyuanModal) window.history.back()
   else route(tab.value, false, true)
@@ -237,7 +205,6 @@ function resetActivityFilters() {
   activityFilter.value = 'all'
 }
 function viewOnMap(id: string) {
-  mapView.value = 'reference'
   query.value = ''
   const npcArea = id.startsWith('npc:')
   visibleLayers[npcArea ? 'npc' : id.startsWith('quest:') ? 'quest' : 'places'] = true
@@ -256,7 +223,7 @@ const visibleActivities = computed(() =>
     (a) =>
       (activityFilter.value === 'all' || a.category === activityFilter.value) &&
       a.sessions.some((s) => shanghaiDate(new Date(s.start)) === selectedDay.value) &&
-      matchesSearch(query.value, a.name, a.subtitle, placeById(a.placeId)!.name, ...a.tags),
+      matchesBilingual(query.value, a.name, a.subtitle, placeById(a.placeId)!.name, ...a.tags),
   ),
 )
 const currentActivity = computed(() =>
@@ -373,7 +340,7 @@ onBeforeUnmount(() => {
     :inert="hasModal || undefined"
   >
     <header class="app-header">
-      <button class="brand" aria-label="濮院漫游，返回地图" @click="changeTab('map')">
+      <button class="brand" :aria-label="t('濮院漫游，返回地图')" @click="changeTab('map')">
         <span class="brand-mark"
           ><svg width="37" height="42" viewBox="0 0 42 46" fill="none">
             <path
@@ -383,23 +350,48 @@ onBeforeUnmount(() => {
             />
             <path d="M10 8q5 1 11-5 5 5 11 5" stroke="currentColor" stroke-width="1.5" /></svg
         ></span>
-        <span class="brand-type">濮院漫游<small>PUYUAN · WANDER SLOWLY</small></span>
+        <span class="brand-type"
+          >{{ t('濮院漫游') }}<small>{{ t('PUYUAN · WANDER SLOWLY') }}</small></span
+        >
       </button>
 
       <div class="header-actions">
-        <button class="guide-button" @click="openOverlay('guide')">
-          <AppIcon name="book" :size="18" /><span>游园手帖</span>
+        <button
+          type="button"
+          class="language-button"
+          :aria-label="languageAction"
+          :title="languageAction"
+          @click="toggleLanguage"
+        >
+          <svg
+            width="32"
+            height="32"
+            viewBox="0 0 32 32"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path d="M6 1.5h20L30.5 6v20L26 30.5H6L1.5 26V6Z" fill="#faf4e6" stroke="#bca580" />
+            <path d="m8 24 16-16" stroke="#c5b394" />
+            <path
+              d="m10.4 4.8 1.1 1.6M5.5 8h11.2m-3.1.3c-1.1 3.9-3.9 6.4-7.4 8m2-7.3c1.3 2.8 3.7 5.3 7.6 7"
+              stroke="var(--lang-zh)"
+              stroke-width="1.65"
+            />
+            <path
+              d="M20.3 17.3h-4.8v8h4.8m-4.6-4.1h3.7m3 4.1v-5.6m0 2.5c.7-3.1 4.3-3.4 4.3-.3v3.4"
+              stroke="var(--lang-en)"
+              stroke-width="1.5"
+            />
+          </svg>
         </button>
       </div>
     </header>
 
     <main class="main-content">
-      <section
-        v-show="tab === 'map'"
-        class="map-page"
-        :class="{ 'reference-view': mapView === 'reference', 'geographic-view': geographicView }"
-        aria-label="游园地图"
-      >
+      <section v-show="tab === 'map'" class="map-page reference-view" :aria-label="t('游园地图')">
         <ParkMap
           :places="places"
           :layers="visibleLayers"
@@ -407,19 +399,13 @@ onBeforeUnmount(() => {
           :motion="motionActive"
           :active-quest-id="activeQuest?.id"
           :active-npc-id="activeNpc?.id"
-          :view="mapView"
-          :fix="location.fix.value"
-          :now="now"
-          :focus-location="focusLocation"
-          @geoselect="openGeoPoint"
           @game="openQuest"
           @npc="openNpc"
-          @outside="notify('当前位置在园区视野之外，未将定位点移入园区')"
           @select="(place) => openSelection({ kind: 'place', id: place.id })"
           @locate="openOverlay('location')"
         />
         <div class="map-topbar">
-          <div v-if="!geographicView" class="filter-pills" role="group" aria-label="地图图层">
+          <div class="filter-pills" role="group" :aria-label="t('地图图层')">
             <button
               v-for="layer in mapLayers"
               :key="layer.id"
@@ -431,57 +417,31 @@ onBeforeUnmount(() => {
               <QuestToken v-if="layer.id === 'quest'" />
               <EncounterToken v-else-if="layer.id === 'npc'" />
               <AppIcon v-else name="lantern" :size="17" />
-              {{ layer.name }}
+              {{ t(layer.name) }}
             </button>
           </div>
-          <div v-else class="geo-layer-legend">
-            <span><i class="water-line"></i>真实水道</span
-            ><span><i class="road-line"></i>道路与桥梁</span
-            ><span><i class="boundary-line"></i>园区边界</span>
-          </div>
-        </div>
-        <div class="map-view-switch" aria-label="地图视图">
-          <button
-            v-for="view in mapViews"
-            :key="view.id"
-            :class="{ active: mapView === view.id }"
-            :aria-pressed="mapView === view.id"
-            @click="changeMapView(view.id)"
-          >
-            {{ view.name }}
-          </button>
         </div>
         <div class="map-introduction">
-          <p class="eyebrow"><span></span> 江 南 好 时 节</p>
+          <p class="eyebrow"><span></span> {{ t('江 南 好 时 节') }}</p>
           <h1>
-            一入濮院<br />便是<span>江南</span><i class="title-seal">慢<br />游</i>
+            {{ t('一入濮院') }}<br />{{ t('便是') }}<span>{{ t('江南') }}</span
+            ><i class="title-seal">{{ t('慢') }}<br />{{ t('游') }}</i>
           </h1>
           <div class="intro-rule"><span></span><i>◇</i></div>
-          <p class="intro-copy">循水巷，过石桥，听一曲婉转。<br />把脚步放慢，让风景发生。</p>
-          <span class="intro-caption">A LITTLE WANDER, A LOT TO DISCOVER.</span>
+          <p class="intro-copy">
+            {{ t('循水巷，过石桥，听一曲婉转。') }}<br />{{ t('把脚步放慢，让风景发生。') }}
+          </p>
+          <span class="intro-caption">{{ t('A LITTLE WANDER, A LOT TO DISCOVER.') }}</span>
         </div>
-        <div
-          v-if="geographicView || visibleLayers.quest || visibleLayers.npc"
-          class="map-bottom-note"
-        >
-          <template v-if="!geographicView">
-            <span v-if="visibleLayers.quest" class="quest-legend"
-              ><QuestToken />江湖令 · 团建挑战</span
-            >
-            <span v-if="visibleLayers.npc" class="quest-legend"
-              ><EncounterToken />行走 NPC · 活动范围</span
-            >
-          </template>
-          <template v-else>
-            <span class="demo-dot"></span>
-            <a
-              href="https://www.openstreetmap.org/copyright"
-              target="_blank"
-              rel="noopener noreferrer"
-              >© OpenStreetMap</a
-            >
-          </template>
-          <span class="note-separator">/</span><span class="map-hint">拖动探索 · 双指缩放</span>
+        <div v-if="visibleLayers.quest || visibleLayers.npc" class="map-bottom-note">
+          <span v-if="visibleLayers.quest" class="quest-legend"
+            ><QuestToken />{{ t('江湖令 · 团建挑战') }}</span
+          >
+          <span v-if="visibleLayers.npc" class="quest-legend"
+            ><EncounterToken />{{ t('行走 NPC · 活动范围') }}</span
+          >
+          <span class="note-separator">/</span
+          ><span class="map-hint">{{ t('拖动探索 · 双指缩放') }}</span>
         </div>
         <div class="map-vignette" aria-hidden="true"></div>
       </section>
@@ -513,18 +473,20 @@ onBeforeUnmount(() => {
       <section
         v-if="tab === 'activities'"
         class="catalog-page activities-page"
-        aria-label="活动列表"
+        :aria-label="t('活动列表')"
       >
         <div class="catalog-heading">
           <div>
-            <p class="eyebrow">MOMENTS WORTH WANDERING FOR</p>
-            <h1>好时光，<span>当有好相逢。</span></h1>
-            <p>听戏、寻艺、逛风物。在濮院，赴一场风雅之约。</p>
+            <p class="eyebrow">{{ t('MOMENTS WORTH WANDERING FOR') }}</p>
+            <h1>
+              {{ t('好时光，') }}<span>{{ t('当有好相逢。') }}</span>
+            </h1>
+            <p>{{ t('听戏、寻艺、逛风物。在濮院，赴一场风雅之约。') }}</p>
           </div>
-          <div class="heading-stamp">雅<br />集</div>
+          <div class="heading-stamp">{{ t('雅') }}<br />{{ t('集') }}</div>
         </div>
         <div class="catalog-toolbar">
-          <div class="text-filters" aria-label="活动分类">
+          <div class="text-filters" :aria-label="t('活动分类')">
             <button
               v-for="filter in [
                 { id: 'all', label: '全部活动' },
@@ -537,17 +499,17 @@ onBeforeUnmount(() => {
               :aria-pressed="activityFilter === filter.id"
               @click="activityFilter = filter.id"
             >
-              {{ filter.label }}
+              {{ t(filter.label) }}
             </button>
           </div>
           <label class="search-field"
             ><AppIcon name="search" :size="18" /><input
               v-model="query"
-              aria-label="搜索活动"
-              placeholder="寻找一场心动的相遇" /><button
+              :aria-label="t('搜索活动')"
+              :placeholder="t('寻找一场心动的相遇')" /><button
               v-if="query"
               class="clear-search"
-              aria-label="清空搜索"
+              :aria-label="t('清空搜索')"
               @click.prevent="query = ''"
             >
               <AppIcon name="close" :size="15" /></button
@@ -562,23 +524,23 @@ onBeforeUnmount(() => {
               :aria-pressed="dayFilter === index"
               @click="dayFilter = index"
             >
-              {{ label }}<small>{{ shiftDay(today, index).slice(5).replace('-', '.') }}</small>
+              {{ t(label) }}<small>{{ shiftDay(today, index).slice(5).replace('-', '.') }}</small>
             </button>
           </div>
-          <span class="demo-label">演示日程 · 非实际演出安排</span>
+          <span class="demo-label">{{ t('演示日程 · 非实际演出安排') }}</span>
         </div>
         <div class="activity-grid">
           <article v-for="activity in visibleActivities" :key="activity.id" class="activity-card">
             <button
               class="activity-art"
-              :aria-label="`查看${activity.name}详情`"
+              :aria-label="t('查看{name}详情', { name: activity.name })"
               @click="openSelection({ kind: 'activity', id: activity.id })"
             >
               <img
                 :src="`/art/${placeById(activity.placeId)?.art}.svg`"
-                :alt="`${activity.name}意境插画`"
+                :alt="t('{name}意境插画', { name: activity.name })"
                 loading="lazy"
-              /><span class="cover-category">{{ categoryLabels[activity.category] }}</span>
+              /><span class="cover-category">{{ t(categoryLabels[activity.category]) }}</span>
             </button>
             <div class="activity-card-body">
               <div class="activity-time">
@@ -592,30 +554,38 @@ onBeforeUnmount(() => {
                     ) === 'ongoing'
                   "
                   class="live-label"
-                  >进行中</span
+                  >{{ t('进行中') }}</span
                 >
               </div>
               <button
                 class="activity-title"
                 @click="openSelection({ kind: 'activity', id: activity.id })"
               >
-                <h2>{{ activity.name }}</h2>
+                <h2>{{ t(activity.name) }}</h2>
               </button>
-              <p class="card-subtitle">{{ activity.subtitle }}</p>
+              <p class="card-subtitle">{{ t(activity.subtitle) }}</p>
               <div class="tag-row">
-                <span v-for="tag in activity.tags" :key="tag">{{ tag }}</span>
+                <span v-for="tag in activity.tags" :key="tag">{{ t(tag) }}</span>
               </div>
               <div class="activity-card-footer">
-                <span><AppIcon name="pin" :size="14" />{{ placeById(activity.placeId)?.name }}</span
+                <span
+                  ><AppIcon name="pin" :size="14" />{{ t(placeById(activity.placeId)?.name) }}</span
                 ><button @click="openSelection({ kind: 'activity', id: activity.id })">
-                  赴约详情<AppIcon name="arrow" :size="17" />
+                  {{ t('赴约详情') }}<AppIcon name="arrow" :size="17" />
                 </button>
               </div>
             </div>
             <button
               class="activity-favorite"
               :class="{ saved: isFavorite({ kind: 'activity', id: activity.id }) }"
-              :aria-label="`${isFavorite({ kind: 'activity', id: activity.id }) ? '取消收藏' : '收藏'}${activity.name}`"
+              :aria-label="
+                t(
+                  isFavorite({ kind: 'activity', id: activity.id })
+                    ? '取消收藏{name}'
+                    : '收藏{name}',
+                  { name: activity.name },
+                )
+              "
               :aria-pressed="isFavorite({ kind: 'activity', id: activity.id })"
               @click="toggleFavorite({ kind: 'activity', id: activity.id })"
             >
@@ -625,11 +595,13 @@ onBeforeUnmount(() => {
         </div>
         <div v-if="!visibleActivities.length" class="catalog-empty">
           <AppIcon name="fan" :size="38" />
-          <h2>暂时没有这类活动</h2>
-          <p>试着换个关键词或分类，发现另一种相遇。</p>
-          <button class="primary-button" @click="resetActivityFilters">查看全部活动</button>
+          <h2>{{ t('暂时没有这类活动') }}</h2>
+          <p>{{ t('试着换个关键词或分类，发现另一种相遇。') }}</p>
+          <button class="primary-button" @click="resetActivityFilters">
+            {{ t('查看全部活动') }}
+          </button>
         </div>
-        <p class="catalog-footnote">— 不赶时间，只赴好时光 —</p>
+        <p class="catalog-footnote">{{ t('— 不赶时间，只赴好时光 —') }}</p>
       </section>
     </main>
     <MainNav :current="tab" @navigate="changeTab" />
@@ -648,65 +620,75 @@ onBeforeUnmount(() => {
       @close="closeModal"
     >
       <div v-if="selectedDinner" class="simple-dialog">
-        <p class="section-kicker">自由晚餐 · 餐厅推荐</p>
-        <h2>{{ selectedDinner.name }}</h2>
-        <p>{{ selectedDinner.style }} · 约 {{ selectedDinner.seats }} 个餐位</p>
+        <p class="section-kicker">{{ t('自由晚餐 · 餐厅推荐') }}</p>
+        <h2>{{ t(selectedDinner.name) }}</h2>
+        <p>
+          {{ t(selectedDinner.style) }} ·
+          {{ t('约 {count} 个餐位', { count: selectedDinner.seats }) }}
+        </p>
         <button
           v-if="selectedDinner.placeId"
           class="field-action"
           @click="viewOnMap(selectedDinner.placeId)"
         >
-          在地图中查看
+          {{ t('在地图中查看') }}
         </button>
       </div>
       <template v-else-if="detail">
         <div class="detail-hero" :class="{ 'model-hero': detail.model }">
           <img
             :src="detail.model?.heroAsset || detail.model?.asset || `/art/${detail.art}.svg`"
-            :alt="`${detail.name}意境插画`"
-          /><span class="detail-category">{{ detail.category }}</span>
+            :alt="t('{name}意境插画', { name: detail.name })"
+          /><span class="detail-category">{{ t(detail.category) }}</span>
         </div>
         <div class="detail-body">
-          <p class="eyebrow">A MOMENT IN PUYUAN</p>
-          <h2>{{ detail.name }}</h2>
-          <p class="detail-subtitle">{{ detail.subtitle }}</p>
-          <p class="detail-description">{{ detail.description }}</p>
+          <p class="eyebrow">{{ t('A MOMENT IN PUYUAN') }}</p>
+          <h2>{{ t(detail.name) }}</h2>
+          <p class="detail-subtitle">{{ t(detail.subtitle) }}</p>
+          <p class="detail-description">{{ t(detail.description, { name: detail.place.name }) }}</p>
           <div class="detail-facts">
             <div>
               <AppIcon name="pin" :size="18" /><span
-                ><small>所在地点</small>{{ detail.place.name }}</span
+                ><small>{{ t('所在地点') }}</small
+                >{{ t(detail.place.name) }}</span
               >
             </div>
             <div v-if="currentActivity">
               <AppIcon name="clock" :size="18" /><span
-                ><small>{{ currentActivity.duration }}</small
+                ><small>{{ t(currentActivity.duration) }}</small
                 >{{ currentActivity.time }}</span
               >
             </div>
             <div v-if="currentRestaurant">
               <AppIcon name="clock" :size="18" /><span
-                ><small>示例营业时间</small>{{ currentRestaurant.hours }}</span
+                ><small>{{ t('示例营业时间') }}</small
+                >{{ currentRestaurant.hours }}</span
               >
             </div>
             <div v-if="currentRestaurant">
               <AppIcon name="tea" :size="18" /><span
-                ><small>示例人均</small>¥{{ currentRestaurant.price }} / 人</span
+                ><small>{{ t('示例人均') }}</small
+                >¥{{ currentRestaurant.price }} {{ t('/ 人') }}</span
               >
             </div>
           </div>
           <div v-if="currentActivity" class="session-list">
-            <h3>场次一览 <span>演示日程</span></h3>
+            <h3>
+              {{ t('场次一览') }} <span>{{ t('演示日程') }}</span>
+            </h3>
             <div v-for="session in currentActivity.sessions" :key="session.start">
               <span
-                >{{ dayLabel(session.start, new Date(now)) }}
+                >{{ dayLabel(session.start, new Date(now), locale) }}
                 <small>{{
                   shanghaiDate(new Date(session.start)).slice(5).replace('-', '.')
                 }}</small></span
               ><strong>{{ currentActivity.time }}</strong
               ><span class="session-state" :class="sessionStatus([session], now)">{{
-                { ongoing: '进行中', upcoming: '待开始', ended: '已结束' }[
-                  sessionStatus([session], now)
-                ]
+                t(
+                  { ongoing: '进行中', upcoming: '待开始', ended: '已结束' }[
+                    sessionStatus([session], now)
+                  ],
+                )
               }}</span>
             </div>
           </div>
@@ -717,14 +699,14 @@ onBeforeUnmount(() => {
             "
             class="place-content"
           >
-            <h3>在这里，可以遇见</h3>
+            <h3>{{ t('在这里，可以遇见') }}</h3>
             <button
               v-if="linkedDinner"
               @click="openSelection({ kind: 'restaurant', id: linkedDinner.id })"
             >
               <AppIcon name="bowl" /><span
-                ><strong>{{ linkedDinner.name }}</strong
-                ><small>自由晚餐推荐 · {{ linkedDinner.style }}</small></span
+                ><strong>{{ t(linkedDinner.name) }}</strong
+                ><small>{{ t('自由晚餐推荐 ·') }} {{ t(linkedDinner.style) }}</small></span
               ><AppIcon name="chevron" />
             </button>
             <button
@@ -733,7 +715,7 @@ onBeforeUnmount(() => {
               @click="openSelection({ kind: 'activity', id: activity.id })"
             >
               <AppIcon name="fan" :size="20" /><span
-                ><strong>{{ activity.name }}</strong
+                ><strong>{{ t(activity.name) }}</strong
                 ><small>{{ activity.time }}</small></span
               ><AppIcon name="chevron" :size="17" /></button
             ><button
@@ -742,15 +724,21 @@ onBeforeUnmount(() => {
               @click="openSelection({ kind: 'restaurant', id: restaurant.id })"
             >
               <AppIcon name="tea" :size="20" /><span
-                ><strong>{{ restaurant.name }}</strong
-                ><small>{{ restaurant.cuisine }} · 示例人均 ¥{{ restaurant.price }}</small></span
+                ><strong>{{ t(restaurant.name) }}</strong
+                ><small
+                  >{{ t(restaurant.cuisine) }} {{ t('· 示例人均 ¥') }}{{ restaurant.price }}</small
+                ></span
               ><AppIcon name="chevron" :size="17" />
             </button>
           </div>
           <div class="demo-notice">
             <AppIcon name="info" :size="15" />
             <p>
-              当前为游园体验版。地点布局、活动、营业时间及价格为演示内容，实际信息请以园区公告为准。
+              {{
+                t(
+                  '当前为游园体验版。地点布局、活动、营业时间及价格为演示内容，实际信息请以园区公告为准。',
+                )
+              }}
             </p>
           </div>
         </div>
@@ -762,79 +750,40 @@ onBeforeUnmount(() => {
             @click="toggleFavorite(selection)"
           >
             <AppIcon name="heart" :size="20" />{{
-              isFavorite(selection) ? '已收藏' : '收藏'
+              t(isFavorite(selection) ? '已收藏' : '收藏')
             }}</button
           ><button class="primary-button" @click="viewOnMap(detail.place.id)">
-            <AppIcon name="map" :size="18" />在地图中查看<AppIcon name="arrow" :size="18" />
+            <AppIcon name="map" :size="18" />{{ t('在地图中查看')
+            }}<AppIcon name="arrow" :size="18" />
           </button>
         </div> </template
     ></AppDialog>
   </Transition>
 
   <Transition name="sheet">
-    <AppDialog v-if="overlay === 'guide'" label="游园手帖" @close="closeModal"
-      ><div class="simple-dialog guide-dialog">
-        <span class="dialog-emblem"><AppIcon name="book" :size="28" /></span>
-        <p class="eyebrow">YOUR LITTLE GUIDE</p>
-        <h2>游园手帖</h2>
-        <p class="dialog-intro">不必赶路，把时光交给水乡。</p>
-        <div class="guide-step">
-          <span>壹</span>
-          <div>
-            <h3>循着地图，随心慢游</h3>
-            <p>
-              点亮上方牌签，显示对应标记；再点一次即可隐藏。拖动地图或双指缩放，点标记查看详情。
-            </p>
-          </div>
-        </div>
-        <div class="guide-step">
-          <span>贰</span>
-          <div>
-            <h3>寻味赴约，各有欢喜</h3>
-            <p>
-              打开「行程」查看两天安排，「餐厅」收录自由晚餐推荐。导览上点红色江湖令看对应挑战，点靛青侠客看游走
-              NPC 的规则和活动范围（非实时位置）。
-            </p>
-          </div>
-        </div>
-        <div class="guide-step">
-          <span>叁</span>
-          <div>
-            <h3>留一点时间，静赏风物</h3>
-            <p>导览动画跟随系统的「减少动态效果」设置。收藏保存在当前设备，关闭页面后仍然保留。</p>
-          </div>
-        </div>
-        <div class="demo-notice">
-          <AppIcon name="info" :size="17" />
-          <p>导览是古镇示意图；路网按地理坐标展示，可以查看设备位置。暂不提供步行导航。</p>
-        </div>
-        <button class="primary-button full-width" @click="closeModal">
-          开始慢游<AppIcon name="arrow" :size="18" />
-        </button></div
-    ></AppDialog>
-  </Transition>
-  <Transition name="sheet">
     <AppDialog v-if="overlay === 'favorites'" label="我的收藏" @close="closeModal"
       ><div class="simple-dialog">
         <span class="dialog-emblem"><AppIcon name="heart" :size="28" /></span>
-        <p class="eyebrow">SAVE A LITTLE WONDER</p>
-        <h2>把美好，留在行程里</h2>
-        <p class="dialog-intro">已收藏 {{ favoriteItems.length }} 份心动 · 保存在这台设备</p>
+        <p class="eyebrow">{{ t('SAVE A LITTLE WONDER') }}</p>
+        <h2>{{ t('把美好，留在行程里') }}</h2>
+        <p class="dialog-intro">
+          {{ t('已收藏 {count} 份心动 · 保存在这台设备', { count: favoriteItems.length }) }}
+        </p>
         <div v-if="!favoriteItems.length" class="favorites-empty">
           <AppIcon name="leaf" :size="42" />
-          <p>还没有收藏。<br />遇见喜欢的地点、活动与餐厅，点亮那颗心。</p>
-          <button class="primary-button" @click="closeModal">去发现美好</button>
+          <p>{{ t('还没有收藏。') }}<br />{{ t('遇见喜欢的地点、活动与餐厅，点亮那颗心。') }}</p>
+          <button class="primary-button" @click="closeModal">{{ t('去发现美好') }}</button>
         </div>
         <div v-else class="favorite-list">
           <div v-for="item in favoriteItems" :key="selectionKey(item.selection)">
             <button @click="openSelection(item.selection)">
-              <span class="favorite-type">{{ item.label }}</span><span
-                ><strong>{{ item.name }}</strong
-                ><small>{{ item.subtitle }}</small></span
+              <span class="favorite-type">{{ t(item.label) }}</span><span
+                ><strong>{{ t(item.name) }}</strong
+                ><small>{{ t(item.subtitle) }}</small></span
               ><AppIcon name="chevron" :size="18" /></button
             ><button
               class="remove-favorite"
-              :aria-label="`取消收藏${item.name}`"
+              :aria-label="t('取消收藏{name}', { name: item.name })"
               @click="toggleFavorite(item.selection)"
             >
               <AppIcon name="heart" :size="18" />
@@ -847,9 +796,9 @@ onBeforeUnmount(() => {
     <AppDialog v-if="overlay === 'location'" label="我的位置" @close="closeModal"
       ><div class="simple-dialog location-dialog">
         <span class="dialog-emblem"><AppIcon name="locate" :size="30" /></span>
-        <p class="eyebrow">FIND YOUR PLACE</p>
-        <h2>此刻，你在何处</h2>
-        <p class="dialog-intro">位置仅用于当前设备，不会上传或保存轨迹。</p>
+        <p class="eyebrow">{{ t('FIND YOUR PLACE') }}</p>
+        <h2>{{ t('此刻，你在何处') }}</h2>
+        <p class="dialog-intro">{{ t('位置仅用于当前设备，不会上传或保存轨迹。') }}</p>
         <div class="location-state" :class="location.state.value" role="status">
           <span v-if="location.state.value === 'loading'" class="spinner"></span
           ><AppIcon
@@ -857,32 +806,28 @@ onBeforeUnmount(() => {
             :name="location.state.value === 'available' ? 'check' : 'pin'"
             :size="28"
           />
-          <p>{{ locationMessage }}</p>
-          <small v-if="location.fix.value"
-            >设备报告精度约 {{ Math.round(location.fix.value.accuracy) }} 米 ·
-            {{
-              new Date(location.fix.value.timestamp).toLocaleTimeString('zh-CN', {
+          <p>{{ t(locationMessage) }}</p>
+          <small v-if="location.fix.value">{{
+            t('设备报告精度约 {meters} 米 · {time} 获取', {
+              meters: Math.round(location.fix.value.accuracy),
+              time: new Date(location.fix.value.timestamp).toLocaleTimeString(locale, {
                 hour: '2-digit',
                 minute: '2-digit',
-              })
-            }}
-            获取</small
-          >
+              }),
+            })
+          }}</small>
         </div>
         <div class="demo-notice">
           <AppIcon name="info" :size="17" />
           <p>
-            当前古风地图尚未进行地理校准，暂不在示意图上显示定位点。路网使用真实地理坐标；公开边界不代表实际开放范围。
+            {{
+              t(
+                '设备位置只显示在下方的园区边界概览中，不会标在手绘导览上。公开边界不代表实际开放范围。',
+              )
+            }}
           </p>
         </div>
         <GeoLocationMap :fix="location.fix.value" :now="now" />
-        <button
-          v-if="location.fix.value"
-          class="secondary-button full-width"
-          @click="viewLocationOnMap"
-        >
-          <AppIcon name="map" :size="17" />在路网中查看位置
-        </button>
         <button
           v-if="location.state.value !== 'denied'"
           class="primary-button full-width"
@@ -890,48 +835,23 @@ onBeforeUnmount(() => {
           @click="location.locate()"
         >
           <AppIcon name="locate" :size="18" />{{
-            location.state.value === 'loading'
-              ? '正在定位…'
-              : location.state.value === 'idle'
-                ? '获取设备位置'
-                : '重新获取位置'
+            t(
+              location.state.value === 'loading'
+                ? '正在定位…'
+                : location.state.value === 'idle'
+                  ? '获取设备位置'
+                  : '重新获取位置',
+            )
           }}</button
-        ><button v-else class="primary-button full-width" @click="closeModal">继续浏览地图</button>
+        ><button v-else class="primary-button full-width" @click="closeModal">
+          {{ t('继续浏览地图') }}
+        </button>
       </div></AppDialog
     >
   </Transition>
-  <Transition name="sheet">
-    <AppDialog
-      v-if="overlay === 'geopoint' && geoSelection"
-      :label="geoName(geoSelection)"
-      @close="closeModal"
-    >
-      <div class="simple-dialog geo-place-dialog">
-        <span class="dialog-emblem"><AppIcon name="pin" :size="28" /></span>
-        <p class="eyebrow">A PLACE ON THE MAP</p>
-        <h2>{{ geoName(geoSelection) }}</h2>
-        <p class="dialog-intro">公开地图地标 · 地理坐标视图</p>
-        <p class="geo-place-description">
-          此处位置来自 OpenStreetMap
-          的原始地标记录，未使用手绘图像推算。地标名称、开放状态与现场情况可能存在差异。
-        </p>
-        <div v-if="geoSelection.geometry.type === 'Point'" class="geo-coordinates">
-          <span>经度 {{ geoSelection.geometry.coordinates[0].toFixed(7) }}</span
-          ><span>纬度 {{ geoSelection.geometry.coordinates[1].toFixed(7) }}</span>
-        </div>
-        <a
-          class="secondary-button full-width"
-          :href="String(geoSelection.properties.source_url)"
-          target="_blank"
-          rel="noopener noreferrer"
-          >查看地图来源<AppIcon name="arrow" :size="17" /></a
-        ><button class="primary-button full-width" @click="closeModal">继续看地图</button>
-      </div>
-    </AppDialog>
-  </Transition>
   <Transition name="toast"
     ><div v-if="toast" class="toast-message" role="status">
-      <AppIcon name="check" :size="17" />{{ toast }}
+      <AppIcon name="check" :size="17" />{{ t(toast) }}
     </div></Transition
   >
 </template>

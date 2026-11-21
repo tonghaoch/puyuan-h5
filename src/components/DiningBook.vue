@@ -1,10 +1,10 @@
 <script setup lang="ts">
+import { t, matchesBilingual } from '../i18n'
 import { computed, ref } from 'vue'
 import AppIcon from './AppIcon.vue'
 import FieldHeading from './FieldHeading.vue'
 import ChapterTabs from './ChapterTabs.vue'
 import { dinnerSpots } from '../data/offsite'
-import { matchesSearch } from '../data/catalog'
 const props = defineProps<{ favorites: string[] }>()
 defineEmits<{ save: [id: string]; map: [id: string] }>()
 const query = ref('')
@@ -28,12 +28,12 @@ const shown = computed(() =>
   entries.filter(
     (spot) =>
       (group.value === '全部' || spot.group === group.value) &&
-      matchesSearch(query.value, spot.name, spot.style),
+      matchesBilingual(query.value, spot.name, spot.style, spot.group),
   ),
 )
 </script>
 <template>
-  <section class="field-page" aria-label="餐厅推荐">
+  <section class="field-page" :aria-label="t('餐厅推荐')">
     <FieldHeading
       theme="food"
       edition="DINING NOTES"
@@ -47,24 +47,29 @@ const shown = computed(() =>
     </FieldHeading>
     <div class="field-inner dining-inner">
       <section class="supper-slip" aria-labelledby="supper-title">
-        <h2 id="supper-title"><AppIcon name="bowl" :size="18" /> 第一天 · 自由晚餐</h2>
+        <h2 id="supper-title"><AppIcon name="bowl" :size="18" /> {{ t('第一天 · 自由晚餐') }}</h2>
         <dl class="supper-facts">
           <div>
-            <dt>晚餐时间</dt>
-            <dd><time datetime="16:30">16:30</time> <small>起</small></dd>
+            <dt>{{ t('晚餐时间') }}</dt>
+            <dd>
+              <time datetime="16:30">16:30</time> <small>{{ t('起') }}</small>
+            </dd>
           </div>
           <div>
-            <dt>参考人均预算</dt>
+            <dt>{{ t('参考人均预算') }}</dt>
             <dd><small>¥</small>80–100</dd>
           </div>
         </dl>
-        <p>两天的团队午餐另见<a href="#itinerary">行程</a>。</p>
+        <p>
+          {{ t('两天的团队午餐另见') }}<a href="#itinerary">{{ t('行程') }}</a
+          >{{ t('。') }}
+        </p>
       </section>
       <div class="field-section-head directory-head">
-        <h2 class="field-title">古镇餐桌</h2>
-        <span class="section-count" role="status" aria-atomic="true"
-          >{{ shown.length }} 家推荐</span
-        >
+        <h2 class="field-title">{{ t('古镇餐桌') }}</h2>
+        <span class="section-count" role="status" aria-atomic="true">{{
+          t('{count} 家推荐', { count: shown.length })
+        }}</span>
       </div>
       <label class="book-search"
         ><AppIcon name="search" :size="18" /><input
@@ -72,8 +77,8 @@ const shown = computed(() =>
           v-model="query"
           name="dining"
           type="search"
-          aria-label="搜索餐厅"
-          placeholder="搜索店名、菜系…"
+          :aria-label="t('搜索餐厅')"
+          :placeholder="t('搜索店名、菜系…')"
       /></label>
       <ChapterTabs
         class="dining-filters"
@@ -85,9 +90,11 @@ const shown = computed(() =>
       <article v-for="spot in shown" :key="spot.id" class="directory-row dinner-row">
         <span class="entry-number" aria-hidden="true">{{ spot.number }}</span>
         <div class="entry-copy">
-          <h3>{{ spot.name }}</h3>
+          <h3>{{ t(spot.name) }}</h3>
           <p class="entry-detail">
-            <span>{{ spot.style }}</span><span>约 {{ spot.seats }} 个餐位</span>
+            <span>{{ t(spot.style) }}</span><span>{{
+              t('约 {count} 个餐位', { count: spot.seats })
+            }}</span>
           </p>
           <button
             v-if="spot.placeId"
@@ -95,7 +102,7 @@ const shown = computed(() =>
             class="ink-link"
             @click="$emit('map', spot.placeId)"
           >
-            <AppIcon name="pin" :size="14" /> 在地图查看
+            <AppIcon name="pin" :size="14" /> {{ t('在地图查看') }}
           </button>
         </div>
         <button
@@ -103,20 +110,24 @@ const shown = computed(() =>
           type="button"
           :class="{ saved: isSaved(spot.id) }"
           :aria-pressed="isSaved(spot.id)"
-          :aria-label="`${isSaved(spot.id) ? '取消收藏' : '收藏'}${spot.name}`"
+          :aria-label="t(isSaved(spot.id) ? '取消收藏{name}' : '收藏{name}', { name: spot.name })"
           @click="$emit('save', spot.id)"
         >
           <AppIcon name="heart" :size="18" />
-          <span>{{ isSaved(spot.id) ? '已收藏' : '收藏' }}</span>
+          <span>{{ t(isSaved(spot.id) ? '已收藏' : '收藏') }}</span>
         </button>
       </article>
       <div v-if="!shown.length" class="empty-table">
         <AppIcon name="search" :size="22" />
-        <h3>没有找到这家餐厅</h3>
-        <p>试试更短的店名、菜系，或切换餐厅分类。</p>
-        <button type="button" class="ink-link" @click="clearFilters">查看全部餐厅 →</button>
+        <h3>{{ t('没有找到这家餐厅') }}</h3>
+        <p>{{ t('试试更短的店名、菜系，或切换餐厅分类。') }}</p>
+        <button type="button" class="ink-link" @click="clearFilters">
+          {{ t('查看全部餐厅 →') }}
+        </button>
       </div>
-      <p v-else class="field-fine">餐位为总容量，不代表当晚余位；营业与价格以门店为准。</p>
+      <p v-else class="field-fine">
+        {{ t('餐位为总容量，不代表当晚余位；营业与价格以门店为准。') }}
+      </p>
     </div>
   </section>
 </template>

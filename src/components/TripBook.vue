@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from '../i18n'
 import FieldHeading from './FieldHeading.vue'
 import ChapterTabs from './ChapterTabs.vue'
 import AppIcon from './AppIcon.vue'
@@ -18,7 +19,7 @@ function jumpToDay(number: '01' | '02') {
 }
 </script>
 <template>
-  <section class="field-page trip-book" aria-label="两天行程">
+  <section class="field-page trip-book" :aria-label="t('两天行程')">
     <FieldHeading
       theme="journey"
       edition="TRAVEL JOURNAL"
@@ -41,12 +42,12 @@ function jumpToDay(number: '01' | '02') {
         tabindex="-1"
       >
         <header class="trip-chapter">
-          <span class="day-number" :aria-label="`第${day.number === '01' ? '一' : '二'}天`">
-            DAY <b>{{ day.number }}</b>
+          <span class="day-number" :aria-label="t(day.number === '01' ? '第一天' : '第二天')">
+            {{ t('DAY') }} <b>{{ day.number }}</b>
           </span>
           <div>
-            <p class="day-route">{{ day.number === '01' ? '苏州 → 濮院' : '濮院 → 苏州' }}</p>
-            <h2 :id="`day-title-${day.number}`">{{ day.title }}</h2>
+            <p class="day-route">{{ t(day.number === '01' ? '苏州 → 濮院' : '濮院 → 苏州') }}</p>
+            <h2 :id="`day-title-${day.number}`">{{ t(day.title) }}</h2>
           </div>
           <button
             class="chapter-turn"
@@ -54,22 +55,22 @@ function jumpToDay(number: '01' | '02') {
             :aria-controls="day.number === '01' ? 'trip-day-02' : 'trip-day-01'"
             @click="jumpToDay(day.number === '01' ? '02' : '01')"
           >
-            {{ day.number === '01' ? '看第二天' : '回第一天' }}
+            {{ t(day.number === '01' ? '看第二天' : '回第一天') }}
             <span aria-hidden="true">{{ day.number === '01' ? '↓' : '↑' }}</span>
           </button>
         </header>
         <ol class="trip-entries" role="list">
           <li v-for="row in day.rows" :key="row[0]" class="trip-entry">
-            <div class="entry-time">{{ row[0] }}</div>
+            <div class="entry-time">{{ t(row[0]) }}</div>
             <div class="entry-body">
-              <h3>{{ row[1] }}</h3>
-              <p>{{ row[2] }}</p>
+              <h3>{{ t(row[1]) }}</h3>
+              <p>{{ t(row[2]) }}</p>
               <div v-if="row.length === 5" class="entry-links">
                 <a class="ink-link" :href="`#${row[3]}`">
-                  {{ row[4] }} <AppIcon name="arrow" :size="14" />
+                  {{ t(row[4]) }} <AppIcon name="arrow" :size="14" />
                 </a>
                 <a v-if="row[3] === 'itinerary/walk'" class="ink-link" href="#itinerary/studio">
-                  查看体验 <AppIcon name="arrow" :size="14" />
+                  {{ t('查看体验') }} <AppIcon name="arrow" :size="14" />
                 </a>
               </div>
             </div>
@@ -78,48 +79,56 @@ function jumpToDay(number: '01' | '02') {
       </section>
     </div>
     <div v-else-if="section === 'walk'" class="field-inner">
-      <p class="section-kicker">DAY 02 · GUIDED WALK</p>
-      <h2 class="field-title">跟讲解，走水巷</h2>
+      <p class="section-kicker">{{ t('DAY 02 · GUIDED WALK') }}</p>
+      <h2 class="field-title">{{ t('跟讲解，走水巷') }}</h2>
       <p class="field-copy">
-        10:00–12:00，约 45 人一组。已报名体验的同事按自己的安排出发，无需同时参加讲解。
+        {{ t('10:00–12:00，约 45 人一组。已报名体验的同事按自己的安排出发，无需同时参加讲解。') }}
       </p>
       <div class="journal-panel">
-        <small>沿途风景</small>
-        <h3>漱芳禅园 · 濮川诗社 · 梅泾剧场</h3>
-        <p>这是行程资料推荐的看点；集合处和当天游览顺序请听从讲解员安排。</p>
+        <small>{{ t('沿途风景') }}</small>
+        <h3>{{ t('漱芳禅园 · 濮川诗社 · 梅泾剧场') }}</h3>
+        <p>{{ t('这是行程资料推荐的看点；集合处和当天游览顺序请听从讲解员安排。') }}</p>
       </div>
-      <a class="field-action" href="#map"><AppIcon name="map" :size="18" /> 打开古镇导览</a>
+      <a class="field-action" href="#map"
+        ><AppIcon name="map" :size="18" /> {{ t('打开古镇导览') }}</a
+      >
     </div>
     <div v-else-if="section === 'studio'" class="field-inner">
-      <p class="section-kicker">DAY 02 · WORKSHOPS</p>
-      <h2 class="field-title">给自己留一件手作</h2>
-      <p class="field-copy">按已报名项目参加。以下为方案团队价，不代表实时库存或报名成功。</p>
+      <p class="section-kicker">{{ t('DAY 02 · WORKSHOPS') }}</p>
+      <h2 class="field-title">{{ t('给自己留一件手作') }}</h2>
+      <p class="field-copy">
+        {{ t('按已报名项目参加。以下为方案团队价，不代表实时库存或报名成功。') }}
+      </p>
       <article v-for="item in experiences" :key="item[0]" class="directory-row">
         <div>
-          <small>{{ item[1] }}</small>
-          <h3>{{ item[0] }}</h3>
-          <p v-if="item[4]">{{ item[4] }}</p>
+          <small>{{ t(item[1]) }}</small>
+          <h3>{{ t(item[0]) }}</h3>
+          <p v-if="item[4]">{{ t(item[4]) }}</p>
         </div>
         <div class="directory-meta">
           <strong>¥{{ item[3] }}</strong
-          ><small>约 {{ item[2] }} 分钟</small>
+          ><small>{{ t('约 {count} 分钟', { count: item[2] }) }}</small>
         </div>
       </article>
     </div>
     <div v-else class="field-inner">
-      <p class="section-kicker">ON STAGE · 今日演艺</p>
-      <h2 class="field-title">看戏，先看当天场次</h2>
+      <p class="section-kicker">{{ t('ON STAGE · 今日演艺') }}</p>
+      <h2 class="field-title">{{ t('看戏，先看当天场次') }}</h2>
       <p class="field-copy">
-        园内节目随日调整，不把示例时间当作实际排期。微信中长按识别下方小程序码；也可在微信搜索「濮院时尚古镇」查看演艺时间表。
+        {{
+          t(
+            '园内节目随日调整，不把示例时间当作实际排期。微信中长按识别下方小程序码；也可在微信搜索「濮院时尚古镇」查看演艺时间表。',
+          )
+        }}
       </p>
       <figure class="show-code">
         <img
           src="/art/offsite-shows.png"
           width="216"
           height="216"
-          alt="濮院时尚古镇演艺时间表微信小程序码"
+          :alt="t('濮院时尚古镇演艺时间表微信小程序码')"
         />
-        <figcaption>景区演艺时间表 · 以当天公告为准</figcaption>
+        <figcaption>{{ t('景区演艺时间表 · 以当天公告为准') }}</figcaption>
       </figure>
     </div>
   </section>

@@ -37,7 +37,7 @@ test('separate lawn tokens open the indicated challenge without leaving the map'
   const hammer = page.getByRole('button', { name: '游戏：大草坪 · 一锤定音' })
   await expect(page.locator('.quest-pin')).toHaveCount(8)
   const scene = page.locator('.map-scene')
-  await page.getByRole('button', { name: '放大地图' }).click()
+  await page.locator('.map-viewport').press('=')
   await expect(flag).toBeInViewport()
   const camera = await scene.getAttribute('style')
   const flagIcon = flag.locator('svg')
@@ -81,8 +81,6 @@ test('separate lawn tokens open the indicated challenge without leaving the map'
   const viewport = (await page.locator('.map-viewport').boundingBox())!
   const anchor = (await page.locator('[data-marker="quest:treasure"]').boundingBox())!
   expect(Math.abs(viewport.x + viewport.width / 2 - anchor.x)).toBeLessThan(1)
-  await page.getByRole('button', { name: '路网', exact: true }).click()
-  await expect(page.locator('.quest-pin')).toHaveCount(0)
 })
 
 test('legacy lawn links open only the original game and dismiss locally', async ({ page }) => {
@@ -144,13 +142,13 @@ test('quest and NPC artwork scales in proportion to the map', async ({ page }) =
     )
   const initial = await sizes()
   for (const [action, ratio] of [
-    ['放大地图', 1.25],
-    ['放大地图', 1.25 ** 2],
-    ['缩小地图', 1.25],
-    ['重置地图视野', 1],
-    ['缩小地图', 0.8],
+    ['=', 1.2],
+    ['=', 1.2 ** 2],
+    ['-', 1.2],
+    ['Home', 1],
+    ['-', 1 / 1.2],
   ] as const) {
-    await page.getByRole('button', { name: action }).click()
+    await page.locator('.map-viewport').press(action)
     const current = await sizes()
     for (const [index, original] of initial.entries()) {
       expect(current[index]!.width / original.width).toBeCloseTo(ratio, 2)
@@ -210,7 +208,7 @@ test('all thirteen pins stay directly above their map points during pan, zoom an
     await checkPins()
     for (const [index, gap] of (await gaps()).entries())
       expect(gap).toBeCloseTo(initialGaps[index]!, 2)
-    await page.getByRole('button', { name: '放大地图' }).click()
+    await viewport.press('=')
   }
 })
 
@@ -240,8 +238,6 @@ test('five NPC markers show roaming areas; the roaming constable has no invented
   await expect(card.getByText(/不是实时位置/)).toBeVisible()
   await page.goBack()
   await expect(pin).toBeFocused()
-  await page.getByRole('button', { name: '路网', exact: true }).click()
-  await expect(page.locator('.field-marker')).toHaveCount(0)
 })
 
 test('three independent map toggles control markers in every combination', async ({ page }) => {
@@ -270,9 +266,8 @@ test('three independent map toggles control markers in every combination', async
   await toggle('古镇地点')
   await check(false, false, false)
   await expect(page.locator('.map-art')).toBeVisible()
-  await page.getByRole('button', { name: '路网', exact: true }).click()
-  await expect(layers).toHaveCount(0)
-  await page.getByRole('button', { name: '导览', exact: true }).click()
+  await page.getByRole('button', { name: '行程', exact: true }).click()
+  await page.getByRole('button', { name: '地图', exact: true }).click()
   await check(false, false, false)
   await toggle('行走 NPC')
   await check(false, true, false)
@@ -305,7 +300,7 @@ test('zoom and camera survive tab changes and pan responds to pointer drag', asy
   await page.goto('/')
   const scene = page.locator('.map-scene')
   const initial = await scene.getAttribute('style')
-  await page.getByRole('button', { name: '放大地图', exact: true }).click()
+  await page.locator('.map-viewport').press('=')
   await expect(scene).not.toHaveAttribute('style', initial!)
   const zoomed = await scene.getAttribute('style')
   await page.getByRole('button', { name: /^餐厅$/ }).click()
@@ -320,7 +315,7 @@ test('zoom and camera survive tab changes and pan responds to pointer drag', asy
   await page.mouse.move(x + 60, y + 40, { steps: 6 })
   await page.mouse.up()
   await expect(scene).not.toHaveAttribute('style', zoomed!)
-  await page.getByRole('button', { name: '重置地图视野' }).click()
+  await viewport.press('Home')
   await expect(scene).toHaveAttribute('style', initial!)
 })
 
@@ -363,7 +358,8 @@ test('device geolocation remains separate from the uncalibrated scene', async ({
   await page.getByRole('button', { name: '获取设备位置', exact: true }).click()
   await expect(page.getByRole('dialog').getByText('已获取设备位置', { exact: true })).toBeVisible()
   await expect(page.getByText(/设备报告精度约 18 米/)).toBeVisible()
-  await expect(page.getByText(/暂不在示意图上显示定位点/)).toBeVisible()
+  await expect(page.getByRole('dialog').getByText(/位置在园区附近视野之外/)).toBeVisible()
+  await expect(page.locator('.geo-user')).toHaveCount(0)
   await expect(page.locator('.reference-labels button')).toHaveCount(18)
 })
 
@@ -461,8 +457,10 @@ test('near-park GPS is plotted only on the attributed geographic overview', asyn
   await expect(page.locator('.geo-map')).toBeVisible()
   await page.getByRole('button', { name: '获取设备位置', exact: true }).click()
   await expect(page.locator('.geo-user')).toBeVisible()
+  await expect(page.locator('.geo-boundary')).toBeVisible()
+  await expect(page.getByRole('button', { name: /路网/ })).toHaveCount(0)
   await expect(page.getByText('你的位置在公开资料记录的园区范围内。')).toBeVisible()
-  await expect(page.getByRole('link', { name: '© OpenStreetMap contributors' })).toBeVisible()
+  await expect(page.getByRole('link', { name: '© OpenStreetMap 贡献者' })).toBeVisible()
   expect(Number(await page.locator('.geo-accuracy').getAttribute('r'))).toBeGreaterThan(0)
   await expect(page.locator('.map-scene .geo-user')).toHaveCount(0)
 })
@@ -538,37 +536,39 @@ test('zooming the reference map loads local AI tiles and panning replaces them',
   await page.goto('/')
   const tiles = page.locator('.reference-tiles img[src*="/8/"]')
   await expect(tiles).toHaveCount(0)
-  const plus = page.getByRole('button', { name: '放大地图' })
-  const minus = page.getByRole('button', { name: '缩小地图' })
-  await minus.click()
-  await expect(minus).toBeDisabled()
-  await plus.click()
-  await expect(minus).toBeEnabled()
-  for (let i = 0; i < 8; i++) await plus.click()
-  await expect(plus).toBeDisabled()
+  const viewport = page.locator('.map-viewport')
+  const scene = page.locator('.map-scene')
+  const initialWidth = (await scene.boundingBox())!.width
+  await viewport.press('-')
+  await viewport.press('-')
+  expect((await scene.boundingBox())!.width / initialWidth).toBeCloseTo(0.8, 3)
+  await viewport.press('Home')
+  for (let step = 0; step < 10; step++) await viewport.press('=')
+  expect((await scene.boundingBox())!.width / initialWidth).toBeCloseTo(1.25 ** 8, 3)
   await expect(tiles.first()).toBeVisible()
   await expect(tiles.first()).toHaveJSProperty('naturalWidth', 1024)
   const firstTile = await tiles.first().getAttribute('src')
   expect(await tiles.count()).toBeLessThan(30)
-  const viewport = page.locator('.map-viewport')
-  await viewport.focus()
   for (let i = 0; i < 10; i++) await viewport.press('ArrowRight')
   await expect(page.locator(`.reference-tiles img[src="${firstTile}"]`)).toHaveCount(0)
   await expect(tiles.first()).toBeVisible()
   await viewport.press('Home')
-  await expect(plus).toBeEnabled()
-  await expect(minus).toBeEnabled()
   await expect(tiles).toHaveCount(0)
 })
 
-test('the reference map is the default and switching to real roads preserves its camera', async ({
+test('the illustrated guide is the only main map, including for retired landmark links', async ({
   page,
 }) => {
-  await page.goto('/')
-  const views = page.locator('.map-view-switch button')
-  await expect(views).toHaveText(['导览', '路网'])
-  const reference = page.getByRole('button', { name: '导览', exact: true })
-  await expect(reference).toHaveAttribute('aria-pressed', 'true')
+  const geodataRequests: string[] = []
+  page.on('request', (request) => {
+    if (new URL(request.url()).pathname.startsWith('/geodata/')) geodataRequests.push(request.url())
+  })
+  await page.goto('/#map/geopoint/node-12885564503')
+  await expect(page).toHaveURL(/#map$/)
+  await expect(page.getByRole('region', { name: /古镇导览/ })).toBeVisible()
+  await expect(page.getByRole('group', { name: '地图图层' }).getByRole('button')).toHaveCount(3)
+  await expect(page.getByRole('button', { name: /^(路网|导览)$/ })).toHaveCount(0)
+  await expect(page.getByRole('dialog')).toHaveCount(0)
   await expect(page.locator('.map-art')).toHaveAttribute('src', '/art/puyuan-original-scope.webp')
   await expect
     .poll(() =>
@@ -578,39 +578,7 @@ test('the reference map is the default and switching to real roads preserves its
       })),
     )
     .toEqual({ pixels: [1520, 1240], scene: [1520, 1240] })
-  await page.getByRole('button', { name: '放大地图' }).click()
-  const zoomed = await page.locator('.map-scene').getAttribute('style')
-  await page.getByRole('button', { name: '路网', exact: true }).click()
-  await expect(page.locator('.real-road').first()).toBeVisible()
-  await expect(page.locator('.geo-landmark')).toHaveCount(8)
-  await expect(page.getByRole('textbox', { name: '搜索地图地点或活动' })).toHaveCount(0)
-  await page.getByRole('button', { name: '查看地图资料：福山塔', exact: true }).click()
-  await expect(page.getByRole('dialog').getByRole('heading', { name: '福山塔' })).toBeVisible()
-  await page.getByRole('button', { name: '继续看地图' }).click()
-  await expect(page.getByRole('button', { name: '影像核对', exact: true })).toHaveCount(0)
-  await expect(page.locator('.geo-landmark')).toHaveCount(8)
-  await reference.click()
-  await expect(page.locator('.map-scene')).toHaveAttribute('style', zoomed!)
-})
-
-test('acquired GPS can be opened on the main real map without placing it on the reference map', async ({
-  page,
-  context,
-}) => {
-  await context.grantPermissions(['geolocation'])
-  await context.setGeolocation({ latitude: 30.6828922, longitude: 120.6296382, accuracy: 10 })
-  await page.goto('/')
-  await page.getByRole('button', { name: '获取我的位置' }).click()
-  await page.getByRole('button', { name: '获取设备位置', exact: true }).click()
-  await page.getByRole('button', { name: '在路网中查看位置' }).click()
-  await expect(page.getByRole('dialog')).toHaveCount(0)
-  await expect(page.locator('.main-user-position')).toBeVisible()
-  await expect(page.getByRole('button', { name: '路网', exact: true })).toHaveAttribute(
-    'aria-pressed',
-    'true',
-  )
-  await page.getByRole('button', { name: '导览', exact: true }).click()
-  await expect(page.locator('.main-user-position')).toHaveCount(0)
+  expect(geodataRequests).toEqual([])
 })
 
 test('bottom sheet can be dragged down to dismiss', async ({ page }) => {
@@ -629,7 +597,7 @@ test('panning beyond the former crop reveals meadow and can return to town', asy
   const initial = await scene.getAttribute('style')
   await page.getByRole('region', { name: /古镇导览/ }).focus()
   for (let i = 0; i < 22; i++) await page.keyboard.press('ArrowRight')
-  await expect(page.getByRole('button', { name: '回到古镇', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: '回到古镇', exact: true })).toHaveCount(0)
   await expect(page.locator('.meadow-backdrop')).toHaveCSS(
     'background-image',
     /reference-meadow\.webp/,
@@ -637,10 +605,30 @@ test('panning beyond the former crop reveals meadow and can return to town', asy
   const view = (await page.locator('.map-viewport').boundingBox())!
   const image = (await page.locator('.map-art').boundingBox())!
   expect(image.x + image.width).toBeLessThan(view.x + 35)
-  await page.getByRole('button', { name: '回到古镇', exact: true }).click()
+  await page.keyboard.press('Home')
   await expect(scene).toHaveAttribute('style', initial!)
-  await page.getByRole('button', { name: '路网', exact: true }).click()
-  await expect(page.locator('.meadow-backdrop')).toHaveCount(0)
+})
+
+test('location is the only camera-area control and clears the bottom nav and legend', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 740 })
+  await page.goto('/#map')
+  await expect(
+    page.getByRole('button', { name: /^(放大地图|缩小地图|重置地图视野)$/ }),
+  ).toHaveCount(0)
+  await page.locator('.language-button').click()
+  const locate = page.getByRole('button', { name: 'Find my location' })
+  const button = (await locate.boundingBox())!
+  const nav = (await page.locator('.main-nav').boundingBox())!
+  const legend = (await page.locator('.map-bottom-note').boundingBox())!
+  expect(button.width).toBeGreaterThanOrEqual(44)
+  expect(button.height).toBeGreaterThanOrEqual(44)
+  expect(button.x + button.width).toBeCloseTo(nav.x + nav.width - 14, 0)
+  expect(button.y + button.height).toBeCloseTo(nav.y - 13, 0)
+  expect(legend.x + legend.width).toBeLessThan(button.x)
+  await locate.click()
+  await expect(page.getByRole('dialog', { name: 'My location' })).toBeVisible()
 })
 
 test('the tower link survives reload without changing the temple place or its default card', async ({

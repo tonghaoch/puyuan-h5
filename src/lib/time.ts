@@ -21,13 +21,17 @@ export function sessionStatus(
   if (sessions.some((s) => Date.parse(s.start) > now)) return 'upcoming'
   return 'ended'
 }
-export function dayLabel(start: string, now = new Date()): string {
+export function dayLabel(
+  start: string,
+  now = new Date(),
+  locale: 'zh-CN' | 'en' = 'zh-CN',
+): string {
   const day = shanghaiDate(new Date(start))
-  if (day === shanghaiDate(now)) return '今天'
-  if (day === shiftDay(shanghaiDate(now), 1)) return '明天'
-  return new Intl.DateTimeFormat('zh-CN', {
+  if (day === shanghaiDate(now)) return locale === 'en' ? 'Today' : '今天'
+  if (day === shiftDay(shanghaiDate(now), 1)) return locale === 'en' ? 'Tomorrow' : '明天'
+  return new Intl.DateTimeFormat(locale, {
     timeZone: 'Asia/Shanghai',
-    month: 'numeric',
+    month: locale === 'en' ? 'short' : 'numeric',
     day: 'numeric',
   }).format(new Date(start))
 }

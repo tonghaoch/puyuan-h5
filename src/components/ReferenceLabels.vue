@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from '../i18n'
 import type { Place } from '../data/catalog'
 import layout from '../data/reference-map.json'
 
@@ -36,16 +37,16 @@ function printedName(place: Place) {
 </script>
 <template>
   <div class="reference-labels">
-    <span class="town-title" :style="position(1055, 718)">濮院古镇</span>
+    <span class="town-title" :style="position(1055, 718)">{{ t('濮院古镇') }}</span>
     <button
       v-for="place in places"
       :key="place.id"
       :style="position(...centers[place.id]!)"
-      :aria-label="`查看${printedName(place)}`"
+      :aria-label="t('查看{name}', { name: printedName(place) })"
       @click.stop="$emit('select', place)"
       @dblclick.stop
     >
-      {{ printedName(place) }}
+      {{ t(printedName(place)) }}
     </button>
   </div>
 </template>

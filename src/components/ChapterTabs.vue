@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from '../i18n'
 defineProps<{
   label: string
   items: readonly (readonly [string, string])[]
@@ -11,7 +12,7 @@ defineEmits<{ select: [key: string] }>()
   <component
     :is="base ? 'nav' : 'div'"
     :role="base ? undefined : 'group'"
-    :aria-label="label"
+    :aria-label="t(label)"
     class="chapter-tabs"
     :class="{ 'chapter-index': base }"
   >
@@ -20,10 +21,10 @@ defineEmits<{ select: [key: string] }>()
         v-if="base"
         :href="`${base}${key ? '/' + key : ''}`"
         :aria-current="current === key ? 'page' : undefined"
-        >{{ name }}</a
+        >{{ t(name) }}</a
       >
       <button v-else type="button" :aria-pressed="current === key" @click="$emit('select', key)">
-        {{ name }}
+        {{ t(name) }}
       </button>
     </template>
   </component>

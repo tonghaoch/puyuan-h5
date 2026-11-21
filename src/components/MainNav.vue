@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from '../i18n'
 import type { Tab } from '../data/catalog'
 defineProps<{ current: Tab }>()
 defineEmits<{ navigate: [tab: Tab] }>()
@@ -11,7 +12,7 @@ const destinations = [
 </script>
 
 <template>
-  <nav class="main-nav" aria-label="主要导航">
+  <nav class="main-nav" :aria-label="t('主要导航')">
     <button
       v-for="[id, label] in destinations"
       :key="id"
@@ -57,7 +58,7 @@ const destinations = [
           <path d="M14.2 6.8V5a1.8 1.8 0 0 1 3.6 0v1.8M10 17.5q1 1.7 3.5 2" />
         </g>
       </svg>
-      <span>{{ label }}</span>
+      <span>{{ t(label) }}</span>
     </button>
   </nav>
 </template>
