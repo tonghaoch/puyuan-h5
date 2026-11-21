@@ -29,7 +29,7 @@ SOX 活动手册按 v1119 行程资料整理。`src/data/offsite.ts` 保存两�
     npm install
     npm run dev
 
-打开终端显示的 Local 地址。手机与微信测试需要可访问的 HTTPS 地址；本项目是网页，不是小程序工程。
+打开终端显示的 Local 地址。H5 和微信小程序是两个入口：网页可直接分享，小程序用 `miniprogram/` 中的 `web-view` 加载它。[微信开发者工具真机测试与 GitHub Pages 审阅](docs/phone-review.md)。
 
 ## 验证
 
