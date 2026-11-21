@@ -4,6 +4,7 @@ import { publicAsset } from '../lib/public-asset'
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import type { MapLayer, Place } from '../data/catalog'
 import { clampCamera, zoomAt, zoomRange, SCENE, type Camera } from '../lib/map-camera'
+import { useWalkPreview } from '../lib/walk-preview'
 import ReferenceTiles from './ReferenceTiles.vue'
 import referenceMap from '../data/reference-map.json'
 import ReferenceLabels from './ReferenceLabels.vue'
@@ -68,6 +69,13 @@ function openPin(pin: (typeof pins)[number], event: MouseEvent) {
   else emit('npc', pin.id, opener)
 }
 const viewport = ref<HTMLElement>()
+const walkPreview =
+  (import.meta.env.DEV || import.meta.env.MODE === 'location-preview') &&
+  new URLSearchParams(window.location.search).get('preview') === 'walk'
+    ? useWalkPreview(() => props.motion)
+    : null
+const position = computed(() => walkPreview?.point.value)
+const locateLabel = computed(() => (position.value ? '回到我的位置' : '获取我的位置'))
 const camera = reactive<Camera>({ x: 0, y: 0, scale: 0.6 })
 const dimensions = reactive({ width: 0, height: 0 })
 const limits = computed(() => zoomRange(dimensions.width, dimensions.height))
@@ -99,6 +107,15 @@ function reset() {
   const { width, height } = dimensions
   const scale = limits.value.initial
   setCamera({ scale, x: width / 2 - 850 * scale, y: (height + 5) / 2 - 605 * scale })
+}
+function locateOrRecenter() {
+  const point = position.value
+  if (!point) return emit('locate')
+  setCamera({
+    scale: camera.scale,
+    x: dimensions.width / 2 - point.x * camera.scale,
+    y: dimensions.height / 2 - point.y * camera.scale,
+  })
 }
 function changeZoom(factor: number) {
   setCamera(
@@ -328,6 +345,15 @@ onBeforeUnmount(() => observer?.disconnect())
         </svg>
       </div>
       <ReferenceLabels v-if="layers.places" :places="places" @select="emit('select', $event)" />
+      <div
+        v-if="position"
+        class="walker-anchor"
+        :style="{ left: `${position.x}px`, top: `${position.y}px` }"
+        role="img"
+        :aria-label="t('我的位置（模拟）')"
+      >
+        <span class="walker-seal" aria-hidden="true">{{ t('我') }}</span>
+      </div>
       <div class="field-markers">
         <div
           v-for="pin in fieldMarkers"
@@ -365,12 +391,29 @@ onBeforeUnmount(() => observer?.disconnect())
     </div>
   </div>
   <button
+    v-if="walkPreview"
+    type="button"
+    class="walk-preview-control"
+    :aria-label="t(walkPreview.action.value)"
+    :title="t(walkPreview.action.value)"
+    @click="walkPreview.toggle"
+  >
+    <span>{{ t('模拟步行') }}</span>
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
+      <path
+        :d="
+          walkPreview.action.value === '暂停模拟步行' ? 'M2 2h3v8H2zm5 0h3v8H7z' : 'M3 1l7 5-7 5z'
+        "
+      />
+    </svg>
+  </button>
+  <button
     type="button"
     class="locate-tool"
-    :aria-label="t('获取我的位置')"
-    :title="t('获取我的位置')"
-    aria-haspopup="dialog"
-    @click="emit('locate')"
+    :aria-label="t(locateLabel)"
+    :title="t(locateLabel)"
+    :aria-haspopup="position ? undefined : 'dialog'"
+    @click="locateOrRecenter"
   >
     <AppIcon name="locate" :size="22" />
   </button>

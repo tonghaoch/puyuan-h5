@@ -674,6 +674,48 @@
   z-index: 4;
   pointer-events: none;
 }
+.walker-anchor {
+  position: absolute;
+  z-index: 5;
+  pointer-events: none;
+  transform: scale(var(--inverse-scale));
+  transform-origin: 0 0;
+}
+.walker-seal {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
+  width: 27px;
+  height: 27px;
+  border: 2px solid #fff4d9;
+  border-radius: 50%;
+  background: #294760;
+  color: #fff4d9;
+  box-shadow: 0 0 0 1px #284258, inset 0 0 0 1px #95a7ac, 0 2px 5px #172e3a59;
+  font: 700 14px/1 var(--serif);
+}
+.walk-preview-control {
+  position: absolute;
+  z-index: 7;
+  right: max(14px, env(safe-area-inset-right));
+  bottom: 64px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid #adb7b3;
+  border-radius: 5px;
+  background: #fbf6e8;
+  color: #294760;
+  font: 600 12px/1 var(--serif);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .walker-anchor {
+    transition: left 0.55s linear, top 0.55s linear;
+  }
+}
 .field-marker {
   --pin-ink: #853b29;
   position: absolute;

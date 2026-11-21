@@ -14,6 +14,8 @@
 
 ## 给同事一个 GitHub Pages 链接
 
+定位 UI 的本地验收：启动 `npm run dev`，在开发地址后加 `?preview=walk`。靛蓝圆印是模拟位置，不会读取设备 GPS。点「模拟步行」可暂停或继续；系统开启减少动态效果时改为手动单步。拖动或缩放后，点右下角定位键可回到圆印，当前缩放倍数不变。单独构建手机 UI 预览时使用 Vite 的 `--mode location-preview`；常规构建和 Pages 即使带上相同参数也不启用模拟。
+
 - `npm run build:review` 生成 `dist-review/`。它是可独立部署的静态站点，支持仓库子路径和 `#map` 等深链接。不要上传整个源码仓库、原 PPT、参考图目录或个人开发者工具配置。**成品仍包含行程、集合地点和活动图片**，公开审阅前需确认这些可对外展示。
 - 在 **Settings → Pages → Build and deployment → Source** 选 **GitHub Actions**。推送到 `main` 后会自动运行测试、构建和网页检查；全部通过才会部署到 Pages。也可在 **Actions → Publish H5 review to Pages → Run workflow** 手动重新部署。成功后分享部署返回的网址或其普通二维码，微信扫一扫即可打开，无需安装开发者工具。
 - 若私有仓库因套餐限制不能开启 Pages，不必改源码可见性。获得公开成品的授权后，可将 `dist-review/` **的内容**放到单独的公开审阅仓库，Pages 选择 **Deploy from a branch → main → /(root)**。这种方式需要在更新版本时重新发布成品。普通 Pages 不是邀请制，拿到链接的人可能继续转发；如内容限内部，应使用带访问控制的托管。
