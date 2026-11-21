@@ -12,6 +12,30 @@ ENCODER = Path(__file__).resolve().parents[1]/'scripts/encode-art-asset.py'
 
 
 class PublishedRaster(unittest.TestCase):
+    def test_meadow_keeps_small_tufts_without_mirrored_flowering_shrubs(self):
+        root = ENCODER.parents[1]
+        with Image.open(root/'public/art/reference-meadow.webp') as grass, \
+             Image.open(root/'references/reference-outpaint.webp') as painting:
+            sample = painting.crop((61,62,253,254))
+            for box in ((144,64,192,108),(0,8,40,50)):
+                self.assertEqual(grass.crop(box).tobytes(),sample.crop(box).tobytes())
+            for box in ((0,102,62,167),(0,217,62,282)):
+                self.assertGreater(grass.crop(box).convert('L').getextrema()[0],145)
+            self.assertEqual(grass.crop((0,0,1,384)).tobytes(),grass.crop((383,0,384,384)).tobytes())
+            self.assertEqual(grass.crop((0,0,384,1)).tobytes(),grass.crop((0,383,384,384)).tobytes())
+            for y in (141,227):
+                expected = grass.getpixel((1,y))
+                for level in (1,2,4,8):
+                    path = root/'public/art/puyuan-original-scope.webp'
+                    x, row = level+level//2, y*level+level//2
+                    if level != 1:
+                        size = 1024 if level == 8 else 512
+                        path = root/f'public/art/reference-tiles/{level}/0-{row//size}.webp'
+                        row %= size
+                    with Image.open(path) as scene, self.subTest(y=y,level=level):
+                        actual = scene.getpixel((x,row))
+                        self.assertLess(max(abs(a-b) for a,b in zip(actual,expected)),16)
+
     def test_boundary_roads_survive_meadow_at_every_zoom(self):
         root = ENCODER.parents[1]
         art = root/'public/art'
