@@ -1,0 +1,42 @@
+name: Publish H5 review to Pages
+
+on: workflow_dispatch
+
+concurrency:
+  group: review-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build:review
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:review
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist-review
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.publish.outputs.page_url }}
+    steps:
+      - id: publish
+        uses: actions/deploy-pages@v4

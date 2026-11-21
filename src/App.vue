@@ -26,6 +26,7 @@ import {
   type Selection,
 } from './data/catalog'
 import { useLocation } from './lib/location'
+import { publicAsset } from './lib/public-asset'
 import { t, locale, languageAction, toggleLanguage, matchesBilingual } from './i18n'
 import { dayLabel, shanghaiDate, shiftDay, sessionStatus } from './lib/time'
 
@@ -537,7 +538,7 @@ onBeforeUnmount(() => {
               @click="openSelection({ kind: 'activity', id: activity.id })"
             >
               <img
-                :src="`/art/${placeById(activity.placeId)?.art}.svg`"
+                :src="publicAsset(`/art/${placeById(activity.placeId)?.art}.svg`)"
                 :alt="t('{name}意境插画', { name: activity.name })"
                 loading="lazy"
               /><span class="cover-category">{{ t(categoryLabels[activity.category]) }}</span>
@@ -637,7 +638,11 @@ onBeforeUnmount(() => {
       <template v-else-if="detail">
         <div class="detail-hero" :class="{ 'model-hero': detail.model }">
           <img
-            :src="detail.model?.heroAsset || detail.model?.asset || `/art/${detail.art}.svg`"
+            :src="
+              publicAsset(
+                detail.model?.heroAsset || detail.model?.asset || `/art/${detail.art}.svg`,
+              )
+            "
             :alt="t('{name}意境插画', { name: detail.name })"
           /><span class="detail-category">{{ t(detail.category) }}</span>
         </div>

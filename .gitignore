@@ -8,6 +8,8 @@ dist/
 coverage/
 *.tsbuildinfo
 project.private.config.json
+miniprogram/preview-url.js
+dist-review/
 artifacts/
 playwright-report/
 test-results/

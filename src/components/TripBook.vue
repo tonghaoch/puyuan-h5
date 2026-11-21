@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { publicAsset } from '../lib/public-asset'
 import { t } from '../i18n'
 import FieldHeading from './FieldHeading.vue'
 import ChapterTabs from './ChapterTabs.vue'
@@ -28,7 +29,13 @@ function jumpToDay(number: '01' | '02') {
       seal="同行"
     >
       <template #art>
-        <img class="journey-print" src="/art/journal-journey.svg" width="320" height="236" alt="" />
+        <img
+          class="journey-print"
+          :src="publicAsset('/art/journal-journey.svg')"
+          width="320"
+          height="236"
+          alt=""
+        />
       </template>
     </FieldHeading>
     <ChapterTabs label="行程内容" base="#itinerary" :items="sections" :current="section" />
@@ -123,7 +130,7 @@ function jumpToDay(number: '01' | '02') {
       </p>
       <figure class="show-code">
         <img
-          src="/art/offsite-shows.png"
+          :src="publicAsset('/art/offsite-shows.png')"
           width="216"
           height="216"
           :alt="t('濮院时尚古镇演艺时间表微信小程序码')"

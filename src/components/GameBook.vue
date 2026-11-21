@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { t } from '../i18n'
+import { publicAsset } from '../lib/public-asset'
 import FieldHeading from './FieldHeading.vue'
 import ChapterTabs from './ChapterTabs.vue'
 import AppIcon from './AppIcon.vue'
@@ -50,7 +51,7 @@ const sections = [
       >
         <span class="dossier-thumb"
           ><img
-            :src="encounterImage(quest.id, 'thumb')"
+            :src="publicAsset(encounterImage(quest.id, 'thumb'))"
             alt=""
             width="56"
             height="56"
@@ -77,7 +78,7 @@ const sections = [
           @click.exact.prevent="$emit('npc', npc.id, $event.currentTarget as HTMLElement)"
         >
           <img
-            :src="encounterImage(npc.id, 'thumb')"
+            :src="publicAsset(encounterImage(npc.id, 'thumb'))"
             alt=""
             width="54"
             height="54"

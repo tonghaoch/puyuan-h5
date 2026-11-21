@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { t } from '../i18n'
+import { publicAsset } from '../lib/public-asset'
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import type { MapLayer, Place } from '../data/catalog'
 import { clampCamera, zoomAt, zoomRange, SCENE, type Camera } from '../lib/map-camera'
@@ -261,7 +262,7 @@ onBeforeUnmount(() => observer?.disconnect())
     <div class="map-scene" :style="style">
       <img
         class="map-art"
-        src="/art/puyuan-original-scope.webp"
+        :src="publicAsset('/art/puyuan-original-scope.webp')"
         :alt="t('原始参考地图')"
         :width="SCENE.width"
         :height="SCENE.height"
@@ -309,7 +310,7 @@ onBeforeUnmount(() => observer?.disconnect())
                     stroke-width="1.4"
                   />
                   <image
-                    :href="i % 2 ? '/art/boat-covered.webp' : '/art/boat-bamboo.webp'"
+                    :href="publicAsset(i % 2 ? '/art/boat-covered.webp' : '/art/boat-bamboo.webp')"
                     x="-15"
                     y="-13"
                     width="30"
