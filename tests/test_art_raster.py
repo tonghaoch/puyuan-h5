@@ -6,12 +6,29 @@ import subprocess
 import sys
 import unittest
 
-from PIL import Image, ImageChops
+from PIL import Image, ImageChops, ImageStat
 
 ENCODER = Path(__file__).resolve().parents[1]/'scripts/encode-art-asset.py'
 
 
 class PublishedRaster(unittest.TestCase):
+    def test_neighbouring_wharf_crowns_retain_comparable_ink_detail(self):
+        art = ENCODER.parents[1]/'public/art/reference-tiles'
+        # Both crowns share a tile. Measure changes one scene pixel apart,
+        # not WebP noise or single display pixels at a particular zoom.
+        for level in (4,8):
+            with Image.open(art/f'{level}/10-1.webp') as image:
+                def ink(box):
+                    crop = image.crop(tuple(n*level for n in box)).convert('L')
+                    w,h = crop.size
+                    delta = ImageChops.difference(crop.crop((0,0,w-level,h)),
+                                                  crop.crop((level,0,w,h)))
+                    return ImageStat.Stat(delta).rms[0]
+                ratio = ink((0,79,18,99)) / ink((25,87,45,107))
+                with self.subTest(level=level):
+                    self.assertGreater(ratio,0.72)
+                    self.assertLess(ratio,1.4)
+
     def test_food_centre_callout_is_gone_at_every_zoom(self):
         art = ENCODER.parents[1]/'public/art'
         # Two interior-only cutouts of the printed scroll: its white rim in
