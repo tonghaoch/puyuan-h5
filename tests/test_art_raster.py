@@ -6,12 +6,50 @@ import subprocess
 import sys
 import unittest
 
-from PIL import Image
+from PIL import Image, ImageChops, ImageStat
 
 ENCODER = Path(__file__).resolve().parents[1]/'scripts/encode-art-asset.py'
 
 
 class PublishedRaster(unittest.TestCase):
+    def test_neighbouring_wharf_crowns_retain_comparable_ink_detail(self):
+        art = ENCODER.parents[1]/'public/art/reference-tiles'
+        # Both crowns share a tile. Measure changes one scene pixel apart,
+        # not WebP noise or single display pixels at a particular zoom.
+        for level in (4,8):
+            with Image.open(art/f'{level}/10-1.webp') as image:
+                def ink(box):
+                    crop = image.crop(tuple(n*level for n in box)).convert('L')
+                    w,h = crop.size
+                    delta = ImageChops.difference(crop.crop((0,0,w-level,h)),
+                                                  crop.crop((level,0,w,h)))
+                    return ImageStat.Stat(delta).rms[0]
+                ratio = ink((0,79,18,99)) / ink((25,87,45,107))
+                with self.subTest(level=level):
+                    self.assertGreater(ratio,0.72)
+                    self.assertLess(ratio,1.4)
+
+    def test_food_centre_callout_is_gone_at_every_zoom(self):
+        art = ENCODER.parents[1]/'public/art'
+        # Two interior-only cutouts of the printed scroll: its white rim in
+        # the trees and its tail above the roof. Neither includes paving.
+        for level in (1, 2, 4, 8):
+            for left,top,right,bottom in ((1281,227,1311,244),(1297,235,1312,249)):
+                crop = Image.new('RGB',((right-left)*level,(bottom-top)*level))
+                if level == 1:
+                    with Image.open(art/'puyuan-original-scope.webp') as image:
+                        crop = image.crop((left,top,right,bottom))
+                else:
+                    step = 256 if level == 2 else 128
+                    for y in range(top//step,(bottom-1)//step+1):
+                        for x in range(left//step,(right-1)//step+1):
+                            with Image.open(art/f'reference-tiles/{level}/{x}-{y}.webp') as tile:
+                                crop.paste(tile, ((x*step-left)*level,(y*step-top)*level))
+                with self.subTest(level=level,window=(left,top)):
+                    r,g,b = crop.split()
+                    darkest = ImageChops.darker(r,ImageChops.darker(g,b))
+                    self.assertLess(sum(darkest.histogram()[236:]),4*level**2)
+
     def test_meadow_keeps_small_tufts_without_mirrored_flowering_shrubs(self):
         root = ENCODER.parents[1]
         with Image.open(root/'public/art/reference-meadow.webp') as grass, \

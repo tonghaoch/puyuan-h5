@@ -12,13 +12,17 @@ puyuan-reference.jpg 是用户于 2026-11-17 提供的原始参考图，尺寸 2
 
 右上水上舞台旁的路、左下中兴路与凯旋路的交叉口用同一坐标系的 `restoredRoadOutlines` 描边，仅在镇外用原画路面取色补齐，避免把印刷路名和云朵带回草坪。
 
+东北河湾原「美食中心」标牌的白边、尖尾和桥头岸线已修入 `reference-label-repairs.webp`；这层先于高清图块生成，独立显示的地名仍由页面控制。
+
+近看修图以 18 个原标牌位置和中央竖排镇名为检查点，直接检查 8 倍图块。已在去字底稿中局部补画东北河湾、剧场河岸、书场等处的树冠，以及游客中心、翔云观等处的瓦线。维护时只改对应笔触，不对整张地图做锐化；水面与草地不以建筑的纹理密度为目标。改动底稿后需要分别重建概览／2 倍层和下述 4／8 倍层。
+
 2026-11-18：scripts/prepare-reference-map.py 按 src/data/reference-map.json 选取古镇范围，生成 public/art 下的配色版、原色对照和水面动画遮罩。仅做平移、遮罩与配色，原图不覆盖。
 
-`npm run art:reference` 重建 1520 × 1240 的原色概览图和 2 倍保真图块（Lanczos 插值、轻度锐化）。加上 `-- --ai-master /path/to/puyuan-AI-4x.webp --fsrcnn-x4 /path/to/FSRCNN_x4.pb` 可同时生成 4 倍图块：原标牌附近使用去字底图重新超分，其余沿用高清母图。省略这两个参数时保留已发布的 4 倍图块。两层均为 512 像素无损 WebP，边界图块按实际尺寸裁切。原始 JPG 与手绘导览素材不变。
+`npm run art:reference` 重建 1520 × 1240 的原色概览图和 2 倍保真图块（Lanczos 插值、轻度锐化），不改动 4 倍和 8 倍图块。
 
-高清层在切块前统一增强明暗边缘，对每个像素的修正量设限，避免地名笔画和屋脊出现过重的亮边。缩放比例乘屏幕像素比超过 1.7 时切入 4 倍层，不必等到 2 倍图已被拉大才加载。
+要重建当前发布的 **4 倍和 8 倍层**，在独立 Python 环境中安装 `pillow numpy torch spandrel==0.4.2`，下载 [Real-ESRGAN v0.2.5.0 的插画模型](https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesr-animevideov3.pth)，运行 `npm run art:reference -- --realesrgan-x4 /path/to/realesr-animevideov3.pth`。脚本校验模型摘要，读取未压缩的去字合成图，保留图块四周的邻域参与推理，再裁回原坐标。8 倍图层结合原尺寸与 2 倍采样输入的推理结果。原始 JPG、概览与 2 倍层均不覆盖；网页端不加载模型。
 
-近看档（缩放 ≥ 2.7 或缩放 × 屏幕像素比 > 4）用 8 倍层。它与 4 倍层采用同一图块网格，每块最多 1024 像素。`npm run art:reference -- --lapsrn-x8 /path/to/LapSRN_x8.pb` 可从原始裁切直接重建，需 NumPy、opencv-contrib-python-headless 4.11 和 [LapSRN 模型](https://github.com/fannymonori/TF-LapSRN/blob/master/export/LapSRN_x8.pb)。不提供模型时保留随项目发布的近看层。
+缩放比例乘屏幕像素比超过 1.7 时切入 4 倍层；达到最大缩放、缩放 ≥ 2.7 或缩放 × 屏幕像素比 > 4 时切入 8 倍层。两档使用同一网格，每块覆盖 128 × 128 场景像素，边缘按实际尺寸裁切。旧版 FSRCNN / LapSRN 重建参数见 `python3 scripts/prepare-reference-map.py --help`。
 
 ## 活动图录
 
