@@ -1,6 +1,11 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import AppIcon from './components/AppIcon.vue'
+import TripBook from './components/TripBook.vue'
+import GameBook from './components/GameBook.vue'
+import QuestDetail from './components/QuestDetail.vue'
+import DiningBook from './components/DiningBook.vue'
+import { dinnerSpots, gameSites } from './data/offsite'
 import ParkMap from './components/ParkMap.vue'
 import AppDialog from './components/AppDialog.vue'
 import GeoLocationMap from './components/GeoLocationMap.vue'
@@ -26,6 +31,11 @@ import { dayLabel, shanghaiDate, shiftDay, sessionStatus } from './lib/time'
 
 type Overlay = 'guide' | 'favorites' | 'location' | 'geopoint' | null
 const tab = ref<Tab>('map')
+const bookSection = ref('')
+const activeSite = ref<(typeof gameSites)[number]>()
+const challengeIndex = ref(0)
+const questOrigin = ref<'map' | 'games' | null>(null)
+let questOpener: HTMLElement | null = null
 const mapView = ref<MapView>('reference')
 const geographicView = computed(() => isGeographicView(mapView.value))
 const focusLocation = ref(0)
@@ -39,7 +49,6 @@ const detailModelId = ref<string>()
 const overlay = ref<Overlay>(null)
 const query = ref('')
 const mapFilter = ref<Category | 'all'>('all')
-const foodFilter = ref('全部')
 const activityFilter = ref('all')
 const dayFilter = ref(0)
 const focusRequest = ref<{ id: string; nonce: number } | null>(null)
@@ -68,6 +77,7 @@ const validKeys = new Set([
   ...places.map((p) => `place:${p.id}`),
   ...activities.map((a) => `activity:${a.id}`),
   ...restaurants.map((r) => `restaurant:${r.id}`),
+  ...dinnerSpots.map((r) => `restaurant:${r.id}`),
 ])
 function loadFavorites(): string[] {
   try {
@@ -87,9 +97,10 @@ const motionActive = computed(
 )
 const today = computed(() => shanghaiDate(new Date(now.value)))
 const tabs: { id: Tab; label: string; icon: string; english: string }[] = [
-  { id: 'map', label: '游园地图', icon: 'map', english: 'EXPLORE' },
-  { id: 'food', label: '寻味濮院', icon: 'tea', english: 'TASTE' },
-  { id: 'activities', label: '风雅之约', icon: 'fan', english: 'DISCOVER' },
+  { id: 'map', label: '地图', icon: 'map', english: 'EXPLORE' },
+  { id: 'itinerary', label: '行程', icon: 'calendar', english: 'JOURNAL' },
+  { id: 'games', label: '游戏', icon: 'flag', english: 'QUESTS' },
+  { id: 'food', label: '餐厅', icon: 'bowl', english: 'DINING' },
 ]
 function validSelection(kind: string, id: string): Selection | null {
   if (
@@ -101,7 +112,28 @@ function validSelection(kind: string, id: string): Selection | null {
 }
 function readRoute() {
   const [nextTab, kind, id, modelId] = window.location.hash.slice(1).split('/')
-  tab.value = nextTab === 'food' || nextTab === 'activities' ? nextTab : 'map'
+  tab.value =
+    nextTab === 'food' || nextTab === 'activities' || nextTab === 'itinerary' || nextTab === 'games'
+      ? nextTab
+      : 'map'
+  const sections =
+    tab.value === 'itinerary'
+      ? ['walk', 'studio', 'shows']
+      : tab.value === 'games'
+        ? ['roaming', 'tokens']
+        : []
+  bookSection.value = kind && sections.includes(kind) ? kind : ''
+  const previous = activeSite.value
+  activeSite.value =
+    tab.value === 'games' && kind === 'task' ? gameSites.find((s) => s.id === id) : undefined
+  challengeIndex.value = activeSite.value?.challenges[Number(modelId)] ? Number(modelId) : 0
+  questOrigin.value = window.history.state?.questOrigin ?? null
+  if (previous && !activeSite.value && questOpener?.isConnected) {
+    const opener = questOpener
+    nextTick(() => {
+      if (opener.getClientRects().length) opener.focus({ preventScroll: true })
+    })
+  }
   selection.value = kind && id ? validSelection(kind, id) : null
   detailModelId.value = kind === 'place' ? modelId : undefined
   geoSelection.value =
@@ -123,10 +155,32 @@ function route(path: string, modal = false, replace = false) {
   readRoute()
 }
 function changeTab(next: Tab) {
-  if (next !== tab.value || hasModal.value) {
+  if (next !== tab.value || hasModal.value || activeSite.value || bookSection.value) {
     query.value = ''
     route(next)
   }
+}
+function openQuest(id: string) {
+  questOpener = document.activeElement instanceof HTMLElement ? document.activeElement : null
+  window.history.pushState({ questOrigin: tab.value }, '', `#games/task/${id}`)
+  readRoute()
+  nextTick(() =>
+    document.querySelector<HTMLElement>('.quest-detail')?.focus({ preventScroll: true }),
+  )
+}
+function chooseChallenge(i: number) {
+  if (!activeSite.value) return
+  window.history.replaceState(window.history.state, '', `#games/task/${activeSite.value.id}/${i}`)
+  readRoute()
+}
+function leaveQuest() {
+  if (questOrigin.value) window.history.back()
+  else route('games', false, true)
+}
+function mapForQuest() {
+  if (!activeSite.value) return
+  if (questOrigin.value === 'map') leaveQuest()
+  else viewOnMap(`quest:${activeSite.value.id}`)
 }
 function openSelection(next: Selection, modelId?: string) {
   route(`${tab.value}/${next.kind}/${next.id}${modelId ? `/${modelId}` : ''}`, true, hasModal.value)
@@ -172,7 +226,6 @@ function isFavorite(item: Selection) {
 function resetFilters(target: Tab) {
   query.value = ''
   if (target === 'map') mapFilter.value = 'all'
-  if (target === 'food') foodFilter.value = '全部'
   if (target === 'activities') activityFilter.value = 'all'
 }
 function viewOnMap(placeId: string) {
@@ -186,12 +239,10 @@ function viewOnMap(placeId: string) {
 const visiblePlaces = computed(() =>
   places.filter((place) => mapFilter.value === 'all' || place.category === mapFilter.value),
 )
-const visibleRestaurants = computed(() =>
-  restaurants.filter(
-    (r) =>
-      (foodFilter.value === '全部' || r.cuisine === foodFilter.value) &&
-      matchesSearch(query.value, r.name, r.cuisine, r.subtitle, ...r.tags),
-  ),
+const selectedDinner = computed(() =>
+  selection.value?.kind === 'restaurant'
+    ? dinnerSpots.find((s) => s.id === selection.value!.id)
+    : undefined,
 )
 const selectedDay = computed(() => shiftDay(today.value, dayFilter.value))
 const visibleActivities = computed(() =>
@@ -241,7 +292,13 @@ const placeActivities = computed(() =>
   activities.filter((a) => a.placeId === currentPlace.value?.id),
 )
 const placeRestaurants = computed(() =>
-  restaurants.filter((r) => r.placeId === currentPlace.value?.id),
+  restaurants.filter(
+    (r) =>
+      r.placeId === currentPlace.value?.id && !dinnerSpots.some((s) => s.placeId === r.placeId),
+  ),
+)
+const linkedDinner = computed(() =>
+  dinnerSpots.find((s) => s.placeId && s.placeId === currentPlace.value?.id),
 )
 const favoriteItems = computed(() =>
   favorites.value.flatMap((key) => {
@@ -253,13 +310,13 @@ const favoriteItems = computed(() =>
         ? placeById(sel.id)
         : sel.kind === 'activity'
           ? activities.find((a) => a.id === sel.id)
-          : restaurants.find((r) => r.id === sel.id)
+          : (restaurants.find((r) => r.id === sel.id) ?? dinnerSpots.find((r) => r.id === sel.id))
     if (!item) return []
     return [
       {
         selection: sel,
         name: item.name,
-        subtitle: item.subtitle,
+        subtitle: 'subtitle' in item ? item.subtitle : item.style,
         label: sel.kind === 'activity' ? '活动' : sel.kind === 'restaurant' ? '餐厅' : '地点',
       },
     ]
@@ -347,6 +404,7 @@ onBeforeUnmount(() => {
           :now="now"
           :focus-location="focusLocation"
           @geoselect="openGeoPoint"
+          @game="openQuest"
           @outside="notify('当前位置在园区视野之外，未将定位点移入园区')"
           @select="(place) => openSelection({ kind: 'place', id: place.id })"
           @locate="openOverlay('location')"
@@ -395,8 +453,7 @@ onBeforeUnmount(() => {
           <button @click="resetFilters('map')">查看全部地点</button>
         </div>
         <div class="map-bottom-note">
-          <span class="demo-dot"></span
-          ><span v-if="!geographicView">水乡漫游 · {{ places.length }} 处地点</span
+          <span class="demo-dot"></span><span v-if="!geographicView">朱旗 · 团建挑战</span
           ><span v-else
             ><a
               href="https://www.openstreetmap.org/copyright"
@@ -409,97 +466,30 @@ onBeforeUnmount(() => {
         <div class="map-vignette" aria-hidden="true"></div>
       </section>
 
-      <section v-if="tab === 'food'" class="catalog-page food-page" aria-label="餐厅列表">
-        <div class="catalog-heading">
-          <div>
-            <p class="eyebrow">A TASTE OF JIANGNAN</p>
-            <h1>人间烟火，<span>最是江南。</span></h1>
-            <p>一盏茶，一碗面。把水乡的好滋味，慢慢尝遍。</p>
-          </div>
-          <div class="heading-stamp">食<br />味</div>
-        </div>
-        <div class="catalog-toolbar">
-          <div class="text-filters" aria-label="餐厅分类">
-            <button
-              v-for="filter in ['全部', '茶馆', '江南菜', '小吃']"
-              :key="filter"
-              :class="{ active: foodFilter === filter }"
-              :aria-pressed="foodFilter === filter"
-              @click="foodFilter = filter"
-            >
-              {{ filter }}
-            </button>
-          </div>
-          <label class="search-field"
-            ><AppIcon name="search" :size="18" /><input
-              v-model="query"
-              aria-label="搜索餐厅"
-              placeholder="寻找你喜欢的滋味" /><button
-              v-if="query"
-              class="clear-search"
-              aria-label="清空搜索"
-              @click.prevent="query = ''"
-            >
-              <AppIcon name="close" :size="15" /></button
-          ></label>
-        </div>
-        <div class="results-line">
-          <span>共 {{ visibleRestaurants.length }} 处好滋味</span
-          ><span>演示商户 · 价格与营业时间仅供体验</span>
-        </div>
-        <div class="food-grid">
-          <article v-for="restaurant in visibleRestaurants" :key="restaurant.id" class="food-card">
-            <button
-              class="card-cover"
-              :aria-label="`查看${restaurant.name}详情`"
-              @click="openSelection({ kind: 'restaurant', id: restaurant.id })"
-            >
-              <img
-                :src="`/art/${restaurant.art}.svg`"
-                :alt="`${restaurant.name}意境插画`"
-                loading="lazy"
-              /><span class="cover-category">{{ restaurant.cuisine }}</span>
-            </button>
-            <button
-              class="card-favorite"
-              :class="{ saved: isFavorite({ kind: 'restaurant', id: restaurant.id }) }"
-              :aria-label="`${isFavorite({ kind: 'restaurant', id: restaurant.id }) ? '取消收藏' : '收藏'}${restaurant.name}`"
-              :aria-pressed="isFavorite({ kind: 'restaurant', id: restaurant.id })"
-              @click="toggleFavorite({ kind: 'restaurant', id: restaurant.id })"
-            >
-              <AppIcon name="heart" :size="18" />
-            </button>
-            <div class="food-card-body">
-              <div class="card-title-line">
-                <button @click="openSelection({ kind: 'restaurant', id: restaurant.id })">
-                  <h2>{{ restaurant.name }}</h2></button
-                ><span class="price"
-                  >¥<strong>{{ restaurant.price }}</strong
-                  ><small> / 人</small></span
-                >
-              </div>
-              <p class="card-subtitle">{{ restaurant.subtitle }}</p>
-              <div class="tag-row">
-                <span v-for="tag in restaurant.tags" :key="tag">{{ tag }}</span>
-              </div>
-              <div class="card-footer">
-                <span
-                  ><AppIcon name="pin" :size="14" />{{ placeById(restaurant.placeId)?.name }}</span
-                ><button aria-label="在地图中查看餐厅" @click="viewOnMap(restaurant.placeId)">
-                  地图中查看<AppIcon name="arrow" :size="15" />
-                </button>
-              </div>
-            </div>
-          </article>
-        </div>
-        <div v-if="!visibleRestaurants.length" class="catalog-empty">
-          <AppIcon name="tea" :size="38" />
-          <h2>这一味，还在寻找中</h2>
-          <p>换个关键词，或看看全部餐厅。</p>
-          <button class="primary-button" @click="resetFilters('food')">查看全部餐厅</button>
-        </div>
-        <p class="catalog-footnote">— 让一餐一饭，成为旅途的一部分 —</p>
-      </section>
+      <TripBook v-if="tab === 'itinerary'" :key="bookSection" :section="bookSection" />
+      <GameBook
+        v-if="tab === 'games'"
+        v-show="!activeSite"
+        :section="bookSection"
+        @open="openQuest"
+        @map="viewOnMap"
+      />
+      <QuestDetail
+        v-if="activeSite"
+        :site="activeSite"
+        :index="challengeIndex"
+        :from-map="questOrigin === 'map'"
+        tabindex="-1"
+        @back="leaveQuest"
+        @map="mapForQuest"
+        @choose="chooseChallenge"
+      />
+      <DiningBook
+        v-if="tab === 'food'"
+        :favorites="favorites"
+        @map="viewOnMap"
+        @save="(id) => toggleFavorite({ kind: 'restaurant', id })"
+      />
 
       <section
         v-if="tab === 'activities'"
@@ -628,6 +618,7 @@ onBeforeUnmount(() => {
         v-for="item in tabs"
         :key="item.id"
         :class="{ active: tab === item.id }"
+        :aria-label="item.label"
         :aria-current="tab === item.id ? 'page' : undefined"
         @click="changeTab(item.id)"
       >
@@ -638,102 +629,133 @@ onBeforeUnmount(() => {
   </div>
 
   <Transition name="sheet">
-    <AppDialog v-if="selection && detail" :label="detail.name" @close="closeModal">
-      <div class="detail-hero" :class="{ 'model-hero': detail.model }">
-        <img
-          :src="detail.model?.heroAsset || detail.model?.asset || `/art/${detail.art}.svg`"
-          :alt="`${detail.name}意境插画`"
-        /><span class="detail-category">{{ detail.category }}</span>
-      </div>
-      <div class="detail-body">
-        <p class="eyebrow">A MOMENT IN PUYUAN</p>
-        <h2>{{ detail.name }}</h2>
-        <p class="detail-subtitle">{{ detail.subtitle }}</p>
-        <p class="detail-description">{{ detail.description }}</p>
-        <div class="detail-facts">
-          <div>
-            <AppIcon name="pin" :size="18" /><span
-              ><small>所在地点</small>{{ detail.place.name }}</span
-            >
-          </div>
-          <div v-if="currentActivity">
-            <AppIcon name="clock" :size="18" /><span
-              ><small>{{ currentActivity.duration }}</small
-              >{{ currentActivity.time }}</span
-            >
-          </div>
-          <div v-if="currentRestaurant">
-            <AppIcon name="clock" :size="18" /><span
-              ><small>示例营业时间</small>{{ currentRestaurant.hours }}</span
-            >
-          </div>
-          <div v-if="currentRestaurant">
-            <AppIcon name="tea" :size="18" /><span
-              ><small>示例人均</small>¥{{ currentRestaurant.price }} / 人</span
-            >
-          </div>
-        </div>
-        <div v-if="currentActivity" class="session-list">
-          <h3>场次一览 <span>演示日程</span></h3>
-          <div v-for="session in currentActivity.sessions" :key="session.start">
-            <span
-              >{{ dayLabel(session.start, new Date(now)) }}
-              <small>{{
-                shanghaiDate(new Date(session.start)).slice(5).replace('-', '.')
-              }}</small></span
-            ><strong>{{ currentActivity.time }}</strong
-            ><span class="session-state" :class="sessionStatus([session], now)">{{
-              { ongoing: '进行中', upcoming: '待开始', ended: '已结束' }[
-                sessionStatus([session], now)
-              ]
-            }}</span>
-          </div>
-        </div>
-        <div
-          v-if="selection.kind === 'place' && (placeActivities.length || placeRestaurants.length)"
-          class="place-content"
-        >
-          <h3>在这里，可以遇见</h3>
-          <button
-            v-for="activity in placeActivities"
-            :key="activity.id"
-            @click="openSelection({ kind: 'activity', id: activity.id })"
-          >
-            <AppIcon name="fan" :size="20" /><span
-              ><strong>{{ activity.name }}</strong
-              ><small>{{ activity.time }}</small></span
-            ><AppIcon name="chevron" :size="17" /></button
-          ><button
-            v-for="restaurant in placeRestaurants"
-            :key="restaurant.id"
-            @click="openSelection({ kind: 'restaurant', id: restaurant.id })"
-          >
-            <AppIcon name="tea" :size="20" /><span
-              ><strong>{{ restaurant.name }}</strong
-              ><small>{{ restaurant.cuisine }} · 示例人均 ¥{{ restaurant.price }}</small></span
-            ><AppIcon name="chevron" :size="17" />
-          </button>
-        </div>
-        <div class="demo-notice">
-          <AppIcon name="info" :size="15" />
-          <p>
-            当前为游园体验版。地点布局、活动、营业时间及价格为演示内容，实际信息请以园区公告为准。
-          </p>
-        </div>
-      </div>
-      <div class="detail-actions">
+    <AppDialog
+      v-if="selection && (selectedDinner || detail)"
+      :label="(selectedDinner || detail)!.name"
+      @close="closeModal"
+    >
+      <div v-if="selectedDinner" class="simple-dialog">
+        <p class="section-kicker">自由晚餐 · 餐厅推荐</p>
+        <h2>{{ selectedDinner.name }}</h2>
+        <p>{{ selectedDinner.style }} · 约 {{ selectedDinner.seats }} 个餐位</p>
         <button
-          class="save-button"
-          :class="{ saved: isFavorite(selection) }"
-          :aria-pressed="isFavorite(selection)"
-          @click="toggleFavorite(selection)"
+          v-if="selectedDinner.placeId"
+          class="field-action"
+          @click="viewOnMap(selectedDinner.placeId)"
         >
-          <AppIcon name="heart" :size="20" />{{ isFavorite(selection) ? '已收藏' : '收藏' }}</button
-        ><button class="primary-button" @click="viewOnMap(detail.place.id)">
-          <AppIcon name="map" :size="18" />在地图中查看<AppIcon name="arrow" :size="18" />
+          在地图中查看
         </button>
       </div>
-    </AppDialog>
+      <template v-else-if="detail">
+        <div class="detail-hero" :class="{ 'model-hero': detail.model }">
+          <img
+            :src="detail.model?.heroAsset || detail.model?.asset || `/art/${detail.art}.svg`"
+            :alt="`${detail.name}意境插画`"
+          /><span class="detail-category">{{ detail.category }}</span>
+        </div>
+        <div class="detail-body">
+          <p class="eyebrow">A MOMENT IN PUYUAN</p>
+          <h2>{{ detail.name }}</h2>
+          <p class="detail-subtitle">{{ detail.subtitle }}</p>
+          <p class="detail-description">{{ detail.description }}</p>
+          <div class="detail-facts">
+            <div>
+              <AppIcon name="pin" :size="18" /><span
+                ><small>所在地点</small>{{ detail.place.name }}</span
+              >
+            </div>
+            <div v-if="currentActivity">
+              <AppIcon name="clock" :size="18" /><span
+                ><small>{{ currentActivity.duration }}</small
+                >{{ currentActivity.time }}</span
+              >
+            </div>
+            <div v-if="currentRestaurant">
+              <AppIcon name="clock" :size="18" /><span
+                ><small>示例营业时间</small>{{ currentRestaurant.hours }}</span
+              >
+            </div>
+            <div v-if="currentRestaurant">
+              <AppIcon name="tea" :size="18" /><span
+                ><small>示例人均</small>¥{{ currentRestaurant.price }} / 人</span
+              >
+            </div>
+          </div>
+          <div v-if="currentActivity" class="session-list">
+            <h3>场次一览 <span>演示日程</span></h3>
+            <div v-for="session in currentActivity.sessions" :key="session.start">
+              <span
+                >{{ dayLabel(session.start, new Date(now)) }}
+                <small>{{
+                  shanghaiDate(new Date(session.start)).slice(5).replace('-', '.')
+                }}</small></span
+              ><strong>{{ currentActivity.time }}</strong
+              ><span class="session-state" :class="sessionStatus([session], now)">{{
+                { ongoing: '进行中', upcoming: '待开始', ended: '已结束' }[
+                  sessionStatus([session], now)
+                ]
+              }}</span>
+            </div>
+          </div>
+          <div
+            v-if="
+              selection.kind === 'place' &&
+              (placeActivities.length || placeRestaurants.length || linkedDinner)
+            "
+            class="place-content"
+          >
+            <h3>在这里，可以遇见</h3>
+            <button
+              v-if="linkedDinner"
+              @click="openSelection({ kind: 'restaurant', id: linkedDinner.id })"
+            >
+              <AppIcon name="bowl" /><span
+                ><strong>{{ linkedDinner.name }}</strong
+                ><small>自由晚餐推荐 · {{ linkedDinner.style }}</small></span
+              ><AppIcon name="chevron" />
+            </button>
+            <button
+              v-for="activity in placeActivities"
+              :key="activity.id"
+              @click="openSelection({ kind: 'activity', id: activity.id })"
+            >
+              <AppIcon name="fan" :size="20" /><span
+                ><strong>{{ activity.name }}</strong
+                ><small>{{ activity.time }}</small></span
+              ><AppIcon name="chevron" :size="17" /></button
+            ><button
+              v-for="restaurant in placeRestaurants"
+              :key="restaurant.id"
+              @click="openSelection({ kind: 'restaurant', id: restaurant.id })"
+            >
+              <AppIcon name="tea" :size="20" /><span
+                ><strong>{{ restaurant.name }}</strong
+                ><small>{{ restaurant.cuisine }} · 示例人均 ¥{{ restaurant.price }}</small></span
+              ><AppIcon name="chevron" :size="17" />
+            </button>
+          </div>
+          <div class="demo-notice">
+            <AppIcon name="info" :size="15" />
+            <p>
+              当前为游园体验版。地点布局、活动、营业时间及价格为演示内容，实际信息请以园区公告为准。
+            </p>
+          </div>
+        </div>
+        <div class="detail-actions">
+          <button
+            class="save-button"
+            :class="{ saved: isFavorite(selection) }"
+            :aria-pressed="isFavorite(selection)"
+            @click="toggleFavorite(selection)"
+          >
+            <AppIcon name="heart" :size="20" />{{
+              isFavorite(selection) ? '已收藏' : '收藏'
+            }}</button
+          ><button class="primary-button" @click="viewOnMap(detail.place.id)">
+            <AppIcon name="map" :size="18" />在地图中查看<AppIcon name="arrow" :size="18" />
+          </button>
+        </div> </template
+    ></AppDialog>
   </Transition>
 
   <Transition name="sheet">
@@ -754,7 +776,7 @@ onBeforeUnmount(() => {
           <span>贰</span>
           <div>
             <h3>寻味赴约，各有欢喜</h3>
-            <p>在「寻味濮院」寻找餐厅，在「风雅之约」查看活动。收藏喜欢的内容，随时回来查看。</p>
+            <p>打开「行程」查看两天安排。导览上的朱旗直达游戏规则，「餐厅」收录自由晚餐推荐。</p>
           </div>
         </div>
         <div class="guide-step">
@@ -766,9 +788,7 @@ onBeforeUnmount(() => {
         </div>
         <div class="demo-notice">
           <AppIcon name="info" :size="17" />
-          <p>
-            导览是古镇示意图；路网按地理坐标展示，可以查看设备位置。暂不提供步行导航。
-          </p>
+          <p>导览是古镇示意图；路网按地理坐标展示，可以查看设备位置。暂不提供步行导航。</p>
         </div>
         <button class="primary-button full-width" @click="closeModal">
           开始慢游<AppIcon name="arrow" :size="18" />

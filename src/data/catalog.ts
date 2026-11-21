@@ -2,7 +2,7 @@ import { shanghaiDate, shiftDay } from '../lib/time'
 import referenceMap from './reference-map.json'
 
 export type Category = 'performance' | 'craft' | 'food' | 'scenic' | 'service'
-export type Tab = 'map' | 'food' | 'activities'
+export type Tab = 'map' | 'food' | 'itinerary' | 'games' | 'activities'
 export type Selection = { kind: 'place' | 'activity' | 'restaurant'; id: string }
 export interface ScenePoint {
   x: number

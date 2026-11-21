@@ -1,27 +1,51 @@
 import { test, expect } from '@playwright/test'
 
-test('all three views work, restaurant search and categories filter actual results', async ({
-  page,
-}) => {
+test('four event sections, dinner search, and day two programme', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', (e) => errors.push(e.message))
   await page.goto('/')
   await expect(page.getByRole('region', { name: /古镇导览/ })).toBeVisible()
-  await page.getByRole('button', { name: /^寻味濮院/ }).click()
-  await expect(page.locator('.food-card')).toHaveCount(4)
-  await page.getByRole('button', { name: '茶馆', exact: true }).click()
-  await expect(page.locator('.food-card')).toHaveCount(1)
-  await page.getByRole('textbox', { name: '搜索餐厅' }).fill('不存在的餐厅')
-  await expect(page.getByText('这一味，还在寻找中')).toBeVisible()
-  await page.getByRole('button', { name: '查看全部餐厅', exact: true }).click()
-  await expect(page.locator('.food-card')).toHaveCount(4)
-  await page.getByRole('button', { name: /^风雅之约/ }).click()
-  await expect(page.locator('.activity-card')).toHaveCount(5)
-  await page.getByRole('button', { name: '水乡演艺', exact: true }).click()
-  await expect(page.locator('.activity-card')).toHaveCount(2)
-  await page.getByRole('button', { name: /^明天/ }).click()
-  await expect(page.locator('.activity-card')).toHaveCount(2)
+  await expect(page.locator('.main-nav button')).toHaveCount(4)
+  await page.getByRole('button', { name: '餐厅', exact: true }).click()
+  await expect(page.locator('.dinner-row')).toHaveCount(10)
+  await page.getByRole('button', { name: '特色风味' }).click()
+  await expect(page.locator('.dinner-row')).toHaveCount(3)
+  await page.getByRole('searchbox', { name: '搜索餐厅' }).fill('不存在的餐厅')
+  await expect(page.getByText('没有找到这家餐厅')).toBeVisible()
+  await page.getByRole('button', { name: /查看全部餐厅/ }).click()
+  await expect(page.locator('.dinner-row')).toHaveCount(10)
+  await page.getByRole('button', { name: '行程', exact: true }).click()
+  await page.getByRole('button', { name: /看第二天/ }).click()
+  await expect(page.getByRole('heading', { name: '慢游水乡，返程' })).toBeInViewport()
+  await page.getByRole('link', { name: '查看体验' }).click()
+  await expect(page.locator('.directory-row')).toHaveCount(12)
+  await page.getByRole('link', { name: '演出', exact: true }).click()
+  await expect(page.getByAltText(/演艺时间表微信小程序码/)).toBeVisible()
   expect(errors).toEqual([])
+})
+
+test('one lawn flag opens both rules and returns to the same map camera', async ({ page }) => {
+  await page.goto('/')
+  const flag = page.getByRole('button', { name: /^游戏：大草坪/ })
+  const scene = page.locator('.map-scene')
+  await expect(flag).toBeInViewport()
+  const camera = await scene.getAttribute('style')
+  await flag.click()
+  await expect(page.getByRole('heading', { name: '蹴鞠达人' })).toBeVisible()
+  await page.getByRole('button', { name: '一锤定音' }).click()
+  await expect(page.getByText('全队合计敲破超过 12 个气球。')).toBeVisible()
+  await page.goBack()
+  await expect(scene).toHaveAttribute('style', camera!)
+  await expect(flag).toBeInViewport()
+  await page.goto('/#games/task/treasure')
+  await page.getByRole('button', { name: '在导览中查看' }).click()
+  const pin = page.getByRole('button', { name: /^游戏：珍宝馆/ })
+  await expect(pin).toBeInViewport()
+  const viewport = (await page.locator('.map-viewport').boundingBox())!
+  const pos = (await pin.boundingBox())!
+  expect(Math.abs(viewport.x + viewport.width / 2 - pos.x - pos.width / 2)).toBeLessThan(35)
+  await page.getByRole('button', { name: '路网', exact: true }).click()
+  await expect(page.locator('.quest-pin')).toHaveCount(0)
 })
 
 test('reference labels filter, open a place and link through to restaurant content', async ({
@@ -33,8 +57,8 @@ test('reference labels filter, open a place and link through to restaurant conte
   await page.getByRole('button', { name: '查看深夜食堂', exact: true }).click()
   const dialog = page.getByRole('dialog')
   await expect(dialog.getByRole('heading', { name: '深夜食堂' })).toBeVisible()
-  await dialog.getByRole('button', { name: /水巷茶事.*茶馆/ }).click()
-  await expect(dialog.getByText('示例营业时间')).toBeVisible()
+  await dialog.getByRole('button', { name: /深夜食堂.*自由晚餐推荐/ }).click()
+  await expect(dialog.getByText(/约 50 个餐位/)).toBeVisible()
   await dialog.getByRole('button', { name: '在地图中查看', exact: true }).click()
   await expect(dialog).toHaveCount(0)
   await expect(page.locator('.reference-labels button')).toHaveCount(18)
@@ -48,8 +72,8 @@ test('zoom and camera survive tab changes and pan responds to pointer drag', asy
   await page.getByRole('button', { name: '放大地图', exact: true }).click()
   await expect(scene).not.toHaveAttribute('style', initial!)
   const zoomed = await scene.getAttribute('style')
-  await page.getByRole('button', { name: /^寻味濮院/ }).click()
-  await page.getByRole('button', { name: /^游园地图/ }).click()
+  await page.getByRole('button', { name: /^餐厅$/ }).click()
+  await page.getByRole('button', { name: /^地图$/ }).click()
   await expect(scene).toHaveAttribute('style', zoomed!)
   const viewport = page.getByRole('region', { name: /古镇导览/ })
   const bounds = (await viewport.boundingBox())!
@@ -66,15 +90,14 @@ test('zoom and camera survive tab changes and pan responds to pointer drag', asy
 
 test('favorites persist after reload and can be removed from the card', async ({ page }) => {
   await page.goto('/#food')
-  await page.getByRole('button', { name: '收藏水巷茶事', exact: true }).click()
-  await expect(page.getByRole('button', { name: '取消收藏水巷茶事', exact: true })).toHaveAttribute(
-    'aria-pressed',
-    'true',
-  )
+  await page.getByRole('button', { name: '收藏蚬子滩客栈', exact: true }).click()
+  await expect(
+    page.getByRole('button', { name: '取消收藏蚬子滩客栈', exact: true }),
+  ).toHaveAttribute('aria-pressed', 'true')
   await page.reload()
   await expect(page.getByRole('button', { name: '我的收藏', exact: true })).toHaveCount(0)
-  await page.getByRole('button', { name: '取消收藏水巷茶事', exact: true }).click()
-  await expect(page.getByRole('button', { name: '收藏水巷茶事', exact: true })).toBeVisible()
+  await page.getByRole('button', { name: '取消收藏蚬子滩客栈', exact: true }).click()
+  await expect(page.getByRole('button', { name: '收藏蚬子滩客栈', exact: true })).toBeVisible()
 })
 
 test('direct detail links close locally, browser Back closes an opened detail', async ({
@@ -135,7 +158,7 @@ test('reduced motion is respected and viewport never overflows horizontally', as
   for (const boat of await boats.all())
     await expect(boat).toHaveCSS('animation-play-state', 'paused')
   await expect(page.locator('.map-viewport')).toHaveClass(/motion-paused/)
-  for (const name of [/^游园地图/, /^寻味濮院/, /^风雅之约/]) {
+  for (const name of [/^地图$/, /^餐厅$/, /^行程$/, /^游戏$/]) {
     await page.getByRole('button', { name }).click()
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth > window.innerWidth,
@@ -222,7 +245,7 @@ test('navigation is at the bottom in both desktop preview and mobile', async ({ 
   expect(Math.abs(nav.x - shell.x)).toBeLessThan(3)
   expect(Math.abs(nav.y + nav.height - shell.y - shell.height)).toBeLessThan(3)
   expect(nav.y).toBeGreaterThan(shell.height * 0.8)
-  await page.getByRole('button', { name: /^寻味濮院/ }).click()
+  await page.getByRole('button', { name: /^餐厅$/ }).click()
   await expect(page.getByRole('navigation', { name: '主要导航' })).toBeInViewport()
 })
 

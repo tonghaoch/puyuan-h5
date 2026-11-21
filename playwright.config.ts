@@ -1,6 +1,8 @@
 import { defineConfig, devices } from '@playwright/test'
 import { existsSync } from 'node:fs'
 const localChrome = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+const port = Number(process.env.PLAYWRIGHT_PORT || 5174)
+const baseURL = `http://127.0.0.1:${port}`
 export default defineConfig({
   testDir: './tests',
   testMatch: '**/*.e2e.ts',
@@ -9,7 +11,7 @@ export default defineConfig({
   retries: 0,
   reporter: 'list',
   use: {
-    baseURL: 'http://127.0.0.1:5174',
+    baseURL,
     launchOptions: {
       executablePath:
         process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE ||
@@ -23,8 +25,8 @@ export default defineConfig({
     { name: 'mobile', use: { ...devices['iPhone 13'], defaultBrowserType: 'chromium' } },
   ],
   webServer: {
-    command: 'npm run dev -- --host 127.0.0.1 --port 5174 --strictPort',
-    url: 'http://127.0.0.1:5174',
+    command: `npm run dev -- --host 127.0.0.1 --port ${port} --strictPort`,
+    url: baseURL,
     reuseExistingServer: !process.env.CI,
   },
 })
