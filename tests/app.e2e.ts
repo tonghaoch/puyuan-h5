@@ -609,6 +609,28 @@ test('panning beyond the former crop reveals meadow and can return to town', asy
   await expect(scene).toHaveAttribute('style', initial!)
 })
 
+test('panning keeps the painted meadow intact and aligned', async ({ page }) => {
+  await page.goto('/')
+  const viewport = page.locator('.map-viewport')
+  const meadow = page.locator('.meadow-backdrop')
+  const position = await meadow.evaluate((element) => getComputedStyle(element).backgroundPosition)
+  for (const key of ['ArrowRight', 'ArrowDown', '=', 'ArrowLeft', 'ArrowUp']) {
+    await viewport.press(key)
+    await expect(meadow).toHaveCSS('background-position', position)
+    const view = (await viewport.boundingBox())!
+    const ground = (await meadow.boundingBox())!
+    const scene = (await page.locator('.map-scene').boundingBox())!
+    const period = (384 * scene.width) / 1520
+    expect(ground.x).toBeLessThanOrEqual(view.x + 0.1)
+    expect(ground.y).toBeLessThanOrEqual(view.y + 0.1)
+    expect(ground.x + ground.width).toBeGreaterThanOrEqual(view.x + view.width - 0.1)
+    expect(ground.y + ground.height).toBeGreaterThanOrEqual(view.y + view.height - 0.1)
+    for (const offset of [scene.x - ground.x, scene.y - ground.y]) {
+      expect(offset / period).toBeCloseTo(Math.round(offset / period), 3)
+    }
+  }
+})
+
 test('location is the only camera-area control and clears the bottom nav and legend', async ({
   page,
 }) => {

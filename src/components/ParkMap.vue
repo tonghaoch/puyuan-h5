@@ -83,10 +83,14 @@ const style = computed(() => ({
   '--inverse-scale': 1 / camera.scale,
   '--field-scale': 1 / limits.value.initial,
 }))
-const meadowStyle = computed(() => ({
-  backgroundSize: `${384 * camera.scale}px ${384 * camera.scale}px`,
-  backgroundPosition: `${camera.x}px ${camera.y}px`,
-}))
+const meadowStyle = computed(() => {
+  const period = 384 * camera.scale
+  const tileOffset = (position: number) => position - Math.ceil(position / period) * period
+  return {
+    '--meadow-period': `${period}px`,
+    transform: `translate3d(${tileOffset(camera.x)}px, ${tileOffset(camera.y)}px, 0)`,
+  }
+})
 function setCamera(value: Camera) {
   Object.assign(camera, clampCamera(value, dimensions.width, dimensions.height))
   emit('zoom', camera.scale)
