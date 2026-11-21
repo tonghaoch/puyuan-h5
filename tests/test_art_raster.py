@@ -6,12 +6,33 @@ import subprocess
 import sys
 import unittest
 
-from PIL import Image
+from PIL import Image, ImageChops
 
 ENCODER = Path(__file__).resolve().parents[1]/'scripts/encode-art-asset.py'
 
 
 class PublishedRaster(unittest.TestCase):
+    def test_food_centre_callout_is_gone_at_every_zoom(self):
+        art = ENCODER.parents[1]/'public/art'
+        # Two interior-only cutouts of the printed scroll: its white rim in
+        # the trees and its tail above the roof. Neither includes paving.
+        for level in (1, 2, 4, 8):
+            for left,top,right,bottom in ((1281,227,1311,244),(1297,235,1312,249)):
+                crop = Image.new('RGB',((right-left)*level,(bottom-top)*level))
+                if level == 1:
+                    with Image.open(art/'puyuan-original-scope.webp') as image:
+                        crop = image.crop((left,top,right,bottom))
+                else:
+                    step = 256 if level == 2 else 128
+                    for y in range(top//step,(bottom-1)//step+1):
+                        for x in range(left//step,(right-1)//step+1):
+                            with Image.open(art/f'reference-tiles/{level}/{x}-{y}.webp') as tile:
+                                crop.paste(tile, ((x*step-left)*level,(y*step-top)*level))
+                with self.subTest(level=level,window=(left,top)):
+                    r,g,b = crop.split()
+                    darkest = ImageChops.darker(r,ImageChops.darker(g,b))
+                    self.assertLess(sum(darkest.histogram()[236:]),4*level**2)
+
     def test_boundary_roads_survive_meadow_at_every_zoom(self):
         root = ENCODER.parents[1]
         art = root/'public/art'

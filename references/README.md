@@ -12,6 +12,8 @@ puyuan-reference.jpg 是用户于 2026-11-17 提供的原始参考图，尺寸 2
 
 右上水上舞台旁的路、左下中兴路与凯旋路的交叉口用同一坐标系的 `restoredRoadOutlines` 描边，仅在镇外用原画路面取色补齐，避免把印刷路名和云朵带回草坪。
 
+东北河湾原「美食中心」标牌的白边、尖尾和桥头岸线已修入 `reference-label-repairs.webp`；这层先于高清图块生成，独立显示的地名仍由页面控制。
+
 2026-11-18：scripts/prepare-reference-map.py 按 src/data/reference-map.json 选取古镇范围，生成 public/art 下的配色版、原色对照和水面动画遮罩。仅做平移、遮罩与配色，原图不覆盖。
 
 `npm run art:reference` 重建 1520 × 1240 的原色概览图和 2 倍保真图块（Lanczos 插值、轻度锐化），不改动 4 倍和 8 倍图块。
