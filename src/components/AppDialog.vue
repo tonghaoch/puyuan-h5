@@ -44,7 +44,7 @@ function keydown(event: KeyboardEvent) {
   if (event.key !== 'Tab') return
   const elements = [
     ...(panel.value?.querySelectorAll<HTMLElement>(
-      'button:not([disabled]), a[href], input, select, [tabindex="0"]',
+      'button:not([disabled]), a[href], input, select, summary, [tabindex="0"]',
     ) ?? []),
   ].filter((el) => el.getClientRects().length > 0)
   if (!elements.length) {

@@ -20,6 +20,10 @@ puyuan-reference.jpg 是用户于 2026-11-17 提供的原始参考图，尺寸 2
 
 近看档（缩放 ≥ 2.7 或缩放 × 屏幕像素比 > 4）用 8 倍层。它与 4 倍层采用同一图块网格，每块最多 1024 像素。`npm run art:reference -- --lapsrn-x8 /path/to/LapSRN_x8.pb` 可从原始裁切直接重建，需 NumPy、opencv-contrib-python-headless 4.11 和 [LapSRN 模型](https://github.com/fannymonori/TF-LapSRN/blob/master/export/LapSRN_x8.pb)。不提供模型时保留随项目发布的近看层。
 
+## 活动图录
+
+游戏手册与地图详情采用《微软苏州 SOX OFFSITE v1119》PPT 第 13–20 页的八项挑战、第 21–26 页的六位游走 NPC。`src/data/offsite.ts` 保存玩法、图片顺序与说明；`public/art/encounters` 仅包含相应的 WebP 图版和列表小图，不包含原演示文档。使用 Pillow 和 `python3 scripts/import-encounter-photos.py '/path/to/微软苏州 SOX OFFSITE v1119.pptx'` 可重新导入。第 23 页标题误写「游侠」，按该页正文及第 27 页地图归入「镖师」；第 15 页个人双球门槛的等号以现场裁判为准。
+
 ## 活动参考图落点
 
 `offsite-registration.json` 记录 2026-11-21 提供的 1548 × 1300 活动图。`tips` 是红色、金色图钉尖端（最后两行饱和色像素的横坐标中位数、最后一行纵坐标），不是白色圆心或文字框。固定挑战键为游戏 ID（大草坪两项分别为 `cuju` 和 `hammer`），NPC 键为角色 ID。

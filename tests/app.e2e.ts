@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, type Locator } from '@playwright/test'
 
 test('four event sections, dinner search, and day two programme', async ({ page }) => {
   const errors: string[] = []
@@ -489,6 +489,47 @@ test('navigation is at the bottom in both desktop preview and mobile', async ({ 
   expect(nav.y).toBeGreaterThan(shell.height * 0.8)
   await page.getByRole('button', { name: /^餐厅$/ }).click()
   await expect(page.getByRole('navigation', { name: '主要导航' })).toBeInViewport()
+})
+
+test('narrow navigation keeps one current destination and chapter or filter', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 740 })
+  await page.goto('/#itinerary/walk')
+  const main = page.getByRole('navigation', { name: '主要导航' })
+  const trip = page.getByRole('navigation', { name: '行程内容' })
+  const games = page.getByRole('navigation', { name: '游戏内容' })
+  const dining = page.getByRole('group', { name: '餐厅分类' })
+
+  async function checkTargets(controls: Locator) {
+    for (const control of await controls.all()) {
+      const box = (await control.boundingBox())!
+      expect(box.width).toBeGreaterThanOrEqual(44)
+      expect(box.height).toBeGreaterThanOrEqual(44)
+      expect(box.x).toBeGreaterThanOrEqual(0)
+      expect(box.x + box.width).toBeLessThanOrEqual(320)
+    }
+  }
+
+  await expect(main.locator('[aria-current="page"]')).toHaveText('行程')
+  await expect(trip.locator('a[aria-current="page"]')).toHaveText('游览')
+  await checkTargets(main.getByRole('button'))
+  await checkTargets(trip.getByRole('link'))
+  await trip.getByRole('link', { name: '演出', exact: true }).press('Enter')
+  await expect(trip.locator('a[aria-current="page"]')).toHaveText('演出')
+  await page.goBack()
+  await expect(trip.locator('a[aria-current="page"]')).toHaveText('游览')
+
+  await main.getByRole('button', { name: '游戏' }).click()
+  await expect(main.locator('[aria-current="page"]')).toHaveText('游戏')
+  await checkTargets(games.getByRole('link'))
+  await games.getByRole('link', { name: '游走 NPC' }).click()
+  await expect(games.locator('a[aria-current="page"]')).toHaveText('游走 NPC')
+  await main.getByRole('button', { name: '餐厅' }).click()
+  await expect(main.locator('[aria-current="page"]')).toHaveText('餐厅')
+  await checkTargets(dining.getByRole('button'))
+  await expect(dining.getByRole('button', { pressed: true })).toHaveText('全部')
+  await dining.getByRole('button', { name: '水乡家常' }).click()
+  await expect(dining.getByRole('button', { pressed: true })).toHaveText('水乡家常')
+  await expect(page.getByRole('status')).toContainText('7 家推荐')
 })
 
 test('zooming the reference map loads local AI tiles and panning replaces them', async ({

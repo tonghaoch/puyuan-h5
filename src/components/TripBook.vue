@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import FieldHeading from './FieldHeading.vue'
+import ChapterTabs from './ChapterTabs.vue'
 import AppIcon from './AppIcon.vue'
 import { days, experiences } from '../data/offsite'
 defineProps<{ section: string }>()
@@ -29,15 +30,7 @@ function jumpToDay(number: '01' | '02') {
         <img class="journey-print" src="/art/journal-journey.svg" width="320" height="236" alt="" />
       </template>
     </FieldHeading>
-    <nav class="field-tabs trip-tabs" aria-label="行程内容">
-      <a
-        v-for="[key, label] in sections"
-        :key="key"
-        :href="`#itinerary${key ? '/' + key : ''}`"
-        :aria-current="section === key ? 'page' : undefined"
-        >{{ label }}</a
-      >
-    </nav>
+    <ChapterTabs label="行程内容" base="#itinerary" :items="sections" :current="section" />
     <div v-if="!section" class="field-inner">
       <section
         v-for="day in days"
@@ -135,6 +128,7 @@ function jumpToDay(number: '01' | '02') {
 <style scoped>
 .trip-book {
   --trip-ink: #304e41;
+  --tab-ink: var(--trip-ink);
   --trip-rule: #d7ceba;
   container-type: inline-size;
 }
@@ -144,15 +138,6 @@ function jumpToDay(number: '01' | '02') {
   height: 100%;
   object-fit: contain;
   object-position: right center;
-}
-.trip-tabs {
-  padding-inline: max(12px, calc((100% - 46rem) / 2));
-  border-bottom-color: var(--trip-rule);
-}
-.trip-tabs a[aria-current='page'] {
-  color: var(--trip-ink);
-  border-bottom-color: var(--trip-ink);
-  background: #eaece0;
 }
 .trip-book .field-inner {
   max-width: 46rem;

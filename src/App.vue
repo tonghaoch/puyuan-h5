@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import AppIcon from './components/AppIcon.vue'
+import MainNav from './components/MainNav.vue'
 import TripBook from './components/TripBook.vue'
 import GameBook from './components/GameBook.vue'
-import QuestDetail from './components/QuestDetail.vue'
+import EncounterDetail from './components/EncounterDetail.vue'
 import QuestToken from './components/QuestToken.vue'
 import EncounterToken from './components/EncounterToken.vue'
 import DiningBook from './components/DiningBook.vue'
@@ -93,20 +94,13 @@ function loadFavorites(): string[] {
 }
 const favorites = ref<string[]>(loadFavorites())
 const location = useLocation()
-const mapQuest = computed(() => tab.value === 'map' && !!activeQuest.value)
-const hasModal = computed(
-  () => !!selection.value || !!overlay.value || mapQuest.value || !!activeNpc.value,
-)
+const activeEntry = computed(() => activeQuest.value ?? activeNpc.value)
+const mapEntry = computed(() => (tab.value === 'map' ? activeEntry.value : undefined))
+const hasModal = computed(() => !!selection.value || !!overlay.value || !!mapEntry.value)
 const motionActive = computed(
   () => motion.value && pageVisible.value && tab.value === 'map' && !hasModal.value,
 )
 const today = computed(() => shanghaiDate(new Date(now.value)))
-const tabs: { id: Tab; label: string; icon: string; english: string }[] = [
-  { id: 'map', label: '地图', icon: 'map', english: 'EXPLORE' },
-  { id: 'itinerary', label: '行程', icon: 'calendar', english: 'JOURNAL' },
-  { id: 'games', label: '游戏', icon: 'flag', english: 'QUESTS' },
-  { id: 'food', label: '餐厅', icon: 'bowl', english: 'DINING' },
-]
 function validSelection(kind: string, id: string): Selection | null {
   if (
     (kind === 'place' || kind === 'activity' || kind === 'restaurant') &&
@@ -134,11 +128,16 @@ function readRoute() {
       ? questForRoute(id, modelId)
       : undefined
   activeNpc.value =
-    nextTab === 'map' && kind === 'npc' ? wanderers.find((npc) => npc.id === id) : undefined
-  questOrigin.value = window.history.state?.questOrigin ?? null
-  if (mapQuest.value || activeNpc.value) {
+    (nextTab === 'map' || nextTab === 'games') && kind === 'npc'
+      ? wanderers.find((npc) => npc.id === id)
+      : undefined
+  if (tab.value === 'games' && activeNpc.value) bookSection.value = 'roaming'
+  questOrigin.value =
+    window.history.state?.questOrigin ??
+    (activeNpc.value && window.history.state?.puyuanModal ? 'map' : null)
+  if (mapEntry.value) {
     mapView.value = 'reference'
-    visibleLayers[mapQuest.value ? 'quest' : 'npc'] = true
+    visibleLayers[activeQuest.value ? 'quest' : 'npc'] = true
   }
   if (hadGameDetail && !activeQuest.value && !activeNpc.value && gameOpener?.isConnected) {
     const opener = gameOpener
@@ -167,31 +166,30 @@ function route(path: string, modal = false, replace = false) {
   readRoute()
 }
 function changeTab(next: Tab) {
-  if (next !== tab.value || hasModal.value || activeQuest.value || bookSection.value) {
+  if (next !== tab.value || hasModal.value || activeEntry.value || bookSection.value) {
     query.value = ''
     route(next)
   }
 }
 function openNpc(id: string, opener: HTMLElement) {
-  gameOpener = opener
-  route(`map/npc/${id}`, true)
+  openEntry('npc', id, opener)
 }
 function openQuest(id: string, opener: HTMLElement) {
+  openEntry('task', id, opener)
+}
+function openEntry(kind: 'npc' | 'task', id: string, opener: HTMLElement) {
   gameOpener = opener
-  const path = `${tab.value}/task/${id}`
+  const path = `${tab.value}/${kind}/${id}`
   window.history.pushState({ questOrigin: tab.value }, '', `#${path}`)
   readRoute()
-  if (!mapQuest.value)
+  if (!mapEntry.value)
     nextTick(() =>
       document.querySelector<HTMLElement>('.quest-detail')?.focus({ preventScroll: true }),
     )
 }
 function leaveQuest() {
   if (questOrigin.value) window.history.back()
-  else route(tab.value, false, true)
-}
-function mapForQuest() {
-  if (activeQuest.value) viewOnMap(`quest:${activeQuest.value.id}`)
+  else route(tab.value === 'games' && activeNpc.value ? 'games/roaming' : tab.value, false, true)
 }
 function openSelection(next: Selection, modelId?: string) {
   route(`${tab.value}/${next.kind}/${next.id}${modelId ? `/${modelId}` : ''}`, true, hasModal.value)
@@ -491,17 +489,19 @@ onBeforeUnmount(() => {
       <TripBook v-if="tab === 'itinerary'" :key="bookSection" :section="bookSection" />
       <GameBook
         v-if="tab === 'games'"
-        v-show="!activeQuest"
+        v-show="!activeEntry"
         :section="bookSection"
         @open="openQuest"
+        @npc="openNpc"
         @map="viewOnMap"
       />
-      <QuestDetail
-        v-if="activeQuest && !mapQuest"
-        :quest="activeQuest"
+      <EncounterDetail
+        v-if="activeEntry && !mapEntry"
+        :key="activeEntry.id"
+        :entry="activeEntry"
         tabindex="-1"
         @back="leaveQuest"
-        @map="mapForQuest"
+        @map="viewOnMap"
       />
       <DiningBook
         v-if="tab === 'food'"
@@ -632,65 +632,12 @@ onBeforeUnmount(() => {
         <p class="catalog-footnote">— 不赶时间，只赴好时光 —</p>
       </section>
     </main>
-    <nav class="main-nav" aria-label="主要导航">
-      <button
-        v-for="item in tabs"
-        :key="item.id"
-        :class="{ active: tab === item.id }"
-        :aria-label="item.label"
-        :aria-current="tab === item.id ? 'page' : undefined"
-        @click="changeTab(item.id)"
-      >
-        <AppIcon :name="item.icon" :size="21" /><span>{{ item.label }}</span
-        ><small>{{ item.english }}</small>
-      </button>
-    </nav>
+    <MainNav :current="tab" @navigate="changeTab" />
   </div>
 
   <Transition name="quest-rise" :css="motion" appear>
-    <AppDialog
-      v-if="mapQuest && activeQuest"
-      class="quest-sheet"
-      :label="activeQuest.name"
-      @close="leaveQuest"
-    >
-      <QuestDetail :quest="activeQuest" sheet />
-    </AppDialog>
-  </Transition>
-
-  <Transition name="quest-rise" :css="motion" appear>
-    <AppDialog
-      v-if="activeNpc"
-      class="quest-sheet npc-sheet"
-      :label="activeNpc.name"
-      @close="closeModal"
-    >
-      <article class="quest-brief">
-        <div class="field-inner">
-          <header class="warrant-heading">
-            <EncounterToken />
-            <div>
-              <p class="section-kicker">游走 NPC <i></i> 江湖偶遇</p>
-              <h2>{{ activeNpc.name }}</h2>
-            </div>
-          </header>
-          <div class="rule-block">
-            <AppIcon name="pin" :size="16" />
-            <div>
-              <h3>活动范围</h3>
-              <p>{{ activeNpc.area }}</p>
-            </div>
-          </div>
-          <div class="rule-block">
-            <AppIcon name="book" :size="16" />
-            <div>
-              <h3>相遇规则</h3>
-              <p>{{ activeNpc.description }}</p>
-            </div>
-          </div>
-          <p class="field-fine">活动范围仅作示意，不是实时位置；请在现场留意角色装扮。</p>
-        </div>
-      </article>
+    <AppDialog v-if="mapEntry" class="quest-sheet" :label="mapEntry.name" @close="leaveQuest">
+      <EncounterDetail :key="mapEntry.id" :entry="mapEntry" sheet />
     </AppDialog>
   </Transition>
 

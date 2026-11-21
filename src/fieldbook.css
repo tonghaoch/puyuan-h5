@@ -126,33 +126,6 @@
 .field-inner {
   padding: 22px 20px 34px;
 }
-.field-tabs {
-  display: flex;
-  align-items: stretch;
-  border-bottom: 1px solid var(--faint);
-  background: #faf7ee;
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  padding: 0 12px;
-}
-.field-tabs :is(a, button) {
-  flex: 1;
-  min-width: 0;
-  text-align: center;
-  padding: 14px 2px 12px;
-  min-height: 44px;
-  font-size: 14px;
-  color: #665f52;
-  border-bottom: 2px solid transparent;
-}
-.field-tabs [aria-current='page'],
-.field-tabs [aria-pressed='true'] {
-  border-color: #9c4c30;
-  color: #853d24;
-  font-weight: 700;
-}
-.field-tabs a:hover,
 .ink-link:hover,
 .quest-row:hover,
 .back-link:hover {
@@ -238,15 +211,43 @@
   flex: 1;
   min-width: 0;
 }
-.quest-index {
+.dossier-thumb {
+  position: relative;
+  flex: none;
+}
+.dossier-thumb img,
+.npc-entry img {
+  display: block;
+  border: 1px solid #c9b796;
+  border-radius: 4px;
+}
+.dossier-thumb > span {
+  position: absolute;
+  bottom: 1px;
+  left: 1px;
+  padding: 2px 5px;
+  border-radius: 0 3px;
+  background: #773f2a;
+  color: #fff1d2;
   font:
-    italic 600 21px/1 Georgia,
+    600 12px/1.2 Georgia,
     serif;
-  color: #964e36;
-  border: 1px solid #d6bb9d;
-  border-radius: 3px;
-  padding: 8px 5px;
-  background: #f3ecdc;
+}
+.npc-entry,
+.npc-entry > span {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.npc-entry {
+  color: inherit;
+  margin-bottom: 10px;
+}
+.npc-entry > span {
+  margin-left: auto;
+  gap: 2px;
+  font-size: 12px;
+  color: #365747;
 }
 .directory-meta {
   display: grid;
@@ -321,22 +322,20 @@
 .warrant-heading {
   display: flex;
   align-items: center;
-  gap: 11px;
-  padding: 2px 0 14px;
-  margin-bottom: 14px;
-  border-bottom: 3px double #d7c6a9;
+  gap: 10px;
+  padding: 2px 0;
+  margin-bottom: 13px;
 }
-.warrant-heading .quest-token {
-  width: 38px;
-  height: 48px;
-  filter: drop-shadow(0 1px 1px #633e2e55);
+.warrant-heading :is(.quest-token, .encounter-token) {
+  width: 32px;
+  height: 40px;
+  flex: none;
 }
 .warrant-heading :is(h1, h2) {
-  font: 650 23px/1.35 var(--serif);
-  letter-spacing: 2px;
+  font: 650 25px/1.32 var(--serif);
+  letter-spacing: 0.1em;
 }
-.warrant-heading i,
-.mission-kicker i {
+.warrant-heading i {
   width: 16px;
   border-top: 1px solid currentColor;
 }
@@ -375,10 +374,7 @@
 }
 .quest-brief .warrant-heading {
   padding-right: 36px;
-  margin-bottom: 8px;
-}
-.quest-brief .warrant-heading + .rule-block {
-  border-top: 0;
+  margin-bottom: 12px;
 }
 .quest-brief .rule-block {
   gap: 10px;
@@ -421,8 +417,224 @@
 .rule-block p {
   font-size: 14px;
 }
-.quest-detail .field-title {
-  margin: 3px 0 15px;
+.quest-detail {
+  --plate-ink: #74412f;
+  --plate-paper: #ece1c9;
+}
+.npc-dossier {
+  --plate-ink: #364f50;
+  --plate-paper: #e2e6dc;
+}
+.field-plate figure {
+  margin: 0;
+}
+.plate-mount {
+  position: relative;
+  padding: 4px;
+  border: 1px solid #cbbb9b;
+  background: #f8f3e7;
+  box-shadow: 0 2px 5px #50412d14;
+  touch-action: pan-y pinch-zoom;
+}
+.plate-mount::before,
+.plate-mount::after {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  width: 13px;
+  height: 13px;
+  border: solid #987444;
+  pointer-events: none;
+}
+.plate-mount::before {
+  inset: -1px auto auto -1px;
+  border-width: 2px 0 0 2px;
+}
+.plate-mount::after {
+  inset: auto -1px -1px auto;
+  border-width: 0 2px 2px 0;
+}
+.plate-leaf {
+  position: relative;
+  display: grid;
+  isolation: isolate;
+  overflow: hidden;
+  height: clamp(158px, 48vw, 226px);
+  background: #eee8d8;
+}
+.plate-leaf img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+  object-fit: cover;
+}
+.plate-leaf.contain img {
+  object-fit: contain;
+}
+.plate-leaf.contain {
+  background: repeating-linear-gradient(90deg, #f1ecdf 0 2px, #ede7d9 2px 3px);
+}
+.plate-leaf.portrait {
+  background: linear-gradient(110deg, #f8f0db, #eee9d9 55%, #dadfd0);
+}
+.plate-leaf.portrait::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url('/art/journal-journey.svg') no-repeat -20px 125% / auto 88%;
+  filter: grayscale(1);
+  opacity: 0.14;
+  mix-blend-mode: multiply;
+}
+.plate-leaf.portrait img {
+  inset: 4% auto auto 63%;
+  width: auto;
+  height: 94%;
+  max-width: 57%;
+  object-fit: contain;
+  transform: translateX(-50%);
+  mix-blend-mode: multiply;
+  mask-image: linear-gradient(to right, transparent, black 13%, black 87%, transparent);
+}
+@supports (mask-composite: intersect) {
+  .plate-leaf.portrait img {
+    mask-image:
+      linear-gradient(to right, transparent, black 13%, black 87%, transparent),
+      linear-gradient(to bottom, transparent, black 4%, black 98%, transparent);
+    mask-composite: intersect;
+  }
+}
+.plate-inscription {
+  position: absolute;
+  inset: 50% auto auto 16%;
+  transform: translateY(-50%);
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+}
+.plate-inscription span {
+  writing-mode: vertical-rl;
+  font: 600 21px/1.2 var(--serif);
+  letter-spacing: 0.18em;
+  color: #3a4840;
+}
+.plate-inscription i,
+.plate-imprint {
+  font: 600 11px/1.3 var(--serif);
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+.plate-inscription i {
+  padding: 2px 3px;
+  background: #934a36;
+  color: #fff4d8;
+  border-radius: 2px 1px 3px 1px;
+}
+.field-plate figcaption {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin: 9px 0 2px;
+  color: #605c50;
+  font: 500 13px/1.6 var(--serif);
+}
+.plate-imprint {
+  border: 1px solid #a36951;
+  border-radius: 2px;
+  padding: 0 2px;
+  margin-top: 2px;
+  color: #874631;
+}
+.plate-choices {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.plate-choices::before,
+.plate-choices::after {
+  content: '';
+  flex: 1;
+  border-top: 1px solid #d6c9ae;
+}
+.plate-choices button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 6px;
+  font: 600 14px var(--serif);
+  color: #656454;
+}
+.plate-choices button span {
+  display: grid;
+  place-items: center;
+  width: 19px;
+  height: 19px;
+  border: 1px solid #bcb299;
+  border-radius: 2px;
+  font-size: 12px;
+}
+.plate-choices button[aria-pressed='true'] {
+  color: var(--plate-ink);
+}
+.plate-choices button[aria-pressed='true'] span {
+  border-color: var(--plate-ink);
+  background: var(--plate-ink);
+  color: #fff5df;
+}
+.plate-choices button:focus-visible {
+  outline: 2px solid var(--plate-ink);
+  outline-offset: -2px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .plate-leaf {
+    animation: unfold-plate 180ms ease-out;
+  }
+  @keyframes unfold-plate {
+    from {
+      opacity: 0.5;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
+.dossier-intro {
+  margin: 12px 0;
+  color: #404b40;
+  font: 500 15px/1.75 var(--serif);
+}
+.dossier-note,
+.dossier-shop {
+  margin: 8px 0 12px;
+  padding: 10px 12px;
+  background: var(--plate-paper);
+  border-left: 2px solid var(--plate-ink);
+  color: #424937;
+  font-size: 13px;
+  line-height: 1.65;
+}
+.dossier-shop summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.dossier-shop dl > div {
+  margin-top: 8px;
+}
+.dossier-shop dt {
+  font-weight: 600;
+}
+.dossier-shop dd {
+  margin: 0;
+}
+.dossier-note strong,
+.dossier-shop dt {
+  color: var(--plate-ink);
 }
 .book-search {
   display: flex;
@@ -440,21 +652,6 @@
   border: 0;
   background: transparent;
   color: inherit;
-}
-.dining-filters {
-  display: flex;
-  gap: 8px;
-  margin: 10px 0 20px;
-}
-.dining-filters button {
-  border-radius: 20px;
-  background: #eeeadd;
-  color: #5b6052;
-  padding: 8px 13px;
-}
-.dining-filters button[aria-pressed='true'] {
-  background: #3a5543;
-  color: white;
 }
 .dining-save {
   width: 44px;

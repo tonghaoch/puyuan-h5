@@ -2,12 +2,14 @@
 import { computed, ref } from 'vue'
 import AppIcon from './AppIcon.vue'
 import FieldHeading from './FieldHeading.vue'
+import ChapterTabs from './ChapterTabs.vue'
 import { dinnerSpots } from '../data/offsite'
 import { matchesSearch } from '../data/catalog'
 const props = defineProps<{ favorites: string[] }>()
 defineEmits<{ save: [id: string]; map: [id: string] }>()
 const query = ref('')
 const group = ref('全部')
+const categories = ['全部', '水乡家常', '特色风味'].map((name) => [name, name] as const)
 const searchInput = ref<HTMLInputElement | null>(null)
 const entries = dinnerSpots.map((spot, index) => ({
   ...spot,
@@ -73,17 +75,13 @@ const shown = computed(() =>
           aria-label="搜索餐厅"
           placeholder="搜索店名、菜系…"
       /></label>
-      <div class="dining-filters" role="group" aria-label="餐厅分类">
-        <button
-          v-for="category in ['全部', '水乡家常', '特色风味']"
-          :key="category"
-          type="button"
-          :aria-pressed="group === category"
-          @click="group = category"
-        >
-          {{ category }}
-        </button>
-      </div>
+      <ChapterTabs
+        class="dining-filters"
+        label="餐厅分类"
+        :items="categories"
+        :current="group"
+        @select="group = $event"
+      />
       <article v-for="spot in shown" :key="spot.id" class="directory-row dinner-row">
         <span class="entry-number" aria-hidden="true">{{ spot.number }}</span>
         <div class="entry-copy">
@@ -205,21 +203,8 @@ const shown = computed(() =>
   outline: none;
 }
 .dining-filters {
-  flex-wrap: wrap;
+  --tab-ink: #694831;
   margin: 8px 0 14px;
-}
-.dining-filters button {
-  min-height: 44px;
-  padding: 6px 13px;
-  border: 1px solid var(--rule);
-  border-radius: 4px;
-  background: transparent;
-}
-.dining-filters button[aria-pressed='true'] {
-  border-color: #3a5543;
-  background: #3a5543;
-  color: #fffaf0;
-  font-weight: 650;
 }
 .dinner-row {
   align-items: flex-start;

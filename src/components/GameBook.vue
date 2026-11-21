@@ -1,9 +1,14 @@
 <script setup lang="ts">
 import FieldHeading from './FieldHeading.vue'
+import ChapterTabs from './ChapterTabs.vue'
 import AppIcon from './AppIcon.vue'
-import { quests, wanderers, tools } from '../data/offsite'
+import { encounterImage, quests, wanderers, tools } from '../data/offsite'
 defineProps<{ section: string }>()
-defineEmits<{ open: [id: string, opener: HTMLElement]; map: [id: string] }>()
+defineEmits<{
+  open: [id: string, opener: HTMLElement]
+  npc: [id: string, opener: HTMLElement]
+  map: [id: string]
+}>()
 const sections = [
   ['', '点位挑战'],
   ['roaming', '游走 NPC'],
@@ -19,15 +24,7 @@ const sections = [
       note="一首散落水乡的诗，等你们组队修复。"
       seal="寻诗"
     />
-    <nav class="field-tabs" aria-label="游戏内容">
-      <a
-        v-for="[key, label] in sections"
-        :key="key"
-        :href="`#games${key ? '/' + key : ''}`"
-        :aria-current="section === key ? 'page' : undefined"
-        >{{ label }}</a
-      >
-    </nav>
+    <ChapterTabs label="游戏内容" base="#games" :items="sections" :current="section" />
     <div v-if="!section" class="field-inner">
       <div class="field-section-head">
         <div>
@@ -46,7 +43,15 @@ const sections = [
         :href="`#games/task/${quest.id}`"
         @click.exact.prevent="$emit('open', quest.id, $event.currentTarget as HTMLElement)"
       >
-        <span class="quest-index">{{ String(index + 1).padStart(2, '0') }}</span>
+        <span class="dossier-thumb"
+          ><img
+            :src="encounterImage(quest.id, 'thumb')"
+            alt=""
+            width="56"
+            height="56"
+            loading="lazy"
+          /><span>{{ String(index + 1).padStart(2, '0') }}</span></span
+        >
         <div>
           <small>{{ quest.place }}</small>
           <h3>{{ quest.name }}</h3>
@@ -59,8 +64,24 @@ const sections = [
       <h2 class="field-title">巷中遇见谁</h2>
       <p class="field-copy">以下是活动范围，不是实时位置。在附近留意角色装扮，遇见时再触发挑战。</p>
       <article v-for="npc in wanderers" :key="npc.id" class="journal-panel">
-        <small>{{ npc.area }}</small>
-        <h3>{{ npc.name }}</h3>
+        <a
+          class="npc-entry"
+          :href="`#games/npc/${npc.id}`"
+          @click.exact.prevent="$emit('npc', npc.id, $event.currentTarget as HTMLElement)"
+        >
+          <img
+            :src="encounterImage(npc.id, 'thumb')"
+            alt=""
+            width="54"
+            height="54"
+            loading="lazy"
+          />
+          <div>
+            <small>{{ npc.area }}</small>
+            <h3>{{ npc.name }}</h3>
+          </div>
+          <span>人物手札 <AppIcon name="chevron" :size="14" /></span>
+        </a>
         <p>{{ npc.description }}</p>
         <button v-if="npc.point" class="ink-link" @click="$emit('map', `npc:${npc.id}`)">
           查看活动范围 <AppIcon name="arrow" :size="14" />
