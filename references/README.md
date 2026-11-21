@@ -14,11 +14,11 @@ puyuan-reference.jpg 是用户于 2026-11-17 提供的原始参考图，尺寸 2
 
 2026-11-18：scripts/prepare-reference-map.py 按 src/data/reference-map.json 选取古镇范围，生成 public/art 下的配色版、原色对照和水面动画遮罩。仅做平移、遮罩与配色，原图不覆盖。
 
-`npm run art:reference` 重建 1520 × 1240 的原色概览图和 2 倍保真图块（Lanczos 插值、轻度锐化）。加上 `-- --ai-master /path/to/puyuan-AI-4x.webp --fsrcnn-x4 /path/to/FSRCNN_x4.pb` 可同时生成 4 倍图块：原标牌附近使用去字底图重新超分，其余沿用高清母图。省略这两个参数时保留已发布的 4 倍图块。两层均为 512 像素无损 WebP，边界图块按实际尺寸裁切。原始 JPG 与手绘导览素材不变。
+`npm run art:reference` 重建 1520 × 1240 的原色概览图和 2 倍保真图块（Lanczos 插值、轻度锐化），不改动 4 倍和 8 倍图块。
 
-高清层在切块前统一增强明暗边缘，对每个像素的修正量设限，避免地名笔画和屋脊出现过重的亮边。缩放比例乘屏幕像素比超过 1.7 时切入 4 倍层，不必等到 2 倍图已被拉大才加载。
+要重建当前发布的 **4 倍和 8 倍层**，在独立 Python 环境中安装 `pillow numpy torch spandrel==0.4.2`，下载 [Real-ESRGAN v0.2.5.0 的插画模型](https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesr-animevideov3.pth)，运行 `npm run art:reference -- --realesrgan-x4 /path/to/realesr-animevideov3.pth`。脚本校验模型摘要，读取未压缩的去字合成图，保留图块四周的邻域参与推理，再裁回原坐标。8 倍图层结合原尺寸与 2 倍采样输入的推理结果。原始 JPG、概览与 2 倍层均不覆盖；网页端不加载模型。
 
-近看档（缩放 ≥ 2.7 或缩放 × 屏幕像素比 > 4）用 8 倍层。它与 4 倍层采用同一图块网格，每块最多 1024 像素。`npm run art:reference -- --lapsrn-x8 /path/to/LapSRN_x8.pb` 可从原始裁切直接重建，需 NumPy、opencv-contrib-python-headless 4.11 和 [LapSRN 模型](https://github.com/fannymonori/TF-LapSRN/blob/master/export/LapSRN_x8.pb)。不提供模型时保留随项目发布的近看层。
+缩放比例乘屏幕像素比超过 1.7 时切入 4 倍层；达到最大缩放、缩放 ≥ 2.7 或缩放 × 屏幕像素比 > 4 时切入 8 倍层。两档使用同一网格，每块覆盖 128 × 128 场景像素，边缘按实际尺寸裁切。旧版 FSRCNN / LapSRN 重建参数见 `python3 scripts/prepare-reference-map.py --help`。
 
 ## 活动图录
 

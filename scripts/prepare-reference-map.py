@@ -6,6 +6,14 @@ from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageOps
 
 ROOT=Path(__file__).resolve().parents[1]
 layout=json.loads((ROOT/'src/data/reference-map.json').read_text())
+parser=argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--ai-master',type=Path,help='Legacy 4x AI master in cropped scene coordinates')
+parser.add_argument('--fsrcnn-x4',type=Path,help='FSRCNN_x4.pb for legacy label repairs')
+parser.add_argument('--lapsrn-x8',type=Path,help='LapSRN_x8.pb for the legacy close-up layer')
+parser.add_argument('--realesrgan-x4',type=Path,help='Rebuild only the 4x and 8x tiles with realesr-animevideov3.pth')
+args=parser.parse_args()
+if args.realesrgan_x4 and (args.ai_master or args.fsrcnn_x4 or args.lapsrn_x8):
+    parser.error('Choose either Real-ESRGAN or legacy enhancement options')
 source=Image.open(ROOT/layout['source']).convert('RGB')
 w,h=layout['scene']['width'],layout['scene']['height']
 dx,dy=layout['sourceOffset']['x'],layout['sourceOffset']['y']
@@ -21,7 +29,8 @@ strip=Image.new('RGB',(384,192))
 strip.paste(patch);strip.paste(ImageOps.mirror(patch),(192,0))
 grass=Image.new('RGB',(384,384))
 grass.paste(strip);grass.paste(ImageOps.flip(strip),(0,192))
-grass.save(ROOT/'public/art/reference-meadow.webp',lossless=True,method=4)
+if not args.realesrgan_x4:
+    grass.save(ROOT/'public/art/reference-meadow.webp',lossless=True,method=4)
 # Match the repeating backdrop's origin and period at all four scene edges.
 field=Image.new('RGB',(w,h))
 for y in range(0,h,grass.height):
@@ -55,12 +64,12 @@ if repairs.size != original.size:
     raise ValueError('Label repairs must be registered to the reference scene')
 label_mask=repairs.getchannel('A')
 original.paste(repairs,(0,0),label_mask)
-parser=argparse.ArgumentParser(description=__doc__)
-parser.add_argument('--ai-master',type=Path,help='Approved 4x AI image in cropped scene coordinates')
-parser.add_argument('--fsrcnn-x4',type=Path,help='FSRCNN_x4.pb to enhance label repairs at the same density as the master')
-parser.add_argument('--lapsrn-x8',type=Path,help='LapSRN_x8.pb for the high-density close-up layer')
-args=parser.parse_args()
 directory=ROOT/'public/art/reference-tiles'
+if args.realesrgan_x4:
+    from reference_superres import render_detail_tiles
+    render_detail_tiles(original,rim,args.realesrgan_x4,directory)
+    print('Prepared Real-ESRGAN 4x and 8x tiles. Overview and source are untouched.')
+    raise SystemExit(0)
 if args.ai_master:
     if not args.fsrcnn_x4:
         parser.error('--ai-master requires --fsrcnn-x4 for the restored label regions')
