@@ -36,7 +36,7 @@ test('guide camera retains a bounded meadow at its zoom limits', () => {
   const zoomIn = zoomAt({ x: 0, y: 0, scale: 0.7 }, 1000, 200, 300, 390, 700)
   const zoomOut = zoomAt(zoomIn, 0.0001, 200, 300, 390, 700)
   const { initial } = zoomRange(390, 700)
-  assert.equal(zoomIn.scale, initial * 1.25 ** 8)
+  assert.equal(zoomIn.scale, initial * 4)
   assert.equal(zoomOut.scale, initial / 1.25)
   const clamped = clampCamera({ x: 1e9, y: -1e9, scale: 1 }, 390, 700)
   const world = cameraBounds()

@@ -8,7 +8,7 @@ export const MEADOW_MARGIN = 1600
 export const ZOOM_STEP = 1.25
 export function zoomRange(width: number, height: number) {
   const initial = Math.max(0.22, Math.min(width / 1120, (height - 160) / 1040))
-  return { initial, min: initial / ZOOM_STEP, max: initial * ZOOM_STEP ** 8 }
+  return { initial, min: initial / ZOOM_STEP, max: initial * 4 }
 }
 export function cameraBounds() {
   const margin = MEADOW_MARGIN

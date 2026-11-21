@@ -544,7 +544,7 @@ test('zooming the reference map loads local AI tiles and panning replaces them',
   expect((await scene.boundingBox())!.width / initialWidth).toBeCloseTo(0.8, 3)
   await viewport.press('Home')
   for (let step = 0; step < 10; step++) await viewport.press('=')
-  expect((await scene.boundingBox())!.width / initialWidth).toBeCloseTo(1.25 ** 8, 3)
+  expect((await scene.boundingBox())!.width / initialWidth).toBeCloseTo(4, 3)
   await expect(tiles.first()).toBeVisible()
   await expect(tiles.first()).toHaveJSProperty('naturalWidth', 1024)
   const firstTile = await tiles.first().getAttribute('src')
