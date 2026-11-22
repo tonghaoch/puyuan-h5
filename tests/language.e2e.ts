@@ -35,7 +35,7 @@ test('language toggles in place without resetting the map, quest photos or dinin
   const search = page.getByRole('searchbox')
   await search.fill('hot pot')
   await expect(page.locator('.dinner-row')).toHaveCount(1)
-  await page.getByRole('button', { name: 'Save North Arcade Sichuan Hot Pot' }).click()
+  await page.getByRole('button', { name: 'Save Bei Lang Peng Sichuan Hot Pot' }).click()
   await toggle.click()
   await expect(search).toHaveValue('hot pot')
   await expect(page.getByRole('button', { name: '取消收藏北廊棚川式火锅' })).toHaveAttribute(
@@ -44,11 +44,11 @@ test('language toggles in place without resetting the map, quest photos or dinin
   )
   await search.fill('川式')
   await toggle.click()
-  await expect(page.getByRole('heading', { name: 'North Arcade Sichuan Hot Pot' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Bei Lang Peng Sichuan Hot Pot' })).toBeVisible()
   await page.reload()
   await expect(page.getByRole('navigation', { name: 'Main navigation' })).toBeVisible()
   await page.goto('/#map/favorites')
-  await expect(page.getByRole('dialog')).toContainText('North Arcade Sichuan Hot Pot')
+  await expect(page.getByRole('dialog')).toContainText('Bei Lang Peng Sichuan Hot Pot')
 })
 
 test('all book chapters, map labels and legacy dialogs render English on a narrow phone', async ({
@@ -61,7 +61,7 @@ test('all book chapters, map labels and legacy dialogs render English on a narro
   for (const [route, expected] of [
     ['map', 'Roaming NPCs'],
     ['itinerary', 'Two Days in Puyuan'],
-    ['itinerary/walk', 'Shufang Zen Garden'],
+    ['itinerary/walk', 'Shufang Zen Temple'],
     ['itinerary/studio', 'Ginkgo bookmark'],
     ['itinerary/shows', 'Check today’s curtain times'],
     ['games', 'The Scattered Poem'],
