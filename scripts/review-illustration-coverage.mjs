@@ -47,17 +47,22 @@ const cards = coverage.map(
   ({ accuracy, fraction, mask }) =>
     `<figure><figcaption>设备精度 ${accuracy} 米 · 约 ${(100 * fraction).toFixed(1)}% 园区面积可画约位</figcaption><svg viewBox="0 0 1400 1200" role="img" aria-label="园区位置覆盖"><path fill="#eadbc5" d="${boundary}"/><path fill="none" stroke="#417778" stroke-width="5" d="${mask}"/><path fill="none" stroke="#796844" stroke-width="3" d="${boundary}"/></svg></figure>`,
 )
-const samples = [...report.checks, ...report.releaseChecks].map((point) => {
-  const [longitude, latitude] = point.referenceLonLat
-  const fix = { longitude, latitude, accuracy: 10, timestamp: 0 }
-  const inside = classifyFix(fix, ring, 0)
-  const position = inside === 'inside' ? projectIllustratedFix(fix) : null
-  const label = inside !== 'inside' ? '园外或边界不确定' : position ? '手绘约位' : '仅园区小图'
-  const bearings = position
-    ? Array.from({ length: 73 }, (_, index) => +illustratedBearing(position, 5 * index).toFixed(2))
-    : []
-  return { name: `${point.id} ${point.label}`, position, bearings, label, latitude, longitude }
-})
+const samples = [...report.checks, ...report.releaseChecks, ...(report.trialChecks ?? [])].map(
+  (point) => {
+    const [longitude, latitude] = point.referenceLonLat
+    const fix = { longitude, latitude, accuracy: 10, timestamp: 0 }
+    const inside = classifyFix(fix, ring, 0)
+    const position = inside === 'inside' ? projectIllustratedFix(fix) : null
+    const label = inside !== 'inside' ? '园外或边界不确定' : position ? '手绘约位' : '仅园区小图'
+    const bearings = position
+      ? Array.from(
+          { length: 73 },
+          (_, index) => +illustratedBearing(position, 5 * index).toFixed(2),
+        )
+      : []
+    return { name: `${point.id} ${point.label}`, position, bearings, label, latitude, longitude }
+  },
+)
 const rows = samples.map(
   ({ name, latitude, longitude, label }) =>
     `<tr><th>${name}</th><td>${latitude.toFixed(6)}, ${longitude.toFixed(6)}</td><td>${label}</td></tr>`,

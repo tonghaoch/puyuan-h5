@@ -19,7 +19,7 @@
     "art:generate": "python3 scripts/generate-map.py && npm run art:landscape && npm run art:models && npm run art:meadow && npm run art:scenes",
     "format": "prettier --write src tests scripts/*.mjs vite.config.ts playwright.config.ts tsconfig.json package.json index.html",
     "geo:package": "python3 scripts/package-geodata.py",
-    "location:review": "python3 -B scripts/calibrate_illustration.py && node --experimental-strip-types scripts/review-illustration-coverage.mjs",
+    "location:review": "python3 -B scripts/register_illustration.py && node --experimental-strip-types scripts/review-illustration-coverage.mjs",
     "art:reference": "python3 scripts/prepare-reference-map.py",
     "art:landscape": "python3 scripts/generate-landscape.py",
     "art:geometry": "python3 scripts/generate-roof-volumes.py",

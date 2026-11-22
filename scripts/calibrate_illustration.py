@@ -20,8 +20,25 @@ class Mesh:
     def __init__(self, points):
         self.sites = [point['satellitePx'] for point in points]
         self.targets = [point['scenePx'] for point in points]
-        size = len(points)
-        sites = self.sites + [[-10000, -10000], [20000, -10000], [0, 20000]]
+        ring = hull(points)
+        expected = sum(cross(ring[0], ring[index], ring[index+1]) for index in range(1, len(ring)-1))
+        if expected <= 0:
+            raise ValueError('Control points must span a nondegenerate area')
+        # Merely enclosing the sites is insufficient: a thin hull triangle can have
+        # a circumcircle far beyond that envelope. Verify the completed domain.
+        for scale in (1, 10, 100, 1000, 10000, 100000, 1000000):
+            candidate = self._triangulate(scale)
+            actual = sum(cross(*[self.sites[index] for index in triangle]) for triangle in candidate)
+            if math.isclose(actual, expected, rel_tol=1e-12, abs_tol=1e-7):
+                self.triangles = candidate
+                self.envelope_scale = scale
+                break
+        else:
+            raise ValueError('Triangulation cannot cover the full control-point hull')
+
+    def _triangulate(self, scale):
+        size = len(self.sites)
+        sites = self.sites + [[-10000*scale, -10000*scale], [20000*scale, -10000*scale], [0, 20000*scale]]
         triangles = [(size, size+1, size+2)]
         for index, point in enumerate(self.sites):
             outside, boundary = [], set()
@@ -39,7 +56,7 @@ class Mesh:
                         boundary.add((start, end))
             triangles = outside + [(start, end, index) for start, end in sorted(boundary)
                                    if cross(sites[start], sites[end], point) > 0]
-        self.triangles = [triangle for triangle in triangles if max(triangle) < size]
+        return [triangle for triangle in triangles if max(triangle) < size]
 
     def project(self, query):
         best = None
@@ -195,13 +212,14 @@ def calibrate(controls, checks, release, world):
     return runtime, report
 
 
-def inputs():
-    spec = json.loads(SPEC.read_text())
-    base = json.loads((SPEC.parent / spec['base']).read_text())
+def inputs(root=ROOT):
+    path = root / SPEC.relative_to(ROOT)
+    spec = json.loads(path.read_text())
+    base = json.loads((path.parent / spec['base']).read_text())
     promoted = set(spec['promotedToControl'])
     controls = base['controls'] + [point for point in base['checks'] if point['id'] in promoted] + spec['controls']
     checks = [point for point in base['checks'] if point['id'] not in promoted] + spec['checks']
-    return base, controls, checks, spec['releaseChecks'], list(map(float, (ROOT / base['worldFile']).read_text().splitlines()))
+    return base, controls, checks, spec['releaseChecks'], list(map(float, (root / base['worldFile']).read_text().splitlines()))
 
 
 def review(report, base):
@@ -230,6 +248,10 @@ article{{margin:18px 0}}section{{display:flex;gap:4px}}svg{{width:49%;height:aut
 
 
 def main():
+    if (ROOT / 'references/geodata/registration-release-07.json').exists():
+        from register_illustration import main as active_main
+        active_main()
+        return
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--write-model', action='store_true', help='update the bundled production model')
     args = parser.parse_args()

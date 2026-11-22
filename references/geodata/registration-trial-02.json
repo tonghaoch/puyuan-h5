@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "purpose": "Southern perimeter extension after inspecting trial 01. K1/K2 are regression checks, not fresh evidence for this decision. No thresholds or display masks changed.",
+  "replaceControls": [
+    {"id":"S1","label":"西南长街南渠，矩形街坊西侧路过水桥心","satellitePx":[259,1044],"scenePx":[257,1059],"evidence":"旧配对把影像上矩形街坊西边的桥配到了画面同一街坊东边的桥。逐岸核对：此桥往北沿矩形街坊西侧，往南接平行南岸的横巷；带大院的广场在该街坊以东。取两岸之间的桥面中央，不将东邻桥另算验收。"}
+  ],
+  "addControls": [
+    {"id":"R2-SB","label":"南界大路跨东侧主河处，北路缘遇西岸水线","satellitePx":[998,1094],"scenePx":[1126,1047],"evidence":"在最南端大路过河处，取北侧路边缘与河的西岸交点。核对东西岸及东南小岛在其上游；不用桥梁中心、屋顶或南侧被美术省略的水道。此处岸线可能有数像素误差。"}
+  ],
+  "newChecks": [
+    {"id":"K3","label":"东南主河西岸外、南界大路桥以北小岛的南尖","satellitePx":[1011,1019],"scenePx":[1140,1024],"evidence":"在 S4 汇水口以南、大路桥以北，河中有与西岸分离的小块绿地。取水陆边界最南端；不要将前一处半岛的南尖 K2 或树冠当作本点。与 R2-SB 同一区域，不代表其他街区。"}
+  ]
+}

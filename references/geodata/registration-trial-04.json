@@ -1,0 +1,12 @@
+{
+  "version": 4,
+  "purpose": "Re-select the interpolation family using only observed controls after trials 1-3 corrected their correspondences. Freeze the unchanged established 4-pixel control displacement limit and four uniform subdivision levels before reading this candidate's check results. All 17 existing checks remain regression checks; there are no fresh blind checks in this model-family experiment. Do not modify the bundled application model or interpret synthetic mesh nodes as observed landmarks.",
+  "replaceControls": [],
+  "addControls": [],
+  "newChecks": [],
+  "modelSelection": {
+    "kind": "control-loo-spline-mesh",
+    "maxAnchorPx": 4,
+    "subdivisionLevels": 4
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "version": 12,
+  "purpose": "Source-only correction of V6's bridge-body definition. Preserve original point and apply solely to evaluation. Not a new blind check or surveyed-position claim.",
+  "corrections": [
+    {
+      "id": "V6",
+      "previous": {"satellitePx": [634, 987], "scenePx": [716, 998]},
+      "corrected": {
+        "id": "V6",
+        "label": "南街西段，妆楼侧街块至南侧街路的过水桥面中部",
+        "satellitePx": [636, 996],
+        "scenePx": [716, 998],
+        "evidence": "原图点在斜向过水桥面，旧卫星点在可见桥面以北的暗引道/水面。根据两端街块、东西南街路支线及实际桥面重新选卫星中部，保留原图观察；取点前未查看模型预测或残差。原始观察随记录保留。",
+        "observation": {"satellitePickTolerancePx": 3, "scenePickTolerancePx": 3}
+      }
+    }
+  ]
+}

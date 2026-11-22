@@ -1,0 +1,34 @@
+{
+  "version": 3,
+  "purpose": "Freeze a southwest bridge control and two new ground checks after inspecting original illustration pixels and georeferenced Esri level-18 tiles, before calculating this trial. Earlier check points remain regression evidence. The extra export pixels are not independent surveyed ground truth.",
+  "imageryAudit": "registration-trial-03-imagery.json",
+  "replaceControls": [],
+  "addControls": [
+    {
+      "id": "R3-WB",
+      "label": "西南西侧长街坊南端，接西南小街坊的过水桥心",
+      "satellitePx": [140, 1023],
+      "scenePx": [159, 1075],
+      "evidence": "从西侧长街坊的南端沿路跨窄汊到西南小街坊。影像桥段斜向，插画桥段近南北向；逐岸核对北侧长街坊、南侧小街坊及桥东的水面，不取靠 S1 的矩形街坊西桥，也不取中兴路的公路桥。桥的两端与路缘仍受阴影、树冠和插画简化影响，桥心配对属于待独立验收的人工观察，不是测量控制点。",
+      "observation": {"satellitePickTolerancePx": 4, "scenePickTolerancePx": 3, "originalSceneBounds": [145, 1050, 185, 1090], "satelliteBounds": [125, 1010, 170, 1045]}
+    }
+  ],
+  "newChecks": [
+    {
+      "id": "K4",
+      "label": "西南矩形街坊东侧、与 S1 相邻的南北过水桥心",
+      "satellitePx": [316, 1020],
+      "scenePx": [342, 1043],
+      "evidence": "S1 从矩形街坊西侧接南岸横巷，本点从该街坊东侧跨同一南渠接南岸横巷。影像道路在渠上转斜，插画保留窄桥和两侧桥栏；取跨水段中央。旧 S1 曾误用了这附近的画面点，本点的地物此前见过，但尚未作为独立坐标配对计分；本轮先冻结再算，不称作完全未知的盲测。",
+      "observation": {"satellitePickTolerancePx": 3, "scenePickTolerancePx": 2, "originalSceneBounds": [325, 1025, 355, 1058], "satelliteBounds": [295, 1002, 336, 1037]}
+    },
+    {
+      "id": "K5",
+      "label": "方院西北外侧，西岸纵向地面巷接北侧横巷的转角",
+      "satellitePx": [966, 200],
+      "scenePx": [1092, 300],
+      "evidence": "沿方院西侧的窄水带找西岸纵巷，在其北端接入横巷的转角取路心。北侧横屋、东侧窄水带和南向纵巷共同辨认；不是方院屋顶角，也不是一座已命名桥。插画原始标签遮了部分北侧建筑，但所取路面在标签下方可见，不用标签修补生成的新地物来定位。",
+      "observation": {"satellitePickTolerancePx": 2, "scenePickTolerancePx": 2, "originalSceneBounds": [1070, 279, 1130, 315], "satelliteBounds": [955, 185, 1000, 215]}
+    }
+  ]
+}
