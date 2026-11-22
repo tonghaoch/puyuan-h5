@@ -1,5 +1,6 @@
 import { onBeforeUnmount, onMounted, readonly, ref, watch } from 'vue'
 import { FIX_LIFETIME_MS, type GeographicFix } from './geography'
+import { createLocationSmoother } from './location-smoothing'
 
 type LocationState =
   'idle' | 'loading' | 'available' | 'denied' | 'unavailable' | 'timeout' | 'error' | 'stale'
@@ -28,6 +29,7 @@ export function useLocation(active: () => boolean) {
     if (!active()) return
     stop()
     const token = generation
+    const smoother = createLocationSmoother()
     let newest = -Infinity
     state.value = 'loading'
     try {
@@ -45,6 +47,7 @@ export function useLocation(active: () => boolean) {
             Math.abs(latitude) > 90 ||
             accuracy < 0
           ) {
+            smoother.reset()
             clearFix()
             state.value = 'error'
             return
@@ -53,18 +56,21 @@ export function useLocation(active: () => boolean) {
           newest = timestamp
           const remaining = Math.min(FIX_LIFETIME_MS, timestamp + FIX_LIFETIME_MS - Date.now())
           if (remaining <= 0) {
+            smoother.reset()
             state.value = 'stale'
             return
           }
-          fix.value = { longitude, latitude, accuracy, timestamp }
+          fix.value = smoother.update({ longitude, latitude, accuracy, timestamp })
           state.value = 'available'
           expiry = window.setTimeout(() => {
+            smoother.reset()
             fix.value = null
             state.value = 'stale'
           }, remaining)
         },
         ({ code }) => {
           if (token !== generation) return
+          smoother.reset()
           if (code === 1) {
             stop()
             state.value = 'denied'

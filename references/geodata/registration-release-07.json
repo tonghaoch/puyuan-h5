@@ -1,0 +1,42 @@
+{
+  "version": 7,
+  "purpose": "Release only the confirmed S1/S2 correspondence corrections. Preserve baseline visibility constraints and exclusions. Other trial controls and spline candidates are not included. All historical checks remain in the full audit.",
+  "baseline": "illustration-registration-baseline.json",
+  "corrections": [
+    {
+      "source": "registration-trial-01.json",
+      "ids": [
+        "S2"
+      ]
+    },
+    {
+      "source": "registration-trial-02.json",
+      "ids": [
+        "S1"
+      ]
+    }
+  ],
+  "checkSources": [
+    "registration-trial-01.json",
+    "registration-trial-02.json",
+    "registration-trial-03.json"
+  ],
+  "inputSha256": {
+    "park-registration.json": "18fca638298a6ace157b34040da2048c0b652868b6eb8b998ecf2d31ff829e46",
+    "east-water-street-registration.json": "a49f2c632ba4c5bf2bb7dc2b6b83b1c92e85bf24db18786087b8dd8fb61f8594",
+    "esri-world-imagery-reference.jgw": "376227da1cab4896c477d1109db9518cd7494aa04d30da3b8b781ad4c63b0512",
+    "registration-trial-01.json": "9e18856e7b7ede094ce0f69b2523ead22a78b584237bce174cb4934c1a8c7409",
+    "registration-trial-02.json": "9387bf963f88d63005ff1fa015a00dbae250a05f0beb8a982af5b7773280d31c",
+    "registration-trial-03.json": "5cf180dbca25cf3c1f72d02dc4207e19415cfe2b8423adf5082d43b366d385e3",
+    "illustration-registration-baseline.json": "d78d5573a3745725e44ba51a0cfa75353208b4b9b6e46efd9730a3bce2b33a96",
+    "../../public/art/puyuan-original-scope.webp": "c2bca7625c1c551afbde64e2f3ba59e8fa820da392ff27c844d348671244b767",
+    "esri-world-imagery-reference.jpg": "238bf4edf927731d585bc60386b7271d4f2052b8278608851bb2c86ea00c5a0c",
+    "../../src/data/reference-map.json": "d5be75d3a67e105421f32960243db1c1ce711bfc461c271cec8e1b2e4601c283",
+    "bridge-reobservation-11.json": "f774fe34941d61bed741f2ef674d210ae457ccca82bbeec57d567e9cb395b03a",
+    "bridge-reobservation-12.json": "9e19effe21e22f8cb3a79b906cfdf8fcac913d76f26d52c93c1873a43eaa8492"
+  },
+  "checkReobservations": [
+    "bridge-reobservation-11.json",
+    "bridge-reobservation-12.json"
+  ]
+}

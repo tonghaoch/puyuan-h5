@@ -1,4 +1,6 @@
 import { expect, test } from '@playwright/test'
+import { readFileSync } from 'node:fs'
+import { createGeoFrame, type LngLat } from '../src/lib/geography'
 
 test('the live illustrated fix appears without interaction, tracks, and falls back without moving the map', async ({
   page,
@@ -112,5 +114,67 @@ test('an unsupported geolocation API leaves the guide usable', async ({ page }) 
   await expect(page.getByRole('button', { name: '手动请求定位' })).toHaveCount(0)
   await page.getByRole('button', { name: '获取我的位置' }).click()
   await expect(page.locator('.geo-overview')).toHaveCount(0)
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+})
+
+test('the live marker uses smoothing for jitter and accepts a corrected distant fix immediately', async ({
+  page,
+}) => {
+  await page.clock.install()
+  await page.addInitScript(() => {
+    let update: PositionCallback
+    Object.defineProperty(navigator, 'geolocation', {
+      value: {
+        watchPosition(callback: PositionCallback) {
+          update = callback
+          return 1
+        },
+        clearWatch() {},
+      },
+    })
+    window.addEventListener('smoothing-position', (event) => {
+      update({
+        timestamp: Date.now(),
+        coords: (event as CustomEvent).detail,
+      } as GeolocationPosition)
+    })
+  })
+  const origin = { longitude: 120.63138012, latitude: 30.682173 }
+  const point = (meters: number) => ({
+    ...origin,
+    longitude:
+      origin.longitude +
+      ((meters / (6378137 * Math.cos((origin.latitude * Math.PI) / 180))) * 180) / Math.PI,
+    accuracy: 8,
+  })
+  const emit = (meters: number) =>
+    page.evaluate(
+      (coords) => window.dispatchEvent(new CustomEvent('smoothing-position', { detail: coords })),
+      point(meters),
+    )
+  const boundary = JSON.parse(
+    readFileSync(new URL('../public/geodata/boundary.geojson', import.meta.url), 'utf8'),
+  )
+  const frame = createGeoFrame(boundary.features[0].geometry.coordinates[0] as LngLat[])
+  const expected = (meters: number) => frame.project([point(meters).longitude, origin.latitude])
+  const distance = (a: readonly number[], b: readonly number[]) =>
+    Math.hypot(a[0] - b[0], a[1] - b[1])
+  await page.goto('/')
+  await emit(4)
+  await page.getByRole('button', { name: '获取我的位置' }).click()
+  const marker = page.locator('.geo-user')
+  await expect(marker).toBeVisible()
+  const camera = await page.locator('.map-scene').getAttribute('style')
+  const position = async () =>
+    (await marker.getAttribute('transform'))!.match(/[-\d.]+/g)!.map(Number)
+  await page.clock.runFor(1000)
+  await emit(-4)
+  await expect
+    .poll(async () => distance(await position(), expected(0)))
+    .toBeLessThan(distance(expected(-4), expected(0)) * 0.8)
+  await page.clock.runFor(1000)
+  await emit(50)
+  await expect.poll(async () => distance(await position(), expected(50))).toBeLessThan(0.001)
+  await expect(page.locator('.map-scene')).toHaveAttribute('style', camera!)
   await expect(page.getByRole('dialog')).toHaveCount(0)
 })

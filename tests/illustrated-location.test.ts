@@ -1,7 +1,12 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { illustratedBearing, projectIllustratedFix } from '../src/lib/illustrated-location.ts'
+import {
+  createIllustrationProjector,
+  illustratedBearing,
+  projectIllustratedFix,
+} from '../src/lib/illustrated-location.ts'
 import registration from '../src/data/illustration-registration.json' with { type: 'json' }
+import baseline from '../references/geodata/illustration-registration-baseline.json' with { type: 'json' }
 
 function sample(east: number, south: number, accuracy = 10) {
   const world = registration.world
@@ -55,4 +60,31 @@ test('unreliable regions, footprint edges, sparse or coarse fixes have no illust
   ])
     assert.equal(sample(east, south), null)
   for (const accuracy of [-1, 51, Infinity, NaN]) assert.equal(sample(816, 688, accuracy), null)
+})
+
+test('confirmed bridge corrections improve the separate west-temple bridge without widening visibility', () => {
+  const before = createIllustrationProjector(baseline)
+  const world = registration.world
+  const fix = (east: number, south: number, accuracy: number) => ({
+    longitude:
+      ((world[4] / 6378137) * 180) / Math.PI + (((east * world[0]) / 6378137) * 180) / Math.PI,
+    latitude: (Math.atan(Math.sinh((world[5] + south * world[3]) / 6378137)) * 180) / Math.PI,
+    accuracy,
+    timestamp: 0,
+  })
+  const previous = before(fix(475, 666, 10))!
+  const corrected = projectIllustratedFix(fix(475, 666, 10))!
+  assert.ok(
+    Math.hypot(corrected.x - 570, corrected.y - 712) <
+      Math.hypot(previous.x - 570, previous.y - 712) * 0.7,
+  )
+  for (const accuracy of [0, 10, 30]) {
+    for (let east = 0; east < 1400; east += 20) {
+      for (let south = 0; south < 1200; south += 20) {
+        const position = fix(east, south, accuracy)
+        if (projectIllustratedFix(position))
+          assert.ok(before(position), `new unsupported marker at ${east},${south}`)
+      }
+    }
+  }
 })

@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "purpose": "Offline image-registration experiment only. Points are visual correspondences, not surveyed positions. Freeze the split before computing either model's predictions.",
+  "replaceControls": [
+    {"id":"S2","label":"朝阳桥以南、南街汇水口以北的东西向过水小桥桥心","satellitePx":[536,921],"scenePx":[600,943],"evidence":"沿朝阳桥下方的同一条纵渠向南，在南侧东西渠汇入口之前，取横巷贯穿两岸的桥面中点。旧影像点 [517,959] 落在桥西南的街区，未改手绘点。"}
+  ],
+  "addControls": [
+    {"id":"R1-SJ","label":"南街中段南北巷与向西通小桥的横巷交点","satellitePx":[611,913],"scenePx":[701,929],"evidence":"从已辨认的东西小桥沿窄巷向东，取接入南北巷的路心；南北巷南端通往横渠，不取屋顶角。"},
+    {"id":"R1-SE","label":"东南半岛北端横越斜支渠的小桥桥心","satellitePx":[932,854],"scenePx":[1071,879],"evidence":"H3 下游、南侧横渠汇入口上游，一条短巷从西侧街区向东跨支渠至狭长陆地，取跨水段中央。"},
+    {"id":"R1-EI","label":"东侧长条河岛两股水道汇合的南端岸尖","satellitePx":[1109,635],"scenePx":[1250,658],"evidence":"东河长桥以北，取细长河岛最南端的地面岸线，不取房屋、树顶或东岸。岸线可能简化；外侧道路和 V5 桥未用来拟合。"}
+  ],
+  "newChecks": [
+    {"id":"K1","label":"东南街区，S4 以西、通往 C4 的南北巷跨横渠桥心","satellitePx":[893,960],"scenePx":[1031,964],"evidence":"从 C4 向南沿同一条路到横渠，取桥心。旁边平行巷道不能混用。"},
+    {"id":"K2","label":"东南斜支渠汇入主河前、低矮半岛的南端","satellitePx":[971,936],"scenePx":[1110,942],"evidence":"在 S4 以东、H3 下游，取低矮绿地的南岸尖，不取树冠；与东河北面的 R1-EI 不是同一岛。岸线辨认为近似值。"}
+  ]
+}

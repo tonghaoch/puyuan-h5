@@ -1,0 +1,15 @@
+{
+  "version": 6,
+  "purpose": "Deterministic synthetic device traces only. No real user location, field measurements, or all-park accuracy claims. All samples, including spikes and persistent bias, remain in the report.",
+  "origin": [120.63, 30.68],
+  "samplePeriodMs": 1000,
+  "scenarios": [
+    {"id":"stationary","label":"静止抖动","seed":123,"knots":[[0,0,0],[39000,0,0]],"noiseM":4,"accuracyM":8},
+    {"id":"start-stop","label":"起步和停下","seed":11,"knots":[[0,0,0],[5000,0,0],[25000,28,0],[35000,28,0]],"noiseM":2.5,"accuracyM":8},
+    {"id":"corner","label":"直角转弯","seed":22,"knots":[[0,0,0],[10000,14,0],[20000,14,14]],"noiseM":2.5,"accuracyM":8},
+    {"id":"bridge","label":"直线过桥","seed":33,"knots":[[0,0,-14],[20000,0,14]],"noiseM":2.5,"accuracyM":8},
+    {"id":"spike","label":"单次大跳点","seed":44,"knots":[[0,0,0],[39000,0,0]],"noiseM":1.5,"accuracyM":6,"spike":{"index":20,"offsetM":[80,45]}},
+    {"id":"bias","label":"持续偏移 12 米","seed":55,"knots":[[0,0,0],[39000,0,0]],"noiseM":2,"accuracyM":5,"biasM":[12,0]},
+    {"id":"gap","label":"间断采样与真实位移","seed":66,"knots":[[0,0,0],[5000,7,0],[15000,21,0],[20000,21,7]],"timesMs":[0,1000,2000,5000,15000,20000],"noiseM":0,"accuracyM":8}
+  ]
+}

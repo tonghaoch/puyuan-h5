@@ -1,0 +1,18 @@
+{
+  "version": 11,
+  "purpose": "Correct the observed bridge identity before scoring. Preserve original values; changes apply only to evaluation observations, not to fitted controls or application coordinates.",
+  "corrections": [
+    {
+      "id": "K4",
+      "previous": {"satellitePx": [316, 1020], "scenePx": [342, 1043]},
+      "corrected": {
+        "id": "K4",
+        "label": "美食广场西侧岸路跨南渠至南街的桥面中部",
+        "satellitePx": [347, 1035],
+        "scenePx": [345, 1044],
+        "evidence": "独立原始图复核确认两端为美食广场西侧岸路和南街。旧卫星点在侧渠水面，不是画面中的同一座桥；新原图点取桥面中部。修正基于两端街块/水道关系，不读模型残差取点；旧值随记录保留，不能算全新盲测。",
+        "observation": {"satellitePickTolerancePx": 4, "scenePickTolerancePx": 3}
+      }
+    }
+  ]
+}
