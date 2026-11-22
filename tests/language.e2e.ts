@@ -10,7 +10,7 @@ test('language toggles in place without resetting the map, quest photos or dinin
   await expect(toggle).toHaveAccessibleName('切换到英文 · English')
   await expect(toggle.locator('svg[aria-hidden="true"]')).toBeVisible()
   await expect(page.getByText('游园手帖')).toHaveCount(0)
-  await page.getByRole('button', { name: '古镇地点', exact: true }).click()
+  await page.getByRole('button', { name: '浏览模式', exact: true }).click()
   await page.locator('.map-viewport').press('=')
   const camera = await scene.getAttribute('style')
   await toggle.click()
@@ -18,10 +18,18 @@ test('language toggles in place without resetting the map, quest photos or dinin
   await expect(toggle).toHaveAccessibleName('Switch to Chinese · 中文')
   await expect(page).toHaveTitle('Puyuan Wanderer · Discover Jiangnan')
   await expect(scene).toHaveAttribute('style', camera!)
-  await expect(page.getByRole('button', { name: 'Places', exact: true })).toHaveAttribute(
+  await expect(page.getByRole('button', { name: 'Browse mode', exact: true })).toHaveAttribute(
     'aria-pressed',
     'true',
   )
+  await page.getByRole('button', { name: 'Game mode', exact: true }).click()
+  await toggle.click()
+  await expect(page.getByRole('button', { name: '游戏模式', exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  )
+  await toggle.click()
+  await expect(scene).toHaveAttribute('style', camera!)
   await page.getByRole('button', { name: 'Quest: Grand Lawn · Cuju Kickoff' }).click()
   const sheet = page.getByRole('dialog', { name: 'Cuju Kickoff' })
   await expect(sheet).toContainText('Score more than 250 points as a team.')
@@ -59,7 +67,7 @@ test('all book chapters, map labels and legacy dialogs render English on a narro
   await expect(page).toHaveURL(/#map$/)
   await page.locator('.language-button').click()
   for (const [route, expected] of [
-    ['map', 'Roaming NPCs'],
+    ['map', 'Browse'],
     ['itinerary', 'Two Days in Puyuan'],
     ['itinerary/walk', 'Shufang Zen Temple'],
     ['itinerary/studio', 'Ginkgo bookmark'],

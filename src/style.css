@@ -334,62 +334,70 @@ button {
 .map-topbar > * {
   pointer-events: auto;
 }
-.filter-pills {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 5px;
-  background: #fbf8edf5;
-  border: 1px solid #ddd7bf;
-  border-radius: 5px;
-  box-shadow: 0 5px 20px #66664209;
+.map-modes {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, 68px);
+  width: max-content;
+  align-self: flex-start;
+  isolation: isolate;
 }
-.filter-pills button {
-  --layer-ink: #465e4d;
-  height: 36px;
-  padding: 0 16px;
+.map-modes::before,
+.map-modes::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+}
+.map-modes::before {
+  inset: 6px 0;
+  border: 1px solid #b7a17a;
+  border-radius: 4px;
+  background: #faf5e8f5;
+  box-shadow: 0 2px 9px #4c492b12;
+}
+.map-modes::after {
+  inset: 9px auto 9px 3px;
+  width: calc(50% - 6px);
+  border: 1px solid #ad7d53;
+  border-radius: 2px;
+  background: #854631;
+  box-shadow: inset 0 0 0 1px #d8af7a44;
+  transition: transform 0.18s ease;
+}
+.map-modes[data-mode='game']::after {
+  transform: translateX(calc(100% + 6px));
+}
+.map-modes button {
   display: flex;
   align-items: center;
-  gap: 7px;
-  border: 1px solid #c9b99b;
-  border-radius: 3px;
-  background: #f5efdf;
+  justify-content: center;
+  gap: 3px;
+  height: 44px;
+  padding: 0;
+  border-radius: 5px;
+  color: #706343;
   font-family: var(--serif);
   font-weight: 600;
   font-size: 12px;
   letter-spacing: 1px;
-  color: #675f50;
   white-space: nowrap;
-  transition:
-    background 0.2s,
-    color 0.2s;
+  transition: color 0.18s;
 }
-.filter-pills [data-layer='quest'] {
-  --layer-ink: #803e30;
-}
-.filter-pills [data-layer='npc'] {
-  --layer-ink: #304757;
-}
-.filter-pills button[aria-pressed='true'] {
-  background: var(--layer-ink);
-  border-color: var(--layer-ink);
+.map-modes button[aria-pressed='true'] {
   color: #fff2d6;
-  box-shadow:
-    inset 0 0 0 1px var(--layer-ink),
-    inset 0 0 0 2px #d5a46799;
 }
-.filter-pills button > svg {
-  width: 17px;
-  height: 20px;
-  flex: none;
+.map-modes button > svg {
+  width: 14px;
+  height: 17px;
+  color: #9f8152;
 }
-.filter-pills button[aria-pressed='false'] > svg {
-  filter: grayscale(1);
-  opacity: 0.72;
+.map-modes button[aria-pressed='true'] > svg {
+  color: #ffe2a4;
 }
-.filter-pills button:focus-visible {
+.map-modes button:focus-visible {
   outline: 2px solid #694c20;
-  outline-offset: 2px;
+  outline-offset: -5px;
 }
 .search-field {
   display: flex;
@@ -1584,9 +1592,6 @@ button {
     right: 25px;
     gap: 15px;
   }
-  .filter-pills button {
-    padding: 0 12px;
-  }
   .search-field {
     width: 230px;
   }
@@ -1684,9 +1689,6 @@ button {
   .map-topbar {
     gap: 10px;
   }
-  .filter-pills button {
-    padding: 0 9px;
-  }
   .food-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1755,22 +1757,6 @@ button {
     gap: 9px;
     align-items: stretch;
     flex-direction: column;
-  }
-  .filter-pills {
-    width: 100%;
-    gap: 3px;
-    padding: 4px;
-    border-radius: 6px;
-    justify-content: space-between;
-  }
-  .filter-pills button {
-    flex: 1;
-    justify-content: center;
-    gap: 5px;
-    padding: 0 7px;
-    height: 33px;
-    font-size: 11px;
-    letter-spacing: 0;
   }
   .search-field input {
     font-size: 11px;
@@ -2183,9 +2169,6 @@ button {
     left: 12px;
     right: 12px;
   }
-  .filter-pills button {
-    padding: 0 5px;
-  }
   .map-introduction h1 {
     font-size: 27px;
   }
@@ -2454,7 +2437,7 @@ html:lang(en) .brand-type {
   font-size: clamp(17px, 5vw, 21px);
   letter-spacing: 0;
 }
-html:lang(en) :is(.filter-pills button, .main-nav button span) {
+html:lang(en) :is(.map-modes button, .main-nav button span) {
   letter-spacing: 0;
   text-indent: 0;
 }
