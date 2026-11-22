@@ -33,6 +33,7 @@ test('separate lawn tokens open the indicated challenge without leaving the map'
   page,
 }) => {
   await page.goto('/')
+  await page.getByRole('button', { name: '游戏模式', exact: true }).click()
   const flag = page.getByRole('button', { name: '游戏：大草坪 · 蹴鞠达人' })
   const hammer = page.getByRole('button', { name: '游戏：大草坪 · 一锤定音' })
   await expect(page.locator('.quest-pin')).toHaveCount(8)
@@ -129,6 +130,7 @@ test('each lawn game has its own handbook entry and locates its own pin', async 
 
 test('quest and NPC artwork scales in proportion to the map', async ({ page }) => {
   await page.goto('/')
+  await page.getByRole('button', { name: '游戏模式', exact: true }).click()
   const artwork = page.locator('.map-art, .field-pin > svg')
   await expect(artwork).toHaveCount(14)
   const firstIcon = page.locator('.field-pin > svg').first()
@@ -157,11 +159,12 @@ test('quest and NPC artwork scales in proportion to the map', async ({ page }) =
   }
 })
 
-test('all thirteen pins stay directly above their map points during pan, zoom and layer changes', async ({
+test('all thirteen pins stay directly above their map points during pan, zoom and mode changes', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/')
+  await page.getByRole('button', { name: '游戏模式', exact: true }).click()
   const markers = page.locator('.field-marker')
   await expect(markers).toHaveCount(13)
   const checkPins = async () => {
@@ -204,7 +207,12 @@ test('all thirteen pins stay directly above their map points during pan, zoom an
   for (let step = 0; step < 5; step++) {
     await viewport.press('ArrowRight')
     await viewport.press('ArrowUp')
-    await page.getByRole('button', { name: '古镇地点', exact: true }).click()
+    const camera = await page.locator('.map-scene').getAttribute('style')
+    await page.getByRole('button', { name: '浏览模式', exact: true }).click()
+    await expect(markers).toHaveCount(0)
+    await page.getByRole('button', { name: '游戏模式', exact: true }).click()
+    await expect(markers).toHaveCount(13)
+    await expect(page.locator('.map-scene')).toHaveAttribute('style', camera!)
     await checkPins()
     for (const [index, gap] of (await gaps()).entries())
       expect(gap).toBeCloseTo(initialGaps[index]!, 2)
@@ -216,9 +224,8 @@ test('five NPC markers show roaming areas; the roaming constable has no invented
   page,
 }) => {
   await page.goto('/')
-  const layers = page.getByRole('group', { name: '地图图层' })
-  await layers.getByRole('button', { name: '江湖令牌' }).click()
-  await layers.getByRole('button', { name: '行走 NPC' }).click()
+  const modes = page.getByRole('group', { name: '地图模式' })
+  await expect(modes.getByRole('button', { pressed: true })).toHaveText('浏览')
   await page.getByRole('button', { name: '游戏', exact: true }).click()
   await page.getByRole('link', { name: '游走 NPC' }).click()
   await expect(page.getByRole('button', { name: '查看活动范围' })).toHaveCount(5)
@@ -228,7 +235,9 @@ test('five NPC markers show roaming areas; the roaming constable has no invented
     .getByRole('button')
     .click()
   await expect(page.locator('.npc-pin')).toHaveCount(5)
-  await expect(layers.getByRole('button', { pressed: true })).toHaveText(['行走 NPC'])
+  await expect(modes.getByRole('button', { pressed: true })).toHaveText('游戏')
+  await expect(page.locator('.quest-pin')).toHaveCount(8)
+  await expect(page.locator('.reference-labels button')).toHaveCount(0)
   await expect(page.getByRole('button', { name: /游走 NPC：巡捕/ })).toHaveCount(0)
   const pin = page.getByRole('button', { name: /游走 NPC：蒙面大侠/ })
   await expect(pin).toBeInViewport()
@@ -240,50 +249,47 @@ test('five NPC markers show roaming areas; the roaming constable has no invented
   await expect(pin).toBeFocused()
 })
 
-test('three independent map toggles control markers in every combination', async ({ page }) => {
+test('two exclusive map modes retain the camera and stay selected across pages', async ({
+  page,
+}) => {
   await page.goto('/')
-  const layers = page.getByRole('group', { name: '地图图层' })
-  const names = ['江湖令牌', '行走 NPC', '古镇地点']
-  await expect(layers.getByRole('button')).toHaveText(names)
-  const check = async (quest: boolean, npc: boolean, places: boolean) => {
-    const enabled = [quest, npc, places]
-    await expect(layers.getByRole('button', { pressed: true })).toHaveText(
-      names.filter((_, index) => enabled[index]),
-    )
-    await expect(page.locator('.quest-pin')).toHaveCount(quest ? 8 : 0)
-    await expect(page.locator('.npc-pin')).toHaveCount(npc ? 5 : 0)
-    await expect(page.locator('.reference-labels button')).toHaveCount(places ? 18 : 0)
-    await expect(page.locator('.quest-legend')).toHaveCount(Number(quest) + Number(npc))
+  const modes = page.getByRole('group', { name: '地图模式' })
+  await expect(modes.getByRole('button')).toHaveText(['浏览', '游戏'])
+  const check = async (mode: '浏览' | '游戏') => {
+    const game = mode === '游戏'
+    await expect(modes.getByRole('button', { pressed: true })).toHaveText(mode)
+    await expect(page.locator('.quest-pin')).toHaveCount(game ? 8 : 0)
+    await expect(page.locator('.npc-pin')).toHaveCount(game ? 5 : 0)
+    await expect(page.locator('.reference-labels button')).toHaveCount(game ? 0 : 18)
+    await expect(page.locator('.quest-legend')).toHaveCount(game ? 2 : 0)
   }
-  const toggle = (name: string) => layers.getByRole('button', { name }).click()
-  await check(true, true, false)
-  await toggle('古镇地点')
-  await check(true, true, true)
-  await toggle('江湖令牌')
-  await check(false, true, true)
-  await toggle('行走 NPC')
-  await check(false, false, true)
-  await toggle('古镇地点')
-  await check(false, false, false)
+  const select = (mode: string) => modes.getByRole('button', { name: `${mode}模式` }).click()
+  await check('浏览')
+  await modes.getByRole('button', { name: '浏览模式' }).press('Enter')
+  await check('浏览')
+  await select('游戏')
+  await check('游戏')
+  await select('游戏')
+  await check('游戏')
+  await page.locator('.map-viewport').press('=')
+  await page.locator('.map-viewport').press('ArrowRight')
+  const camera = await page.locator('.map-scene').getAttribute('style')
+  await select('浏览')
+  await check('浏览')
+  await expect(page.locator('.map-scene')).toHaveAttribute('style', camera!)
   await expect(page.locator('.map-art')).toBeVisible()
   await page.getByRole('button', { name: '行程', exact: true }).click()
   await page.getByRole('button', { name: '地图', exact: true }).click()
-  await check(false, false, false)
-  await toggle('行走 NPC')
-  await check(false, true, false)
-  await toggle('江湖令牌')
-  await check(true, true, false)
-  await toggle('行走 NPC')
-  await check(true, false, false)
-  await toggle('古镇地点')
-  await check(true, false, true)
+  await check('浏览')
+  await select('游戏')
+  await page.getByRole('button', { name: '游戏', exact: true }).click()
+  await page.getByRole('button', { name: '地图', exact: true }).click()
+  await check('游戏')
+  await expect(page.locator('.map-scene')).toHaveAttribute('style', camera!)
 })
 
-test('town places open restaurant content and retain the other layer choices', async ({ page }) => {
+test('town places open restaurant content and dining returns in browse mode', async ({ page }) => {
   await page.goto('/')
-  await page.getByRole('button', { name: '古镇地点', exact: true }).click()
-  await page.getByRole('button', { name: '江湖令牌', exact: true }).click()
-  await page.getByRole('button', { name: '行走 NPC', exact: true }).click()
   await page.getByRole('button', { name: '查看深夜食堂', exact: true }).click()
   const dialog = page.getByRole('dialog')
   await expect(dialog.getByRole('heading', { name: '深夜食堂' })).toBeVisible()
@@ -294,6 +300,19 @@ test('town places open restaurant content and retain the other layer choices', a
   await expect(page.locator('.reference-labels button')).toHaveCount(18)
   await expect(page.locator('.field-marker')).toHaveCount(0)
   await expect(page.getByRole('button', { name: '查看深夜食堂', exact: true })).toBeVisible()
+  await page.getByRole('button', { name: '游戏模式', exact: true }).click()
+  await page.getByRole('button', { name: '餐厅', exact: true }).click()
+  await page
+    .locator('.dinner-row')
+    .filter({ has: page.getByRole('heading', { name: '深夜食堂', exact: true }) })
+    .getByRole('button', { name: '在地图查看' })
+    .click()
+  await expect(page.getByRole('button', { name: '浏览模式' })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  )
+  await expect(page.locator('.reference-labels button')).toHaveCount(18)
+  await expect(page.locator('.field-marker')).toHaveCount(0)
 })
 
 test('zoom and camera survive tab changes and pan responds to pointer drag', async ({ page }) => {
@@ -350,7 +369,6 @@ test('off-park geolocation does not draw an illustrated marker', async ({ page, 
   await context.grantPermissions(['geolocation'])
   await context.setGeolocation({ latitude: 30, longitude: 120, accuracy: 18 })
   await page.goto('/')
-  await page.getByRole('button', { name: '古镇地点', exact: true }).click()
   await page.getByRole('button', { name: '获取我的位置' }).click()
   await expect(page.getByRole('dialog')).toHaveCount(0)
   await expect(page.getByText(/精度约 18 米/)).toBeVisible()
@@ -409,6 +427,7 @@ test('reduced motion is respected and viewport never overflows horizontally', as
 test('two-finger touch zooms the scene on mobile', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'Touch gesture is exercised in the mobile browser project')
   await page.goto('/')
+  await page.getByRole('button', { name: '游戏模式', exact: true }).click()
   const scene = page.locator('.map-scene')
   const npcIcon = page.locator('.npc-pin > svg').first()
   await expect.poll(async () => (await npcIcon.boundingBox())?.width ?? 0).toBeCloseTo(26, 1)
@@ -577,7 +596,7 @@ test('the illustrated guide is the only main map, including for retired landmark
   await page.goto('/#map/geopoint/node-12885564503')
   await expect(page).toHaveURL(/#map$/)
   await expect(page.getByRole('region', { name: /古镇导览/ })).toBeVisible()
-  await expect(page.getByRole('group', { name: '地图图层' }).getByRole('button')).toHaveCount(3)
+  await expect(page.getByRole('group', { name: '地图模式' }).getByRole('button')).toHaveCount(2)
   await expect(page.getByRole('button', { name: /^(路网|导览)$/ })).toHaveCount(0)
   await expect(page.getByRole('dialog')).toHaveCount(0)
   await expect(page.locator('.map-art')).toHaveAttribute('src', '/art/puyuan-original-scope.webp')
@@ -651,6 +670,7 @@ test('location is the only camera-area control and clears the bottom nav and leg
     page.getByRole('button', { name: /^(放大地图|缩小地图|重置地图视野)$/ }),
   ).toHaveCount(0)
   await page.locator('.language-button').click()
+  await page.getByRole('button', { name: 'Game mode', exact: true }).click()
   const locate = page.getByRole('button', { name: 'Find my location' })
   const button = (await locate.boundingBox())!
   const nav = (await page.locator('.main-nav').boundingBox())!
@@ -670,7 +690,7 @@ test('location is the only camera-area control and clears the bottom nav and leg
   await expect(page.locator('.map-scene')).toHaveAttribute('style', camera!)
   await expect(page).toHaveURL(/\/#map$/)
   expect(await page.evaluate(() => history.length)).toBe(historySize)
-  await page.getByRole('button', { name: 'Places', exact: true }).click()
+  await page.getByRole('button', { name: 'Browse mode', exact: true }).click()
   await expect(page.locator('.reference-labels button')).toHaveCount(18)
   await locate.click()
   await expect(page.locator('.geo-overview')).toHaveCount(0)

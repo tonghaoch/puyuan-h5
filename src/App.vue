@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import AppIcon from './components/AppIcon.vue'
 import MainNav from './components/MainNav.vue'
 import TripBook from './components/TripBook.vue'
@@ -18,11 +18,11 @@ import {
   restaurants,
   places,
   categoryLabels,
-  mapLayers,
+  mapModes,
   placeById,
   selectionKey,
   type Tab,
-  type MapLayer,
+  type MapMode,
   type Selection,
 } from './data/catalog'
 import { useLocation } from './lib/location'
@@ -47,7 +47,7 @@ const detailModelId = ref<string>()
 const overlay = ref<Overlay>(null)
 const showLocation = ref(false)
 const query = ref('')
-const visibleLayers = reactive<Record<MapLayer, boolean>>({ quest: true, npc: true, places: false })
+const mapMode = ref<MapMode>('browse')
 const activityFilter = ref('all')
 const dayFilter = ref(0)
 const focusRequest = ref<{ id: string; nonce: number } | null>(null)
@@ -157,9 +157,7 @@ function readRoute() {
   questOrigin.value =
     window.history.state?.questOrigin ??
     (activeNpc.value && window.history.state?.puyuanModal ? 'map' : null)
-  if (mapEntry.value) {
-    visibleLayers[activeQuest.value ? 'quest' : 'npc'] = true
-  }
+  if (mapEntry.value) mapMode.value = 'game'
   if (hadGameDetail && !activeQuest.value && !activeNpc.value && gameOpener?.isConnected) {
     const opener = gameOpener
     nextTick(() => {
@@ -167,6 +165,7 @@ function readRoute() {
     })
   }
   selection.value = kind && id ? validSelection(kind, id) : null
+  if (tab.value === 'map' && selection.value) mapMode.value = 'browse'
   detailModelId.value = kind === 'place' ? modelId : undefined
   overlay.value = kind === 'favorites' ? kind : null
   showLocation.value = !walkPreviewEnabled && tab.value === 'map' && kind === 'location'
@@ -234,7 +233,7 @@ function resetActivityFilters() {
 function viewOnMap(id: string) {
   query.value = ''
   const npcArea = id.startsWith('npc:')
-  visibleLayers[npcArea ? 'npc' : id.startsWith('quest:') ? 'quest' : 'places'] = true
+  mapMode.value = npcArea || id.startsWith('quest:') ? 'game' : 'browse'
   route('map', false, !npcArea)
   focusRequest.value = { id, nonce: Date.now() }
   notify(npcArea ? '已标出角色活动范围，非实时位置' : '已为你找到地图中的位置')
@@ -434,7 +433,7 @@ onBeforeUnmount(() => {
       <section v-show="tab === 'map'" class="map-page reference-view" :aria-label="t('游园地图')">
         <ParkMap
           :places="places"
-          :layers="visibleLayers"
+          :mode="mapMode"
           :focus-request="focusRequest"
           :motion="motionActive"
           :show-location="showLocation"
@@ -463,19 +462,19 @@ onBeforeUnmount(() => {
           @retry="location.retry()"
         />
         <div class="map-topbar">
-          <div class="filter-pills" role="group" :aria-label="t('地图图层')">
+          <div class="map-modes" role="group" :aria-label="t('地图模式')" :data-mode="mapMode">
             <button
-              v-for="layer in mapLayers"
-              :key="layer.id"
+              v-for="mode in mapModes"
+              :key="mode.id"
               type="button"
-              :data-layer="layer.id"
-              :aria-pressed="visibleLayers[layer.id]"
-              @click="visibleLayers[layer.id] = !visibleLayers[layer.id]"
+              :data-mode="mode.id"
+              :aria-label="t(mode.label)"
+              :aria-pressed="mapMode === mode.id"
+              @click="mapMode = mode.id"
             >
-              <QuestToken v-if="layer.id === 'quest'" />
-              <EncounterToken v-else-if="layer.id === 'npc'" />
-              <AppIcon v-else name="lantern" :size="17" />
-              {{ t(layer.name) }}
+              <QuestToken v-if="mode.id === 'game'" />
+              <AppIcon v-else name="pavilion" :size="14" />
+              {{ t(mode.name) }}
             </button>
           </div>
         </div>
@@ -491,13 +490,9 @@ onBeforeUnmount(() => {
           </p>
           <span class="intro-caption">{{ t('A LITTLE WANDER, A LOT TO DISCOVER.') }}</span>
         </div>
-        <div v-if="visibleLayers.quest || visibleLayers.npc" class="map-bottom-note">
-          <span v-if="visibleLayers.quest" class="quest-legend"
-            ><QuestToken />{{ t('江湖令 · 团建挑战') }}</span
-          >
-          <span v-if="visibleLayers.npc" class="quest-legend"
-            ><EncounterToken />{{ t('行走 NPC · 活动范围') }}</span
-          >
+        <div v-if="mapMode === 'game'" class="map-bottom-note">
+          <span class="quest-legend"><QuestToken />{{ t('江湖令 · 团建挑战') }}</span>
+          <span class="quest-legend"><EncounterToken />{{ t('行走 NPC · 活动范围') }}</span>
           <span class="note-separator">/</span
           ><span class="map-hint">{{ t('拖动探索 · 双指缩放') }}</span>
         </div>

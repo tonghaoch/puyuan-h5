@@ -2,7 +2,7 @@
 import { t } from '../i18n'
 import { publicAsset } from '../lib/public-asset'
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
-import type { MapLayer, Place } from '../data/catalog'
+import type { MapMode, Place } from '../data/catalog'
 import { clampCamera, zoomAt, zoomRange, SCENE, type Camera } from '../lib/map-camera'
 import { useWalkPreview, walkPreviewEnabled } from '../lib/walk-preview'
 import { illustratedBearing, type IllustratedPosition } from '../lib/illustrated-location'
@@ -28,7 +28,7 @@ const boatRoutes = [
 const props = defineProps<{
   places: Place[]
   focusRequest: { id: string; nonce: number } | null
-  layers: Record<MapLayer, boolean>
+  mode: MapMode
   motion: boolean
   showLocation: boolean
   illustrated: IllustratedPosition | null
@@ -67,7 +67,7 @@ const pins = [
       : [],
   ),
 ]
-const fieldMarkers = computed(() => pins.filter((pin) => props.layers[pin.kind]))
+const fieldMarkers = computed(() => (props.mode === 'game' ? pins : []))
 function openPin(pin: (typeof pins)[number], event: MouseEvent) {
   const opener = event.currentTarget as HTMLElement
   if (pin.kind === 'quest') emit('game', pin.id, opener)
@@ -350,7 +350,7 @@ onBeforeUnmount(() => observer?.disconnect())
           </g>
         </svg>
       </div>
-      <ReferenceLabels v-if="layers.places" :places="places" @select="emit('select', $event)" />
+      <ReferenceLabels v-if="mode === 'browse'" :places="places" @select="emit('select', $event)" />
       <div
         v-if="illustrated"
         class="illustrated-radius"
