@@ -1,0 +1,39 @@
+{
+  "region": "濮院手绘导览 · 可辨认的水街街区",
+  "base": "east-water-street-registration.json",
+  "promotedToControl": ["H1"],
+  "controls": [
+    {"id":"N1","label":"北水面西廊桥水上段中点","satellitePx":[619,193],"scenePx":[755,289]},
+    {"id":"N2","label":"北水面东廊桥水上段中点","satellitePx":[700,182],"scenePx":[830,278]},
+    {"id":"N3","label":"塔东通往东岸的步道中段","satellitePx":[810,277],"scenePx":[948,358]},
+    {"id":"E1","label":"方院东北侧向东跨主河的桥心","satellitePx":[1289,197],"scenePx":[1386,310]},
+    {"id":"E2","label":"方院东南沿河纵路与横街交点","satellitePx":[1156,365],"scenePx":[1257,453]},
+    {"id":"E3","label":"东河长桥东岸纵向步道交点","satellitePx":[1115,765],"scenePx":[1242,780]},
+    {"id":"E4","label":"东河长桥跨水段中点","satellitePx":[1047,757],"scenePx":[1181,778]},
+    {"id":"W1","label":"寺湾街跨西侧纵渠桥心","satellitePx":[439,451],"scenePx":[568,509]},
+    {"id":"W2","label":"功德桥桥心","satellitePx":[507,695],"scenePx":[603,735]},
+    {"id":"W3","label":"朝阳桥桥心","satellitePx":[514,769],"scenePx":[602,802]},
+    {"id":"W4","label":"大有桥跨南渠桥心","satellitePx":[582,771],"scenePx":[678,809]},
+    {"id":"W5","label":"西北直渠北段东西横桥","satellitePx":[416,336],"scenePx":[555,403]},
+    {"id":"T1","label":"侍郎桥斜跨渠段中点","satellitePx":[662,454],"scenePx":[780,521]},
+    {"id":"T3","label":"御桥东南斜支渠北端横向小桥（取渠口首桥，不是下游横桥）","satellitePx":[841,691],"scenePx":[969,727]},
+    {"id":"S1","label":"西南长水街纵路过南渠桥心","satellitePx":[258,1039],"scenePx":[342,1044]},
+    {"id":"S2","label":"朝阳桥南侧纵渠下游横桥","satellitePx":[517,959],"scenePx":[600,943]},
+    {"id":"S3","label":"南街转折处南北小桥","satellitePx":[711,965],"scenePx":[814,980]},
+    {"id":"S4","label":"东南河口滨水巷跨南渠","satellitePx":[948,953],"scenePx":[1088,949]}
+  ],
+  "checks": [
+    {"id":"V1","label":"塔西过水小桥","satellitePx":[730,286],"scenePx":[856,368]},
+    {"id":"V2","label":"秀桐桥桥心","satellitePx":[460,520],"scenePx":[578,574]},
+    {"id":"V3","label":"西庙桥跨东西支渠","satellitePx":[475,666],"scenePx":[570,712]},
+    {"id":"V4","label":"永乐桥东侧南北向过水桥","satellitePx":[743,719],"scenePx":[864,754]},
+    {"id":"V5","label":"东侧狭长河岛东北跨渠桥","satellitePx":[1164,557],"scenePx":[1302,540]},
+    {"id":"V6","label":"南街西段过水巷口","satellitePx":[634,987],"scenePx":[716,998]}
+  ],
+  "releaseChecks": [
+    {"id":"F1","label":"侍郎桥以西的支渠过水小桥","satellitePx":[605,475],"scenePx":[720,529]},
+    {"id":"F2","label":"侍郎桥东引道与寺旁南北巷的路心","satellitePx":[695,473],"scenePx":[813,539]},
+    {"id":"F3","label":"方院西南侧两条地面街道交点","satellitePx":[984,360],"scenePx":[1088,448]},
+    {"id":"F4","label":"方院东北侧水边街道交点","satellitePx":[1155,199],"scenePx":[1272,310]}
+  ]
+}

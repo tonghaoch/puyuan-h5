@@ -1,30 +1,27 @@
 <script setup lang="ts">
 import { t } from '../i18n'
-import { publicAsset } from '../lib/public-asset'
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import {
-  classifyFix,
-  createGeoFrame,
-  type GeographicFix,
-  type GeoCollection,
-  type LngLat,
-} from '../lib/geography'
+import { computed } from 'vue'
+import type { CompassPermission } from '../lib/compass'
+import CompassFan from './CompassFan.vue'
+import { createGeoFrame, type GeographicFix, type LngLat } from '../lib/geography'
 const props = defineProps<{
   fix: GeographicFix | null
-  now: number
+  ring: LngLat[]
+  error: boolean
+  status: 'inside' | 'outside' | 'uncertain' | 'stale' | null
+  illustrated: boolean
+  heading: number | null
+  compassPermission: CompassPermission
   deviceMessage: string
   canRetry: boolean
 }>()
-defineEmits<{ retry: [] }>()
-const ring = ref<LngLat[]>([])
-const error = ref(false)
-const controller = new AbortController()
-const frame = computed(() => (ring.value.length >= 3 ? createGeoFrame(ring.value) : null))
+defineEmits<{ retry: []; enableCompass: [] }>()
+const frame = computed(() => (props.ring.length >= 3 ? createGeoFrame(props.ring) : null))
 const boundaryPath = computed(() => {
   const projection = frame.value
   if (!projection) return ''
   return (
-    ring.value
+    props.ring
       .map((coordinate, index) => {
         const [x, y] = projection.project(coordinate)
         return `${index ? 'L' : 'M'}${x.toFixed(2)},${y.toFixed(2)}`
@@ -41,40 +38,15 @@ const accuracyRadius = computed(() =>
       Math.cos((props.fix.latitude * Math.PI) / 180)
     : 0,
 )
-const status = computed(() =>
-  props.fix && ring.value.length ? classifyFix(props.fix, ring.value, props.now) : null,
-)
 const message = computed(() => {
   if (!props.fix) return props.deviceMessage
-  if (error.value) return '地理概览暂时无法加载，仍可浏览古镇示意图。'
-  if (!status.value) return '正在加载园区位置…'
-  if (status.value === 'stale') return '这次位置已过期，请重新获取。'
-  if (status.value === 'uncertain') return '位置精度范围接近园区边界，暂无法确认是否在园内。'
-  if (status.value === 'inside') return '你的位置在公开资料记录的园区范围内。'
+  if (props.error) return '地理概览暂时无法加载，仍可浏览古镇示意图。'
+  if (!props.status) return '正在加载园区位置…'
+  if (props.status === 'stale') return '这次位置已过期，请重新获取。'
+  if (props.status === 'uncertain') return '位置精度范围接近园区边界，暂无法确认是否在园内。'
+  if (props.status === 'inside') return '你的位置在公开资料记录的园区范围内。'
   return '你的位置在公开资料记录的园区范围外。'
 })
-onMounted(async () => {
-  try {
-    const response = await fetch(publicAsset('/geodata/boundary.geojson'), {
-      signal: controller.signal,
-    })
-    if (!response.ok) throw new Error('Map data unavailable')
-    const result = (await response.json()) as GeoCollection
-    if (result.type !== 'FeatureCollection' || !Array.isArray(result.features))
-      throw new Error('Invalid map data')
-    const geometry = result.features[0]?.geometry
-    if (
-      geometry?.type !== 'Polygon' ||
-      !geometry.coordinates[0] ||
-      geometry.coordinates[0].length < 3
-    )
-      throw new Error('Invalid park boundary')
-    ring.value = geometry.coordinates[0]
-  } catch {
-    if (!controller.signal.aborted) error.value = true
-  }
-})
-onBeforeUnmount(() => controller.abort())
 </script>
 <template>
   <aside class="geo-overview" :aria-label="t('位置概览')">
@@ -83,6 +55,25 @@ onBeforeUnmount(() => controller.abort())
     <small v-if="fix">{{ t('精度约 {meters} 米', { meters: Math.round(fix.accuracy) }) }}</small>
     <button v-if="canRetry" type="button" @click="$emit('retry')">{{ t('手动请求定位') }}</button>
     <template v-if="status === 'inside' && position">
+      <small>{{
+        t(illustrated ? '手绘图圈出大致位置，不作导航。' : '此处手绘定位依据不足，仅显示园区小图。')
+      }}</small>
+      <button
+        v-if="compassPermission === 'prompt' || compassPermission === 'requesting'"
+        type="button"
+        :disabled="compassPermission === 'requesting'"
+        @click="$emit('enableCompass')"
+      >
+        {{ t('开启手机朝向') }}
+      </button>
+      <small v-else-if="heading !== null">{{ t('扇尖指向手机屏幕上沿的方向。') }}</small>
+      <small v-else-if="compassPermission === 'denied'">{{
+        t('未获朝向权限，仍可查看位置。')
+      }}</small>
+      <small v-else-if="compassPermission === 'unsupported'">{{
+        t('当前环境不支持指南针。')
+      }}</small>
+      <small v-else>{{ t('暂无可靠朝向，可将手机放平再转动。') }}</small>
       <svg
         class="geo-map"
         viewBox="0 0 400 260"
@@ -94,6 +85,7 @@ onBeforeUnmount(() => controller.abort())
         <text x="378" y="22" class="geo-north" text-anchor="middle">{{ t('北 ↑') }}</text>
         <g class="geo-user" :transform="`translate(${position[0]},${position[1]})`">
           <circle :r="accuracyRadius" class="geo-accuracy" />
+          <g v-if="heading !== null" transform="scale(1.45)"><CompassFan :bearing="heading" /></g>
           <circle r="11" class="geo-position" />
         </g>
       </svg>

@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>东河水街 · 手绘定位核对</title>
+<style>
+  * { box-sizing: border-box }
+  body { margin: 0 auto; max-width: 1080px; padding: 30px clamp(16px,4vw,48px); background: #faf4e8; color: #342b20; font: 16px/1.55 system-ui,sans-serif }
+  h1,h2,figcaption { font-family: ui-serif,serif } h1 { margin: 3px 0; font-size: clamp(27px,4vw,40px) } h2 { margin: 26px 0 10px; font-size: 22px }
+  header { border-bottom: 1px solid #cfbfa9 } header small { color: #794323; letter-spacing: .12em }
+  .legend { margin: 16px 0 5px } label { cursor: pointer } input { accent-color: #8f392d }
+  .cards,.overview { display: grid; gap: 12px; align-items: start } .cards { grid-template-columns: repeat(3,1fr) } .overview { grid-template-columns: 1fr 1fr }
+  figure { background: #fffdf8; margin: 0; border: 1px solid #d7cbb8; border-radius: 6px; overflow: hidden }
+  figcaption,figure p { margin: 0; padding: 8px 12px } figcaption { font-weight: 700 } figure p { font-size: 14px }
+  footer { border-top: 1px solid #cfbfa9; margin-top: 24px; padding-top: 10px; font-size: 13px; color: #5d5141 }
+  svg { width: 100%; display: block } svg image { image-rendering: pixelated }
+  svg circle,.estimate { fill: none; stroke-linecap: round } .control { stroke: #ffce58 } .check { stroke: #70fffa }
+  svg circle { stroke-width: 1.5 } .estimate { stroke: #bd0938; stroke-width: 1.7 } .estimate path:first-child { stroke-width: .75 }
+  .cards svg circle { stroke-width: .55 } .cards .estimate { stroke-width: .7 } .cards .estimate path:first-child { stroke-width: .35 }
+  svg text { font: bold 10px sans-serif; fill: white; stroke: #2c251e; stroke-width: 2.5; paint-order: stroke }
+  #estimates:not(:checked) ~ section .estimate { display: none }
+  @media(max-width: 670px) { .cards,.overview { grid-template-columns: 1fr } }
+</style>
+<main>
+  <header><small>濮院 · 定位验收 / 第三轮</small><h1>$region</h1>
+    <p><b>暂不启用手绘定位。</b> 4 个地标用于拟合，另用 3 座桥独立检查。均方根偏差 $rms 米，最大 $maximum 米。两者都是影像对照的地面等效值，不是手机 GPS 精度。</p></header>
+  <p class="legend">青圈 ○ 是人工标出的桥心，红叉 × 是模型预测的位置；总览中的黄色圆圈 C1–C4 是拟合点。</p>
+  <input id="estimates" type="checkbox" checked> <label for="estimates">显示预测点和偏移线</label>
+  <section><h2>先看桥面</h2><p>看 H1 御桥：红叉在青圈左侧，已经偏到水面。取消勾选可看原桥面。</p><div class="cards">$checks</div></section>
+  <section><h2>再看街区</h2><div class="overview"><figure><figcaption>卫星影像 · 参考地标</figcaption>$satellite</figure>
+    <figure><figcaption>手绘图 · 相同编号为同一地标</figcaption>$scene</figure></div></section>
+  <footer>仅作本地研究核对，未使用现场设备定位，不代表全园精度。影像来源：Esri, Vantor, Earthstar Geographics, and the GIS User Community。桥梁身份参考：© OpenStreetMap contributors（ODbL）。</footer>
+</main>
+</html>

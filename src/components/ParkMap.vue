@@ -5,6 +5,8 @@ import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import type { MapLayer, Place } from '../data/catalog'
 import { clampCamera, zoomAt, zoomRange, SCENE, type Camera } from '../lib/map-camera'
 import { useWalkPreview, walkPreviewEnabled } from '../lib/walk-preview'
+import { illustratedBearing, type IllustratedPosition } from '../lib/illustrated-location'
+import CompassFan from './CompassFan.vue'
 import ReferenceTiles from './ReferenceTiles.vue'
 import referenceMap from '../data/reference-map.json'
 import ReferenceLabels from './ReferenceLabels.vue'
@@ -29,6 +31,8 @@ const props = defineProps<{
   layers: Record<MapLayer, boolean>
   motion: boolean
   showLocation: boolean
+  illustrated: IllustratedPosition | null
+  heading: number | null
   activeQuestId?: string
   activeNpcId?: string
 }>()
@@ -71,8 +75,13 @@ function openPin(pin: (typeof pins)[number], event: MouseEvent) {
 }
 const viewport = ref<HTMLElement>()
 const walkPreview = walkPreviewEnabled ? useWalkPreview(() => props.motion) : null
-const position = computed(() => walkPreview?.point.value)
-const locateLabel = computed(() => (position.value ? '回到我的位置' : '获取我的位置'))
+const position = computed(() => walkPreview?.point.value ?? props.illustrated)
+const bearing = computed(() =>
+  !walkPreview && props.illustrated && props.heading !== null
+    ? illustratedBearing(props.illustrated, props.heading)
+    : null,
+)
+const locateLabel = computed(() => (walkPreview ? '回到我的位置' : '获取我的位置'))
 const camera = reactive<Camera>({ x: 0, y: 0, scale: 0.6 })
 const dimensions = reactive({ width: 0, height: 0 })
 const limits = computed(() => zoomRange(dimensions.width, dimensions.height))
@@ -106,7 +115,7 @@ function reset() {
   setCamera({ scale, x: width / 2 - 850 * scale, y: (height + 5) / 2 - 605 * scale })
 }
 function locateOrRecenter() {
-  const point = position.value
+  const point = walkPreview?.point.value
   if (!point) return emit('locate')
   setCamera({
     scale: camera.scale,
@@ -343,13 +352,34 @@ onBeforeUnmount(() => observer?.disconnect())
       </div>
       <ReferenceLabels v-if="layers.places" :places="places" @select="emit('select', $event)" />
       <div
+        v-if="illustrated"
+        class="illustrated-radius"
+        aria-hidden="true"
+        :style="{
+          left: `${illustrated.x}px`,
+          top: `${illustrated.y}px`,
+          width: `${2 * illustrated.radius}px`,
+          height: `${2 * illustrated.radius}px`,
+        }"
+      />
+      <div
         v-if="position"
         class="walker-anchor"
         :style="{ left: `${position.x}px`, top: `${position.y}px` }"
         role="img"
-        :aria-label="t('我的位置（模拟）')"
+        :aria-label="t(walkPreview ? '我的位置（模拟）' : '我的大致位置')"
+        :aria-description="bearing !== null ? t('扇尖指向手机屏幕上沿的方向。') : undefined"
       >
+        <svg
+          v-if="bearing !== null"
+          class="walker-compass"
+          viewBox="-45 -45 90 90"
+          aria-hidden="true"
+        >
+          <CompassFan :bearing="bearing" />
+        </svg>
         <span class="walker-seal" aria-hidden="true">{{ t('我') }}</span>
+        <span v-if="illustrated" class="walker-caption" aria-hidden="true">{{ t('约位') }}</span>
       </div>
       <div class="field-markers">
         <div
@@ -409,7 +439,7 @@ onBeforeUnmount(() => observer?.disconnect())
     class="locate-tool"
     :aria-label="t(locateLabel)"
     :title="t(locateLabel)"
-    :aria-expanded="position ? undefined : showLocation"
+    :aria-expanded="walkPreview ? undefined : showLocation"
     :aria-controls="showLocation ? 'map-location-note' : undefined"
     @click="locateOrRecenter"
   >

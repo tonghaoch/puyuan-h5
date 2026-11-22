@@ -1,0 +1,17 @@
+{
+  "region": "寺南街口至东河滨水街",
+  "satellite": "references/geodata/esri-world-imagery-reference.jpg",
+  "worldFile": "references/geodata/esri-world-imagery-reference.jgw",
+  "scene": "public/art/puyuan-original-scope.webp",
+  "controls": [
+    {"id":"C1", "label":"寺南支渠小桥桥心", "nearOsmWay":1283295052, "satellitePx":[718,706], "scenePx":[832,745]},
+    {"id":"C2", "label":"东端转角支渠桥心（非东侧长条端点）", "nearOsmWay":1283295056, "satellitePx":[1034,618], "scenePx":[1165,665]},
+    {"id":"C3", "label":"东河长桥西引道与南北街路心（非桥头）", "nearOsmWay":965496963, "satellitePx":[982,750], "scenePx":[1116,776]},
+    {"id":"C4", "label":"南斜街与北来巷道交会的路心", "satellitePx":[856,806], "scenePx":[999,823]}
+  ],
+  "checks": [
+    {"id":"H1", "label":"御桥桥心", "nearOsmWay":1283295046, "satellitePx":[816,688], "scenePx":[947,726]},
+    {"id":"H2", "label":"东侧南北巷小桥桥心", "nearOsmWay":1283295031, "satellitePx":[955,662], "scenePx":[1086,701]},
+    {"id":"H3", "label":"南斜街跨支渠桥心", "satellitePx":[895,789], "scenePx":[1031,813]}
+  ]
+}

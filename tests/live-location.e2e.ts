@@ -1,5 +1,31 @@
 import { expect, test } from '@playwright/test'
 
+test('the live illustrated fix appears without interaction, tracks, and falls back without moving the map', async ({
+  page,
+  context,
+}) => {
+  await context.grantPermissions(['geolocation'])
+  await context.setGeolocation({ longitude: 120.63138012, latitude: 30.682173, accuracy: 10 })
+  await page.goto('/')
+  const marker = page.getByRole('img', { name: '我的大致位置' })
+  await expect(marker).toBeAttached()
+  await expect(page.locator('.illustrated-radius')).toHaveCount(1)
+  await expect(page.locator('.geo-overview')).toHaveCount(0)
+  const camera = await page.locator('.map-scene').getAttribute('style')
+  const first = await marker.getAttribute('style')
+  await context.setGeolocation({ longitude: 120.63090338, latitude: 30.68130516, accuracy: 10 })
+  await expect(marker).not.toHaveAttribute('style', first!)
+  await page.getByRole('button', { name: '获取我的位置' }).click()
+  await expect(page.getByText('手绘图圈出大致位置，不作导航。')).toBeVisible()
+  await context.setGeolocation({ longitude: 120.62882956, latitude: 30.67995213, accuracy: 10 })
+  await expect(marker).toHaveCount(0)
+  await expect(page.locator('.illustrated-radius')).toHaveCount(0)
+  await expect(page.locator('.geo-user')).toBeVisible()
+  await expect(page.getByText(/仅显示园区小图/)).toBeVisible()
+  await expect(page.locator('.map-scene')).toHaveAttribute('style', camera!)
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+})
+
 test('watch only the foreground guide; discard late and expired fixes; recover without polling', async ({
   page,
 }) => {

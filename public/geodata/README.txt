@@ -5,6 +5,6 @@ https://opendatacommons.org/licenses/odbl/1-0/
 
 Source: https://www.openstreetmap.org/way/1283631045
 OSM snapshot retrieved 2026-11-17. WGS84 longitude, latitude.
-Only the park boundary is published for the location dialog; its source geometry is preserved.
+Only the unmodified park boundary is published from this OSM dataset. It gates illustrated fixes and is displayed in the geographic overview.
 The snapshot has not been field-surveyed; the boundary is not an authoritative operational boundary.
-This data is separate from the illustrated map, which has not been geographically calibrated.
+The illustrated map uses a separate local image registration. The fit is approximate and has not been field surveyed. Reference imagery used offline: Esri, Vantor, Earthstar Geographics, and the GIS User Community. No satellite raster or visitor coordinates are sent to a map service.
