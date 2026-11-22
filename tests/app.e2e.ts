@@ -288,6 +288,53 @@ test('two exclusive map modes retain the camera and stay selected across pages',
   await expect(page.locator('.map-scene')).toHaveAttribute('style', camera!)
 })
 
+test('the active map-mode slider stays inside its border in both languages', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/#map')
+  const modes = page.locator('.map-modes')
+  for (const width of [320, 390]) {
+    await page.setViewportSize({ width, height: 740 })
+    for (const language of ['zh-CN', 'en']) {
+      if ((await page.locator('html').getAttribute('lang')) !== language)
+        await page.locator('.language-button').click()
+      for (const mode of ['browse', 'game', 'browse', 'game']) {
+        await modes.locator(`button[data-mode="${mode}"]`).click()
+        await expect
+          .poll(() =>
+            modes.evaluate((element) => {
+              const bounds = element.getBoundingClientRect()
+              const selected = element
+                .querySelector('[aria-pressed="true"]')!
+                .getBoundingClientRect()
+              function rectangle(pseudo: string) {
+                const style = getComputedStyle(element, pseudo)
+                const number = (name: string) => parseFloat(style.getPropertyValue(name)) || 0
+                const extra =
+                  style.boxSizing === 'border-box'
+                    ? 0
+                    : number('padding-left') +
+                      number('padding-right') +
+                      number('border-left-width') +
+                      number('border-right-width')
+                const left = bounds.left + number('left') + new DOMMatrix(style.transform).m41
+                return { left, right: left + number('width') + extra }
+              }
+              const rail = rectangle('::before')
+              const slider = rectangle('::after')
+              return Math.min(
+                slider.left - rail.left,
+                rail.right - slider.right,
+                slider.left - selected.left,
+                selected.right - slider.right,
+              )
+            }),
+          )
+          .toBeGreaterThanOrEqual(1)
+      }
+    }
+  }
+})
+
 test('town places open restaurant content and dining returns in browse mode', async ({ page }) => {
   await page.goto('/')
   await page.getByRole('button', { name: '查看深夜食堂', exact: true }).click()

@@ -346,6 +346,7 @@ button {
 .map-modes::after {
   content: '';
   position: absolute;
+  box-sizing: border-box;
   z-index: -1;
   pointer-events: none;
 }
