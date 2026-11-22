@@ -26,6 +26,10 @@ import {
   type Selection,
 } from './data/catalog'
 import { useLocation } from './lib/location'
+import { useCompass } from './lib/compass'
+import { useParkBoundary } from './lib/park-boundary'
+import { classifyFix } from './lib/geography'
+import { projectIllustratedFix } from './lib/illustrated-location'
 import { walkPreviewEnabled } from './lib/walk-preview'
 import { publicAsset } from './lib/public-asset'
 import { t, locale, languageAction, toggleLanguage, matchesBilingual } from './i18n'
@@ -86,6 +90,28 @@ function loadFavorites(): string[] {
 }
 const favorites = ref<string[]>(loadFavorites())
 const location = useLocation(() => !walkPreviewEnabled && pageVisible.value && tab.value === 'map')
+const { ring, error: boundaryError } = useParkBoundary(
+  () => Boolean(location.fix.value),
+  () => showLocation.value,
+)
+const parkStatus = computed(() =>
+  location.fix.value && ring.value.length
+    ? classifyFix(location.fix.value, ring.value, now.value)
+    : null,
+)
+const illustrated = computed(() =>
+  parkStatus.value === 'inside' && location.fix.value
+    ? projectIllustratedFix(location.fix.value)
+    : null,
+)
+const compass = useCompass(
+  () =>
+    !walkPreviewEnabled &&
+    pageVisible.value &&
+    tab.value === 'map' &&
+    parkStatus.value === 'inside' &&
+    Boolean(illustrated.value || showLocation.value),
+)
 const activeEntry = computed(() => activeQuest.value ?? activeNpc.value)
 const mapEntry = computed(() => (tab.value === 'map' ? activeEntry.value : undefined))
 const hasModal = computed(() => !!selection.value || !!overlay.value || !!mapEntry.value)
@@ -412,6 +438,8 @@ onBeforeUnmount(() => {
           :focus-request="focusRequest"
           :motion="motionActive"
           :show-location="showLocation"
+          :illustrated="illustrated"
+          :heading="compass.heading.value"
           :active-quest-id="activeQuest?.id"
           :active-npc-id="activeNpc?.id"
           @game="openQuest"
@@ -423,7 +451,13 @@ onBeforeUnmount(() => {
           v-if="showLocation"
           id="map-location-note"
           :fix="location.fix.value"
-          :now="now"
+          :ring="ring"
+          :error="boundaryError"
+          :status="parkStatus"
+          :illustrated="Boolean(illustrated)"
+          :heading="compass.heading.value"
+          :compass-permission="compass.permission.value"
+          @enable-compass="compass.enable()"
           :device-message="locationMessage"
           :can-retry="['denied', 'timeout', 'error', 'stale'].includes(location.state.value)"
           @retry="location.retry()"

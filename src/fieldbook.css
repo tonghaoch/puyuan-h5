@@ -681,6 +681,33 @@
   transform: scale(var(--inverse-scale));
   transform-origin: 0 0;
 }
+.illustrated-radius {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: calc(1px * var(--inverse-scale)) dashed #294760a3;
+  background: #698da534;
+}
+.walker-caption {
+  position: absolute;
+  top: 16px;
+  transform: translateX(-50%);
+  padding: 2px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+  background: #fbf6e8;
+  color: #294760;
+  font: 600 10px/1.2 var(--serif);
+}
+.walker-compass {
+  position: absolute;
+  width: 90px;
+  height: 90px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
 .walker-seal {
   position: absolute;
   transform: translate(-50%, -50%);
@@ -712,7 +739,7 @@
   font: 600 12px/1 var(--serif);
 }
 @media (prefers-reduced-motion: no-preference) {
-  .walker-anchor {
+  .walker-anchor:not(:has(.walker-caption)) {
     transition: left 0.55s linear, top 0.55s linear;
   }
 }

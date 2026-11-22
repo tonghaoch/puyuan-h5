@@ -346,10 +346,7 @@ test('direct detail links close locally, browser Back closes an opened detail', 
   await expect(page.getByRole('navigation', { name: '主要导航' })).toBeVisible()
 })
 
-test('device geolocation remains separate from the uncalibrated scene', async ({
-  page,
-  context,
-}) => {
+test('off-park geolocation does not draw an illustrated marker', async ({ page, context }) => {
   await context.grantPermissions(['geolocation'])
   await context.setGeolocation({ latitude: 30, longitude: 120, accuracy: 18 })
   await page.goto('/')
@@ -360,6 +357,7 @@ test('device geolocation remains separate from the uncalibrated scene', async ({
   await expect(page.getByText(/园区范围外/)).toBeVisible()
   await expect(page.locator('.geo-map')).toHaveCount(0)
   await expect(page.locator('.geo-user')).toHaveCount(0)
+  await expect(page.locator('.walker-anchor')).toHaveCount(0)
   await expect(page.locator('.reference-labels button')).toHaveCount(18)
 })
 
@@ -454,7 +452,7 @@ test('detail keyboard focus stays in the dialog and Escape restores the opener',
   await expect(opener).toBeFocused()
 })
 
-test('near-park GPS is plotted only on the attributed geographic overview', async ({
+test('the attributed overview stays available independently of the illustrated fix', async ({
   page,
   context,
 }) => {
